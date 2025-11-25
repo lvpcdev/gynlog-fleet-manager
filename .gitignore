@@ -1,16 +1,16 @@
-# Compiled class file (Já tinha, mantive)
+# Compiled class file
 *.class
 
-# Log file (Já tinha)
+# Log file
 *.log
 
-# BlueJ files (Já tinha)
+# BlueJ files
 *.ctxt
 
-# Mobile Tools for Java (J2ME) (Já tinha)
+# Mobile Tools for Java
 .mtj.tmp/
 
-# Package Files # (Já tinha)
+# Package Files
 *.jar
 *.war
 *.nar
@@ -19,7 +19,7 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs (Já tinha)
+# virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
