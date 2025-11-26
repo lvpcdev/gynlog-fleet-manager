@@ -2,6 +2,7 @@ package model.entities;
 
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Movimentacao {
     private Long idMovimentacao;
@@ -9,14 +10,14 @@ public class Movimentacao {
     private Long idTipoDespesa;
     private String descricao;
     private LocalDate data;
-    private double valor;
+    private double valor;;
 
-    public Movimentacao(Long idMovimentacao, Long idVeiculo, Long idTipoDespesa, String descricao, LocalDate data, double valor) {
+    public Movimentacao(Long idMovimentacao, Long idVeiculo, Long idTipoDespesa, String descricao, String data, double valor) {
         this.idMovimentacao = idMovimentacao;
         this.idVeiculo = idVeiculo;
         this.idTipoDespesa = idTipoDespesa;
         this.descricao = descricao;
-        this.data = data;
+        setData(data);
         this.valor = valor;
     }
 
@@ -56,8 +57,11 @@ public class Movimentacao {
         return data;
     }
 
-    public void setData(LocalDate data) {
-        this.data = data;
+    public void setData(String data) {
+
+        DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        this.data = LocalDate.parse(data, fmtData);
     }
 
     public double getValor() {
