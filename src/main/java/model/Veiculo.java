@@ -2,6 +2,7 @@ package model;
 
 import java.sql.SQLOutput;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class Veiculo {
@@ -9,7 +10,7 @@ public class Veiculo {
     private String placa;
     private String marca;
     private String modelo;
-    private LocalDate anoDeFabricacao;
+    private YearMonth anoDeFabricacao;
     private boolean estado;
 
     public Veiculo(String placa, String marca, String modelo, boolean estado, String anoDeFabricacao) {
@@ -52,15 +53,14 @@ public class Veiculo {
         this.modelo = modelo;
     }
 
-    public LocalDate getAnoDeFabricacao() {
+    public YearMonth getAnoDeFabricacao() {
         return anoDeFabricacao;
     }
 
     public void setAnoDeFabricacao(String anoDeFabricacaoString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
-        anoDeFabricacaoString = LocalDate.now().format(formatter);
 
-        this.anoDeFabricacao = LocalDate.parse(anoDeFabricacaoString, formatter);
+        this.anoDeFabricacao = YearMonth.parse(anoDeFabricacaoString, formatter);
     }
 
     public boolean isEstado() {
@@ -72,7 +72,7 @@ public class Veiculo {
     }
 
     public static void main(String[] args) {
-        Veiculo carro = new Veiculo("123","123","abc", false,"10/2025");
+        Veiculo carro = new Veiculo("123","123","abc", false, "05/2020");
 
         System.out.println(carro.getAnoDeFabricacao());
     }
