@@ -2,15 +2,16 @@ package model.entities;
 
 import java.sql.SQLOutput;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class Veiculo {
-    private int idVeiculo;
+    private Long idVeiculo;
     private String placa;
     private String marca;
     private String modelo;
-    private YearMonth anoDeFabricacao;
+    private Year anoDeFabricacao;
     private boolean estado;
 
     public Veiculo(String placa, String marca, String modelo, boolean estado, String anoDeFabricacao) {
@@ -21,11 +22,11 @@ public class Veiculo {
         setAnoDeFabricacao(anoDeFabricacao);
     }
 
-    public int getIdVeiculo() {
+    public Long getIdVeiculo() {
         return idVeiculo;
     }
 
-    public void setIdVeiculo(int idVeiculo) {
+    public void setIdVeiculo(Long idVeiculo) {
         this.idVeiculo = idVeiculo;
     }
 
@@ -53,14 +54,14 @@ public class Veiculo {
         this.modelo = modelo;
     }
 
-    public YearMonth getAnoDeFabricacao() {
+    public Year getAnoDeFabricacao() {
         return anoDeFabricacao;
     }
 
     public void setAnoDeFabricacao(String anoDeFabricacaoString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
 
-        this.anoDeFabricacao = YearMonth.parse(anoDeFabricacaoString, formatter);
+        this.anoDeFabricacao = Year.parse(anoDeFabricacaoString, formatter);
     }
 
     public boolean isEstado() {
@@ -72,7 +73,7 @@ public class Veiculo {
     }
 
     public static void main(String[] args) {
-        Veiculo carro = new Veiculo("123","123","abc", false, "05/2020");
+        Veiculo carro = new Veiculo("123","123","abc", false, "2020");
 
         System.out.println(carro.getAnoDeFabricacao());
     }
