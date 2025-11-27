@@ -64,8 +64,12 @@ public class Veiculo {
         this.anoDeFabricacao = Year.parse(anoDeFabricacaoString, formatter);
     }
 
-    public boolean isEstado() {
-        return estado;
+    public String isEstado() {
+        if(estado){
+            return "Ativo";
+        } else  {
+            return "Inativo";
+        }
     }
 
     public void setEstado(boolean estado) {
