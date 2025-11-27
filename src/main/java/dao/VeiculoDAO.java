@@ -63,28 +63,30 @@ public class VeiculoDAO {
 
             while (linha != null) {
                 String[] partes = linha.split(" \\| ");
+
                 if(Long.parseLong(partes[0]) != idAnterior + 1 && Long.parseLong(partes[0]) != 0){
                     partes[0] = String.valueOf(idAnterior + 1);
                 }
+
                 idAnterior = Long.parseLong(partes[0]);
                 linha = String.join(" | ", partes);
+
                 bw.write(linha);
                 bw.newLine();
+
                 linha = reader.readLine();
 
             }
 
         } catch (IOException e) {
-            System.err.println("Erro ao processar exclusão: " + e.getMessage());
+            System.err.println("Erro ao atualiza lista: " + e.getMessage());
         }
 
         if (arquivoOriginal.delete()) {
             boolean sucesso = arquivoTemp.renameTo(arquivoOriginal);
 
-            if (sucesso) {
-                System.out.println("Registro excluído com sucesso!");
-            } else {
-                System.err.println("Erro ao renomear o arquivo temporário.");
+            if (!sucesso) {
+                System.err.println("Erro ao atualizar lista");
             }
         } else {
             System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
@@ -98,20 +100,24 @@ public class VeiculoDAO {
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
 
-            String linha;
-
-            while ((linha = br.readLine()) != null) {
-
-                String[] partes = linha.split(" | ");
+            String linha = br.readLine();
+            while (linha != null) {
+                String[] partes = linha.split(" \\| ");
                 Long idAtual = Long.parseLong(partes[0]);
 
-
                 if (idAtual.equals(idParaExcluir)) {
+                    linha = br.readLine();
                     continue;
                 }
 
+
                 bw.write(linha);
                 bw.newLine();
+                linha = br.readLine();
+                if(linha == null){
+                    System.err.println("id não encontrado");
+                    break;
+                }
             }
 
         } catch (IOException e) {
@@ -122,10 +128,8 @@ public class VeiculoDAO {
         if (arquivoOriginal.delete()) {
             boolean sucesso = arquivoTemp.renameTo(arquivoOriginal);
 
-            if (sucesso) {
-                System.out.println("Registro excluído com sucesso!");
-            } else {
-                System.err.println("Erro ao renomear o arquivo temporário.");
+            if (!sucesso) {
+                System.err.println("Erro ao atualizar a lista");
             }
         } else {
             System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
