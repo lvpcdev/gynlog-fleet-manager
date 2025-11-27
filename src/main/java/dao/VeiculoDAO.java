@@ -6,6 +6,7 @@ import java.io.*;
 import java.time.format.DateTimeFormatter;
 
 public class VeiculoDAO {
+    Long idAtual = -1L;
     private final String caminho = "data/veiculos.txt";
 
     private DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("yyyy");
@@ -34,16 +35,18 @@ public class VeiculoDAO {
 
     public Long gerarId(){
         File arquivoOriginal = new File("data/veiculos.txt");
-        Long idAtual = 0L;
+
 
         try (LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoOriginal))){
             String linha;
             while (true) {
                 linha = lnr.readLine();
+
                 if(linha == null){
-                    idAtual = (long)lnr.getLineNumber();
+                    idAtual++;
                     break;
                 }
+                idAtual++;
             }
         } catch (IOException e) {
             System.err.println("Erro ao processar: " + e.getMessage());
