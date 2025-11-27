@@ -1,6 +1,8 @@
 package View;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,6 +38,12 @@ public class CadastroVeiculosView extends JFrame {
         JRadioButton botaoAtivo = new JRadioButton("Estado Veículo - ATIVO");
         JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
         JButton botaoCadastrar = new JButton("Cadastrar Veículos");
+
+        //FILTROS
+        AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+
+
+
 
         //======PLACA=======
 
@@ -134,6 +142,7 @@ public class CadastroVeiculosView extends JFrame {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoCadastrar,gbc);
+
 
         botaoCadastrar.addActionListener(new ActionListener() {
             @Override
