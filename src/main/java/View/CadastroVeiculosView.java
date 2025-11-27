@@ -1,5 +1,8 @@
 package View;
 
+import dao.VeiculoDAO;
+import model.entities.Veiculo;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -143,20 +146,27 @@ public class CadastroVeiculosView extends JFrame {
                 String modelo = campoModelo.getText();
                 String ano = campoAnoFabricacao.getText();
 
-                String estado = "";
+                boolean estado = false;
+                String estadoTexto = "";
+
                 if (botaoAtivo.isSelected()) {
-                    estado = "ATIVO";
+                    estadoTexto = "ATIVO";
+                    estado = true;
                 } else if (botaoInativo.isSelected()) {
-                    estado = "INATIVO";
+                    estadoTexto = "INATIVO";
+                    estado = false;
                 }
 
+                Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                VeiculoDAO veiculoDAO = new VeiculoDAO();
+                veiculoDAO.salvar(novoVeiculo);
                 JOptionPane.showMessageDialog(painel,
                         "Veículo Cadastrado!\n" +
                                 "Placa: " + placa + "\n" +
                                 "Marca: " + marca + "\n" +
                                 "Modelo: " + modelo + "\n" +
                                 "Ano: " + ano + "\n" +
-                                "Estado: " + estado);
+                                "Estado: " + estadoTexto);
             }
         });
 
