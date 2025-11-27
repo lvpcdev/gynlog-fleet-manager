@@ -1,6 +1,5 @@
 package dao;
 
-import model.entities.Movimentacao;
 import model.entities.Veiculo;
 
 import java.io.*;
@@ -13,8 +12,8 @@ public class VeiculoDAO {
 
     public void salvar(Veiculo veiculo) {
         File arquivo = new File(caminho);
-
-        String movimentacaoTexto = veiculo.getIdVeiculo() + " | "
+        veiculo.setIdVeiculo(gerarId());
+        String veiculoTexto = veiculo.getIdVeiculo() + " | "
                 + veiculo.getPlaca() + " | "
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
@@ -22,7 +21,7 @@ public class VeiculoDAO {
                 + veiculo.isEstado();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(arquivo, true))){
-            writer.write(movimentacaoTexto);
+            writer.write(veiculoTexto);
             writer.newLine();
 
             System.out.println("Veiculo salvo com sucesso!");
@@ -35,27 +34,21 @@ public class VeiculoDAO {
 
     public Long gerarId(){
         File arquivoOriginal = new File("data/veiculos.txt");
-        File arquivoTemp = new File("data/veiculos-temp.txt");
+        Long idAtual = 0L;
 
-        try (LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoOriginal));{
-
+        try (LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoOriginal))){
             String linha;
-
-            while ((linha = lnr.readLine()) != null) {
-                Long idAtual = (long)lnr.getLineNumber();
-
-                String[] partes = linha.split(" | ");
-                Long idExistente = Long.parseLong(partes[0]);
-
-
-                if (idAtual.equals(idExistente)) {
-                    gerarId()
+            while (true) {
+                linha = lnr.readLine();
+                if(linha == null){
+                    idAtual = (long)lnr.getLineNumber();
+                    break;
                 }
             }
-
         } catch (IOException e) {
-            System.err.println("Erro ao processar exclusão: " + e.getMessage());
+            System.err.println("Erro ao processar: " + e.getMessage());
         }
+        return idAtual;
     }
 
     public void excluir(Long idParaExcluir) {
