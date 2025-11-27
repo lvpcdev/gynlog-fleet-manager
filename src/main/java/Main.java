@@ -1,12 +1,16 @@
-import dao.MovimentacaoDAO;
-import model.entities.Movimentacao;
+import dao.VeiculoDAO;
+import model.entities.Veiculo;
 
 public class Main {
     public static void main(String[] args) {
-        Movimentacao teste = new Movimentacao(1L, 1L, 1L, "Multa", "20/11/2025", 350.00);
+        Veiculo veiculoTeste = new Veiculo("SEM3T12","HONDA","CIVIC", true,"2014");
 
-        //MovimentacaoDAO dao = new MovimentacaoDAO();
-        //dao.salvar(teste);
-        //dao.excluir(1L);
+        VeiculoDAO veiculoDAO = new VeiculoDAO();
+//        veiculoDAO.SalvarVeiculo(veiculoTeste);
+
+        veiculoDAO.ExcluirVeiculo(4L);
+        veiculoDAO.ExcluirVeiculo(4L);
+        veiculoDAO.ExcluirVeiculo(4L);
+
     }
 }

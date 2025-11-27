@@ -28,7 +28,7 @@ public class MovimentacaoDAO {
 
             System.out.println("Movimentação salva com sucesso!");
         } catch (IOException e) {
-            System.err.println("Erro ao salvar movimentação: " + e.getMessage());
+            System.err.println("Erro ao SalvarVeiculo movimentação: " + e.getMessage());
         }
 
 
