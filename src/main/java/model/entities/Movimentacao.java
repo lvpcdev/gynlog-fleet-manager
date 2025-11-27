@@ -12,8 +12,7 @@ public class Movimentacao {
     private LocalDate data;
     private double valor;;
 
-    public Movimentacao(Long idMovimentacao, Long idVeiculo, Long idTipoDespesa, String descricao, String data, double valor) {
-        this.idMovimentacao = idMovimentacao;
+    public Movimentacao(Long idVeiculo, Long idTipoDespesa, String descricao, String data, double valor) {
         this.idVeiculo = idVeiculo;
         this.idTipoDespesa = idTipoDespesa;
         this.descricao = descricao;
