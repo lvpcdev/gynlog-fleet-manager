@@ -102,6 +102,39 @@ public class CadastroVeiculosView extends JFrame {
         gbc.weightx = 1.0;
         painel.add(campoAnoFabricacao,gbc);
 
+        //=====ESTADO=============
+
+        //RÓTULO
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("ESTADO DO VEÍCULO:"),gbc);
+
+        //GRUPO BOTÕES DE ESTADO
+        ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
+        grupoEstadoVeiculo.add(botaoAtivo);
+        grupoEstadoVeiculo.add(botaoInativo);
+
+        //PAINEL DOS BOTÕES
+        JPanel painelEstadoVeiculo = new JPanel();
+        painelEstadoVeiculo.add(botaoAtivo);
+        painelEstadoVeiculo.add(botaoInativo);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.WEST;
+        painel.add(painelEstadoVeiculo,gbc);
+
+        //====BOTÃO CADASTRAR========
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        painel.add(botaoCadastrar,gbc);
+
+
         return painel;
     }
 
