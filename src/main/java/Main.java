@@ -1,6 +1,4 @@
-import dao.MovimentacaoDAO;
 import dao.VeiculoDAO;
-import model.entities.Movimentacao;
 import model.entities.Veiculo;
 
 public class Main {
@@ -8,8 +6,8 @@ public class Main {
         Veiculo veiculoTeste = new Veiculo("SEM3T12","HONDA","CIVIC", true,"2013");
 
         VeiculoDAO veiculoDAO = new VeiculoDAO();
-        veiculoDAO.salvar(veiculoTeste);
+        veiculoDAO.SalvarVeiculo(veiculoTeste);
 
-        veiculoDAO.excluir(3L);
+        veiculoDAO.ExcluirVeiculo(3L);
     }
 }

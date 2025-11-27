@@ -11,9 +11,9 @@ public class VeiculoDAO {
 
     private DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("yyyy");
 
-    public void salvar(Veiculo veiculo) {
+    public void SalvarVeiculo(Veiculo veiculo) {
         File arquivo = new File(caminho);
-        veiculo.setIdVeiculo(gerarId());
+        veiculo.setIdVeiculo(GerarId());
         String veiculoTexto = veiculo.getIdVeiculo() + " | "
                 + veiculo.getPlaca() + " | "
                 + veiculo.getMarca() + " | "
@@ -28,13 +28,12 @@ public class VeiculoDAO {
 
             System.out.println("Veiculo salvo com sucesso!");
         } catch (IOException e) {
-            System.err.println("Erro ao salvar veiculo: " + e.getMessage());
+            System.err.println("Erro ao SalvarVeiculo veiculo: " + e.getMessage());
         }
-
 
     }
 
-    public Long gerarId(){
+    private Long GerarId(){
         File arquivoOriginal = new File("data/veiculos.txt");
 
         try (LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoOriginal))){
@@ -51,7 +50,7 @@ public class VeiculoDAO {
         return idAtual;
     }
 
-    public void AtualizarIds(){
+    private void AtualizarIds(){
         File arquivoOriginal = new File("data/veiculos.txt");
         File arquivoTemp = new File("data/veiculos-temp.txt");
 
@@ -93,7 +92,7 @@ public class VeiculoDAO {
         }
     }
 
-    public void excluir(Long idParaExcluir) {
+    public void ExcluirVeiculo(Long idParaExcluir) {
         File arquivoOriginal = new File("data/veiculos.txt");
         File arquivoTemp = new File("data/veiculos-temp.txt");
 
@@ -135,5 +134,9 @@ public class VeiculoDAO {
             System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
         }
         AtualizarIds();
+    }
+
+    public void AtualizarVeiculo(){
+
     }
 }
