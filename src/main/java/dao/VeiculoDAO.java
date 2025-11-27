@@ -6,7 +6,7 @@ import java.io.*;
 import java.time.format.DateTimeFormatter;
 
 public class VeiculoDAO {
-    Long idAtual = -1L;
+    Long idAtual = 0L;
     private final String caminho = "data/veiculos.txt";
 
     private DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("yyyy");
@@ -25,6 +25,7 @@ public class VeiculoDAO {
             writer.write(veiculoTexto);
             writer.newLine();
 
+
             System.out.println("Veiculo salvo com sucesso!");
         } catch (IOException e) {
             System.err.println("Erro ao salvar veiculo: " + e.getMessage());
@@ -36,22 +37,58 @@ public class VeiculoDAO {
     public Long gerarId(){
         File arquivoOriginal = new File("data/veiculos.txt");
 
-
         try (LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoOriginal))){
-            String linha;
-            while (true) {
+            String linha = lnr.readLine();
+            while(linha != null) {
                 linha = lnr.readLine();
-
-                if(linha == null){
-                    idAtual++;
-                    break;
+                if (linha== null) {
+                    idAtual = (long)lnr.getLineNumber();
                 }
-                idAtual++;
             }
         } catch (IOException e) {
             System.err.println("Erro ao processar: " + e.getMessage());
         }
         return idAtual;
+    }
+
+    public void AtualizarIds(){
+        File arquivoOriginal = new File("data/veiculos.txt");
+        File arquivoTemp = new File("data/veiculos-temp.txt");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
+             BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
+
+            String linha = reader.readLine();
+            Long idAnterior = -1L;
+
+            while (linha != null) {
+                String[] partes = linha.split(" \\| ");
+                if(Long.parseLong(partes[0]) != idAnterior + 1 && Long.parseLong(partes[0]) != 0){
+                    partes[0] = String.valueOf(idAnterior + 1);
+                }
+                idAnterior = Long.parseLong(partes[0]);
+                linha = String.join(" | ", partes);
+                bw.write(linha);
+                bw.newLine();
+                linha = reader.readLine();
+
+            }
+
+        } catch (IOException e) {
+            System.err.println("Erro ao processar exclusão: " + e.getMessage());
+        }
+
+        if (arquivoOriginal.delete()) {
+            boolean sucesso = arquivoTemp.renameTo(arquivoOriginal);
+
+            if (sucesso) {
+                System.out.println("Registro excluído com sucesso!");
+            } else {
+                System.err.println("Erro ao renomear o arquivo temporário.");
+            }
+        } else {
+            System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
+        }
     }
 
     public void excluir(Long idParaExcluir) {
@@ -93,5 +130,6 @@ public class VeiculoDAO {
         } else {
             System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
         }
+        AtualizarIds();
     }
 }
