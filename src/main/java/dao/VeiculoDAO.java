@@ -34,23 +34,33 @@ public class VeiculoDAO {
     }
 
     private Long GerarId(){
-        File arquivoOriginal = new File("data/veiculos.txt");
+        File arquivoUltimoId = new File("data/VeiculosUltimoId.txt");
+        File arquivoUltimoIdTemp = new File("data/VeiculosUltimoIdTemp.txt")
+        Long ultimoId = 0L;
+        try (BufferedReader readerUltimoId = new BufferedReader(new FileReader(arquivoUltimoId));
+            BufferedWriter writerUltimodId = new BufferedWriter(new FileWriter(arquivoUltimoIdTemp))){
 
-        try (LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoOriginal))){
-            String linha = lnr.readLine();
-            while(linha != null) {
-                linha = lnr.readLine();
-                if (linha== null) {
-                    idAtual = (long)lnr.getLineNumber();
-                }
+            String linha = readerUltimoId.readLine();
+
+            if(linha == null){
+                ultimoId = 0L;
+                idAtual = ultimoId;
+                writer.write(String.valueOf(ultimoId));
+                return idAtual;
             }
+
+            ultimoId = Long.parseLong(linha);
+            ultimoId++;
+
+            idAtual = ultimoId;
+
         } catch (IOException e) {
             System.err.println("Erro ao processar: " + e.getMessage());
         }
         return idAtual;
     }
 
-    private void AtualizarIds(){
+    private void AtualizarVeiculos(Long idEscolhido){
         File arquivoOriginal = new File("data/veiculos.txt");
         File arquivoTemp = new File("data/veiculos-temp.txt");
 
@@ -58,22 +68,20 @@ public class VeiculoDAO {
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
 
             String linha = reader.readLine();
-            Long idAnterior = -1L;
 
             while (linha != null) {
                 String[] partes = linha.split(" \\| ");
 
-                if(Long.parseLong(partes[0]) != idAnterior + 1 && Long.parseLong(partes[0]) != 0){
-                    partes[0] = String.valueOf(idAnterior + 1);
+                if(Long.parseLong(partes[0]) == idEscolhido){
+
                 }
 
-                idAnterior = Long.parseLong(partes[0]);
                 linha = String.join(" | ", partes);
-
-                bw.write(linha);
-                bw.newLine();
-
-                linha = reader.readLine();
+//
+//                bw.write(linha);
+//                bw.newLine();
+//
+//                linha = reader.readLine();
 
             }
 
@@ -133,10 +141,6 @@ public class VeiculoDAO {
         } else {
             System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
         }
-        AtualizarIds();
     }
 
-    public void AtualizarVeiculo(){
-
-    }
 }
