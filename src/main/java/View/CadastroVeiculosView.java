@@ -2,7 +2,8 @@ package View;
 
 import javax.swing.*;
 import java.awt.*;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class CadastroVeiculosView extends JFrame {
@@ -134,8 +135,33 @@ public class CadastroVeiculosView extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoCadastrar,gbc);
 
+        botaoCadastrar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String placa = campoPlaca.getText();
+                String marca = campoMarca.getText();
+                String modelo = campoModelo.getText();
+                String ano = campoAnoFabricacao.getText();
 
-        return painel;
+                String estado = "";
+                if (botaoAtivo.isSelected()) {
+                    estado = "ATIVO";
+                } else if (botaoInativo.isSelected()) {
+                    estado = "INATIVO";
+                }
+
+                JOptionPane.showMessageDialog(painel,
+                        "Veículo Cadastrado!\n" +
+                                "Placa: " + placa + "\n" +
+                                "Marca: " + marca + "\n" +
+                                "Modelo: " + modelo + "\n" +
+                                "Ano: " + ano + "\n" +
+                                "Estado: " + estado);
+            }
+        });
+
+
+                return painel;
     }
 
 
