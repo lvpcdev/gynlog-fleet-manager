@@ -5,7 +5,7 @@ import javax.swing.*;
 public class MainView {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            CadastroVeiculosView tela = new CadastroVeiculosView();
+            VeiculosView tela = new VeiculosView();
             tela.setVisible(true);
         });
     }

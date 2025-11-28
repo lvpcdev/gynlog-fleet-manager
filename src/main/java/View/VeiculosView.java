@@ -1,28 +1,39 @@
 package View;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
-import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 
-public class CadastroVeiculosView extends JFrame {
+public class VeiculosView extends JFrame {
 
-    public CadastroVeiculosView() {
-        setTitle("Cadastro de Veículos");
+    public VeiculosView() {
+        setTitle("VEÍCULOS");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel painelCadastro = criarPainelCadastroVeiculos();
-
         JTabbedPane abasPrincipais = new JTabbedPane();
-        abasPrincipais.addTab("Cadastro de Veículos",painelCadastro);
         this.add(abasPrincipais, BorderLayout.CENTER);
 
+        //=====CADASTRO=======
+        JPanel painelCadastro = criarPainelCadastroVeiculos();
+        abasPrincipais.addTab("Cadastro de Veículos",painelCadastro);
         setVisible(true);
+
+
+        //====LISTAGEM========
+        JPanel painelListagem = criarPainelListagemVeiculos();
+        abasPrincipais.addTab("LISTAGEM", painelListagem);
+        setVisible(true);
+
+        //====ATUALIZA=======
+
+
 
     }
     private JPanel criarPainelCadastroVeiculos() {
@@ -39,9 +50,10 @@ public class CadastroVeiculosView extends JFrame {
         JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
         JButton botaoCadastrar = new JButton("Cadastrar Veículos");
 
+        botaoAtivo.setSelected(true);
+
         //FILTROS
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
-
 
 
 
@@ -128,6 +140,7 @@ public class CadastroVeiculosView extends JFrame {
         //PAINEL DOS BOTÕES
         JPanel painelEstadoVeiculo = new JPanel();
         painelEstadoVeiculo.add(botaoAtivo);
+        painelEstadoVeiculo.add(new JLabel("\t|\t"));
         painelEstadoVeiculo.add(botaoInativo);
 
         //LINHA
@@ -173,7 +186,56 @@ public class CadastroVeiculosView extends JFrame {
                 return painel;
     }
 
+    private JPanel criarPainelListagemVeiculos(){
 
+        JPanel painel = new JPanel(new BorderLayout(10,10));
+        painel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        String[] colunas = {"ID","Placa","Marca","Modelo","Ano Fabricação","Estado"};
+
+        DefaultTableModel tableModel = new DefaultTableModel(colunas,0);
+
+        tableModel.addRow(new Object[] {1,"SCU7H31","Fiat","Polo",2020,"Ativo"});//MOCk para teste
+
+
+        JTable veiculosTable = new JTable(tableModel);
+        veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        //Deixar em negrito o cabeçalho
+        veiculosTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(
+                    JTable table,
+                    Object value,
+                    boolean isSelected,
+                    boolean hasFocus,
+                    int row,
+                    int column) {
+            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
+
+            label.setHorizontalAlignment(CENTER);
+            Font originalFont = label.getFont();
+            label.setFont(originalFont.deriveFont(Font.BOLD));
+            return label;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(veiculosTable);
+        painel.add(scrollPane,BorderLayout.CENTER);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        veiculosTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+
+
+
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        painelBotoes.add(new JButton("Editar Selecionado"));
+        painelBotoes.add(new JButton("Excluir Selecionado"));
+
+        painel.add(painelBotoes, BorderLayout.SOUTH);
+        return painel;
+    }
 
 
 }
