@@ -1,10 +1,9 @@
 package view.gui;
-<<<<<<<< HEAD:src/main/java/view/gui/CadastroVeiculosView.java
+
 
 import persistance.dao.VeiculoDAO;
 import model.entities.Veiculo;
-========
->>>>>>>> origin/feat/relatorios:src/main/java/view/gui/VeiculosView.java
+
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
