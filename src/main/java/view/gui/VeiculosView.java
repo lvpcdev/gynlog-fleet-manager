@@ -1,5 +1,6 @@
 package view.gui;
 
+import controller.VeiculoController;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
 

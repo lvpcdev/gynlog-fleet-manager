@@ -1,4 +1,4 @@
-import persistance.dao.MovimentacaoDAO;
+import persistence.dao.MovimentacaoDAO;
 import model.entities.Movimentacao;
 
 public class Main {

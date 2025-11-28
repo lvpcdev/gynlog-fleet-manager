@@ -1,4 +1,5 @@
 package persistence.repository;
 
-public interface GenericRepository {
+public interface GenericRepository<T, ID> {
+
 }

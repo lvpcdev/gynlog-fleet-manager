@@ -1,9 +1,8 @@
-package persistance.dao;
+package persistence.dao;
 
 import model.entities.Movimentacao;
 
 import java.io.*;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class MovimentacaoDAO {
