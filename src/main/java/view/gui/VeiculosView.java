@@ -251,6 +251,13 @@ public class VeiculosView extends JFrame {
         JButton botaoEditar = new JButton("Editar Veículos");
         JButton botaoExcluir = new JButton("Excluir Veículos");
 
+        botaoExcluir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
         painel.add(painelBotoes, BorderLayout.SOUTH);
         painelBotoes.add(botaoEditar,BorderLayout.SOUTH);
         painelBotoes.add(botaoExcluir,BorderLayout.SOUTH);
