@@ -24,7 +24,6 @@ hs_err_pid*
 replay_pid*
 
 # 1. Ignorar arquivos de dados
-*.txt
 *.csv
 *.json
 !README.txt 
