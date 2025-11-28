@@ -8,7 +8,7 @@ public class Main {
         VeiculoDAO veiculoDAO = new VeiculoDAO();
         veiculoDAO.SalvarVeiculo(veiculoTeste);
 
-        veiculoDAO.ExcluirVeiculo(0L);
+        veiculoDAO.ExcluirVeiculo(4L);
 //        veiculoDAO.ExcluirVeiculo(4L);
 //        veiculoDAO.ExcluirVeiculo(4L);
 

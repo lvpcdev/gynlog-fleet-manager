@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 public class VeiculoDAO {
     Long idAtual = 0L;
-    private final String caminho = "data/veiculos.txt";
+    private final String caminho = "data/veiculos/veiculos.txt";
 
     private DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("yyyy");
 
@@ -34,8 +34,8 @@ public class VeiculoDAO {
     }
 
     private Long GerarId(){
-        File arquivoUltimoId = new File("data/VeiculosUltimoId.txt");
-        File arquivoUltimoIdTemp = new File("data/VeiculosUltimoIdTemp.txt")
+        File arquivoUltimoId = new File("data/veiculos/VeiculosUltimoId.txt");
+        File arquivoUltimoIdTemp = new File("data/veiculos/VeiculosUltimoIdTemp.txt");
         Long ultimoId = 0L;
         try (BufferedReader readerUltimoId = new BufferedReader(new FileReader(arquivoUltimoId));
             BufferedWriter writerUltimodId = new BufferedWriter(new FileWriter(arquivoUltimoIdTemp))){
@@ -44,25 +44,33 @@ public class VeiculoDAO {
 
             if(linha == null){
                 ultimoId = 0L;
-                idAtual = ultimoId;
-                writer.write(String.valueOf(ultimoId));
-                return idAtual;
+            } else {
+                ultimoId = Long.parseLong(linha);
+                ultimoId++;
             }
 
-            ultimoId = Long.parseLong(linha);
-            ultimoId++;
-
             idAtual = ultimoId;
+            writerUltimodId.write(String.valueOf(ultimoId));
 
         } catch (IOException e) {
             System.err.println("Erro ao processar: " + e.getMessage());
         }
+
+        if (arquivoUltimoId.delete()) {
+            boolean sucesso = arquivoUltimoIdTemp.renameTo(arquivoUltimoId);
+
+            if (!sucesso) {
+                System.err.println("Erro ao atualizar o id");
+            }
+        } else {
+            System.err.println("Não foi possível apagar o arquivo original(GerarId)");
+        }
         return idAtual;
     }
 
-    private void AtualizarVeiculos(Long idEscolhido){
-        File arquivoOriginal = new File("data/veiculos.txt");
-        File arquivoTemp = new File("data/veiculos-temp.txt");
+    public void EditarVeiculo(Long idEscolhido){
+        File arquivoOriginal = new File(caminho);
+        File arquivoTemp = new File("data/veiculos/veiculos-temp.txt");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
@@ -77,11 +85,11 @@ public class VeiculoDAO {
                 }
 
                 linha = String.join(" | ", partes);
-//
-//                bw.write(linha);
-//                bw.newLine();
-//
-//                linha = reader.readLine();
+
+                bw.write(linha);
+                bw.newLine();
+
+                linha = reader.readLine();
 
             }
 
@@ -101,8 +109,8 @@ public class VeiculoDAO {
     }
 
     public void ExcluirVeiculo(Long idParaExcluir) {
-        File arquivoOriginal = new File("data/veiculos.txt");
-        File arquivoTemp = new File("data/veiculos-temp.txt");
+        File arquivoOriginal = new File("data/veiculos/veiculos.txt");
+        File arquivoTemp = new File("data/veiculos/veiculos-temp.txt");
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
