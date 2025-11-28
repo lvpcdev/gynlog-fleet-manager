@@ -1,4 +1,3 @@
-import dao.MovimentacaoDAO;
 import model.entities.Movimentacao;
 
 public class Main {

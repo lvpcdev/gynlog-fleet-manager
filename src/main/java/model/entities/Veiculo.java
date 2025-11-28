@@ -71,9 +71,5 @@ public class Veiculo {
         this.estado = estado;
     }
 
-    public static void main(String[] args) {
-        Veiculo carro = new Veiculo("123","123","abc", false, "05/2020");
 
-        System.out.println(carro.getAnoDeFabricacao());
-    }
 }

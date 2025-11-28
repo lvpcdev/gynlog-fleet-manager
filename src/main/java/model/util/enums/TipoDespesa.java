@@ -1,6 +1,6 @@
-package model.enums;
+package model.util.enums;
 
-public enum CategoriaDespesa {
+public enum TipoDespesa {
 
     IPVA,
     COMBUSTIVEL,
