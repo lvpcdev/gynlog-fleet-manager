@@ -1,6 +1,7 @@
 package view.gui;
 
-import dao.VeiculoDAO;
+import controller.VeiculoController;
+import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
 
 import javax.swing.*;
@@ -13,6 +14,11 @@ import java.awt.event.ActionListener;
 
 
 public class VeiculosView extends JFrame {
+
+    VeiculoController veiculoController = new VeiculoController();
+    String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado"};
+
+    DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0);
 
     public VeiculosView() {
         setTitle("VEÍCULOS");
@@ -189,6 +195,8 @@ public class VeiculosView extends JFrame {
                                 "Modelo: " + modelo + "\n" +
                                 "Ano: " + ano + "\n" +
                                 "Estado: " + estadoTexto);
+
+               veiculoController.AtualizarVeiculos(tableModelVeiculos);
             }
         });
 
@@ -196,19 +204,14 @@ public class VeiculosView extends JFrame {
                 return painel;
     }
 
-    private JPanel criarPainelListagemVeiculos(){
+    private JPanel criarPainelListagemVeiculos() {
 
-        JPanel painel = new JPanel(new BorderLayout(10,10));
-        painel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        String[] colunas = {"ID","Placa","Marca","Modelo","Ano Fabricação","Estado"};
+        veiculoController.AtualizarVeiculos(tableModelVeiculos);
 
-        DefaultTableModel tableModel = new DefaultTableModel(colunas,0);
-
-        tableModel.addRow(new Object[] {1,"SCU7H31","Fiat","Polo",2020,"Ativo"});//MOCk para teste
-
-
-        JTable veiculosTable = new JTable(tableModel);
+        JTable veiculosTable = new JTable(tableModelVeiculos);
         veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         //Deixar em negrito o cabeçalho
@@ -246,6 +249,7 @@ public class VeiculosView extends JFrame {
         painel.add(painelBotoes, BorderLayout.SOUTH);
         return painel;
     }
+
 
 
 }
