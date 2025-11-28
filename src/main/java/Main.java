@@ -1,7 +1,5 @@
-import dao.MovimentacaoDAO;
-import dao.VeiculoDAO;
+import persistance.dao.MovimentacaoDAO;
 import model.entities.Movimentacao;
-import model.entities.Veiculo;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,8 +14,9 @@ public class Main {
 
         Movimentacao movimentacaoTeste = new Movimentacao(0L, 0L, "Multa", "20/12/2025", 300.00);
         MovimentacaoDAO movimentacaoDAO = new MovimentacaoDAO();
-        movimentacaoDAO.ExcluirMovimentacao(4L);
-        movimentacaoDAO.SalvarMovimentacao(movimentacaoTeste);
+        //movimentacaoDAO.ExcluirMovimentacao(8L);
+        //movimentacaoDAO.SalvarMovimentacao(movimentacaoTeste);
 
+        System.out.println(movimentacaoDAO.lerMovimentacao(10L));
     }
 }

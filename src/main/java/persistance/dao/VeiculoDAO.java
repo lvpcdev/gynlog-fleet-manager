@@ -1,4 +1,4 @@
-package dao;
+package persistance.dao;
 
 import model.entities.Veiculo;
 

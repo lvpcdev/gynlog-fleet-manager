@@ -1,13 +1,15 @@
-package dao;
+package persistance.dao;
 
 import model.entities.Movimentacao;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class MovimentacaoDAO {
 
     private final String caminho = "data/movimentacoes.txt";
+    private final String idCaminho = "data/movimentacao_id_sequence.txt";
     private final DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public void SalvarMovimentacao(Movimentacao mov) {
@@ -15,10 +17,13 @@ public class MovimentacaoDAO {
         if (!diretorio.exists()) {
             diretorio.mkdirs();
         }
-        
+
         File arquivo = new File(caminho);
 
-        mov.setIdMovimentacao(GerarId());
+        if (mov.getIdMovimentacao() == null) {
+            mov.setIdMovimentacao(GerarId());
+        }
+
         String movimentacaoTexto = mov.getIdMovimentacao() + " | "
                 + mov.getIdVeiculo() + " | "
                 + mov.getIdTipoDespesa() + " | "
@@ -37,37 +42,86 @@ public class MovimentacaoDAO {
     }
 
     private Long GerarId() {
+        long ultimoId = -1L;
+        File idFile = new File(idCaminho);
+
+        if (idFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(idFile))) {
+                String line = reader.readLine();
+                if (line != null && !line.trim().isEmpty()) {
+                    ultimoId = Long.parseLong(line.trim());
+                }
+            } catch (IOException | NumberFormatException e) {
+                System.err.println("Aviso: Não foi possível ler o arquivo de sequência de ID. Recalculando...");
+                ultimoId = -1L;
+            }
+        }
+
+        if (ultimoId == -1L) {
+            File arquivoDados = new File(caminho);
+            if (arquivoDados.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(arquivoDados))) {
+                    String linha;
+                    while ((linha = reader.readLine()) != null) {
+                        if (linha.trim().isEmpty()) continue;
+                        String[] partes = linha.split(" \\| ");
+                        if (partes.length > 0) {
+                            try {
+                                long idAtual = Long.parseLong(partes[0].trim());
+                                if (idAtual > ultimoId) {
+                                    ultimoId = idAtual;
+                                }
+                            } catch (NumberFormatException e) { /* Ignora */ }
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Erro ao ler arquivo para inicializar ID: " + e.getMessage());
+                }
+            }
+        }
+
+        long proximoId = ultimoId + 1;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(idFile, false))) {
+            writer.write(String.valueOf(proximoId));
+        } catch (IOException e) {
+            System.err.println("Erro crítico: Não foi possível atualizar o arquivo de sequência de ID: " + e.getMessage());
+        }
+
+        return proximoId;
+    }
+
+    public Movimentacao lerMovimentacao(Long idParaLer) {
         File arquivo = new File(caminho);
-        long maxId = -1L;
 
         if (!arquivo.exists()) {
-            return 0L;
+            return null;
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
             String linha;
             while ((linha = reader.readLine()) != null) {
-                if (linha.trim().isEmpty()) {
-                    continue;
-                }
                 String[] partes = linha.split(" \\| ");
-                if (partes.length > 0) {
-                    try {
-                        long idAtual = Long.parseLong(partes[0].trim());
-                        if (idAtual > maxId) {
-                            maxId = idAtual;
-                        }
-                    } catch (NumberFormatException e) {
-                        System.err.println("Aviso: linha mal formatada no arquivo de movimentações: " + linha);
-                    }
+                Long idAtual = Long.parseLong(partes[0].trim());
+
+                if (idAtual.equals(idParaLer)) {
+                    Long idMovimentacao = Long.parseLong(partes[0].trim());
+                    Long idVeiculo = Long.parseLong(partes[1].trim());
+                    Long idTipoDespesa = Long.parseLong(partes[2].trim());
+                    String descricao = partes[3].trim();
+                    String data = partes[4].trim();
+                    Double valor = Double.parseDouble(partes[5].trim());
+
+                    return new Movimentacao( idVeiculo, idTipoDespesa, descricao, data, valor);
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Erro ao ler arquivo de movimentações para gerar ID: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Erro ao ler a movimentação: " + e.getMessage());
         }
 
-        return maxId + 1;
+        return null;
     }
+
 
     public void ExcluirMovimentacao(Long idParaExcluir) {
         File arquivoOriginal = new File(caminho);
@@ -105,6 +159,7 @@ public class MovimentacaoDAO {
             arquivoTemp.delete();
             return;
         }
+
 
         if (arquivoOriginal.delete()) {
             if (!arquivoTemp.renameTo(arquivoOriginal)) {

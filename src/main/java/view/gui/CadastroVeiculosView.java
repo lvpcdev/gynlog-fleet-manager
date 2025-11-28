@@ -1,6 +1,6 @@
-package View;
+package view.gui;
 
-import dao.VeiculoDAO;
+import persistance.dao.VeiculoDAO;
 import model.entities.Veiculo;
 
 import javax.swing.*;
