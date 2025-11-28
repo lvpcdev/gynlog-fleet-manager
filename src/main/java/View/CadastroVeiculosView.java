@@ -159,7 +159,7 @@ public class CadastroVeiculosView extends JFrame {
 
                 Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, estado, ano);
                 VeiculoDAO veiculoDAO = new VeiculoDAO();
-                veiculoDAO.salvar(novoVeiculo);
+                veiculoDAO.SalvarVeiculo(novoVeiculo);
                 JOptionPane.showMessageDialog(painel,
                         "Veículo Cadastrado!\n" +
                                 "Placa: " + placa + "\n" +
