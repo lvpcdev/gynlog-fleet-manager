@@ -1,6 +1,4 @@
-
 6 | 1 | 4 | 2025-10-10 | 600 | Teste
 7 | 1 | 4 | 2025-11-29 | 300 | haha
-8 | 2 | 6 | 2025-11-29 | 200 | Carro bateu na avenia T-9
 10 | 1 | 4 | 2025-11-29 | 350 | teste
-11 | 61 | 7 | 2025-11-29 | 300 | Reabastecimento do veículo Arthur
+12 | 0 | 6 | 2025-11-29 | 123 | Sei la

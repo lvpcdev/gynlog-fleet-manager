@@ -33,11 +33,24 @@ public class VeiculosView extends JFrame {
     public VeiculosView() {
         setTitle("VEÍCULOS");
         setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // <--- Alterado para permitir voltar ao Menu
         setLocationRelativeTo(null);
 
         JTabbedPane abasPrincipais = new JTabbedPane();
         this.add(abasPrincipais, BorderLayout.CENTER);
+
+        // Adiciona botão "Voltar" no topo (sempre visível)
+        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botaoVoltar = new JButton("Voltar");
+        topo.add(botaoVoltar);
+        this.add(topo, BorderLayout.NORTH);
+
+        botaoVoltar.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                new MenuView();
+                VeiculosView.this.dispose();
+            });
+        });
 
         //=====CADASTRO=======
         JPanel painelCadastro = criarPainelCadastroVeiculos();
@@ -185,14 +198,13 @@ public class VeiculosView extends JFrame {
                 String ano = campoAnoFabricacao.getText();
 
                 String estadoTexto = "";
-                StatusVeiculo statusVeiculo = StatusVeiculo.INATIVO;
                 if (botaoAtivo.isSelected()) {
                     estadoTexto = "ATIVO";
                 } else if (botaoInativo.isSelected()) {
                     estadoTexto = "INATIVO";
                 }
 
-                statusVeiculo = statusVeiculo.setStatus(estadoTexto);
+                StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(estadoTexto);
 
                 Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                 VeiculoDAO veiculoDAO = new VeiculoDAO();
@@ -446,7 +458,7 @@ public class VeiculosView extends JFrame {
 
         campoAnoFabricacao.setText(veiculoDAO.LerVeiculos("anoDeFabricacao", linhaEscolhida));
 
-        if(Objects.equals(veiculoDAO.LerVeiculos("estadoVeiculo", linhaEscolhida), "Ativo")){
+        if(Objects.equals(veiculoDAO.LerVeiculos("estadoVeiculo", linhaEscolhida), "ATIVO")){
             botaoAtivo.setSelected(true);
         } else{
             botaoInativo.setSelected(true);
@@ -462,14 +474,14 @@ public class VeiculosView extends JFrame {
                 String ano = campoAnoFabricacao.getText();
 
                 String estadoTexto = "";
-                StatusVeiculo statusVeiculo = StatusVeiculo.INATIVO;
+
                 if (botaoAtivo.isSelected()) {
                     estadoTexto = "ATIVO";
                 } else if (botaoInativo.isSelected()) {
                     estadoTexto = "INATIVO";
                 }
 
-                statusVeiculo = statusVeiculo.setStatus(estadoTexto);
+                StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(estadoTexto);
 
                 Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                 veiculo.setIdVeiculo(Long.parseLong(veiculoDAO.LerVeiculos("idVeiculo",linhaEscolhida)));

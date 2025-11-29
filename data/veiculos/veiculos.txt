@@ -1,5 +1,2 @@
-0 | ABC1D23 | Hyundai | HB20 | 2017 | INATIVO
-1 | EFG4H56 | Honda | Civic | 2012 | ATIVO
-4 | 12 | 12 | 12 | 1234 | INATIVO
-5 | 123 | 123 | 123 | 1234 | INATIVO
-6 | 1234 | 1234 | 1234 | 1234 | ATIVO
+0 | ABC1D23 | Hyundai | HB20 | 2017 | ATIVO
+1 | EFG4H56 | Honda | Civic | 2012 | INATIVO

@@ -99,8 +99,7 @@ public class VeiculoDAO {
                         String marca = partes[2].trim();
                         String modelo = partes[3].trim();
                         String ano = partes[4].trim();
-                        StatusVeiculo statusVeiculo = null;
-                        statusVeiculo = statusVeiculo.setStatus(partes[5].trim());
+                        StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(partes[5].trim());
 
                         Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                         veiculo.setIdVeiculo(id);

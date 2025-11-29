@@ -162,7 +162,7 @@ public class MovimentacaoDAO {
                         String marca = partes[2].trim();
                         String modelo = partes[3].trim();
                         String ano = partes[4].trim();
-                        StatusVeiculo statusVeiculo = null;
+                        StatusVeiculo statusVeiculo = StatusVeiculo.INATIVO;
                         statusVeiculo = statusVeiculo.setStatus(partes[5].trim());
 
                         Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
