@@ -1,4 +1,4 @@
-package model.util.enums;
+package model.enums;
 
 public enum StatusVeiculo {
     ATIVO("Ativo na Frota"),

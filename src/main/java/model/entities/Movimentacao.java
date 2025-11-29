@@ -1,22 +1,29 @@
 package model.entities;
 
 
+import persistence.dao.TipoDespesaDAO;
+
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class Movimentacao {
+
     private Long idMovimentacao;
-    private Long idVeiculo;
-    private Long idTipoDespesa;
     private String descricao;
     private LocalDate data;
-    private double valor;;
+    private BigDecimal valor;
 
-    public Movimentacao(Long idVeiculo, Long idTipoDespesa, String descricao, String data, double valor) {
-        this.idVeiculo = idVeiculo;
-        this.idTipoDespesa = idTipoDespesa;
+    private Veiculo veiculo;
+    private TipoDespesa tipoDespesa;
+
+    public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor) {
+        this.veiculo = veiculo;
+        this.tipoDespesa = tipoDespesa;
         this.descricao = descricao;
-        setData(data);
+        this.data = data;
         this.valor = valor;
     }
 
@@ -28,20 +35,20 @@ public class Movimentacao {
         this.idMovimentacao = idMovimentacao;
     }
 
-    public Long getIdVeiculo() {
-        return idVeiculo;
+    public Veiculo getVeiculo() {
+        return veiculo;
     }
 
-    public void setIdVeiculo(Long idVeiculo) {
-        this.idVeiculo = idVeiculo;
+    public void setVeiculo(Veiculo veiculo) {
+        this.veiculo = veiculo;
     }
 
-    public Long getIdTipoDespesa() {
-        return idTipoDespesa;
+    public TipoDespesa getTipoDespesa() {
+        return tipoDespesa;
     }
 
-    public void setIdTipoDespesa(Long idTipoDespesa) {
-        this.idTipoDespesa = idTipoDespesa;
+    public void setTipoDespesa(TipoDespesa tipoDespesa) {
+        this.tipoDespesa = tipoDespesa;
     }
 
     public String getDescricao() {
@@ -56,32 +63,46 @@ public class Movimentacao {
         return data;
     }
 
-    public void setData(String data) {
-
-        DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        this.data = LocalDate.parse(data, fmtData);
+    public void setData(LocalDate data) {
+        this.data = data;
     }
 
-    public double getValor() {
+    public BigDecimal getValor() {
         return valor;
     }
 
-    public void setValor(double valor) {
+    public void setValor(BigDecimal valor) {
         this.valor = valor;
     }
 
     @Override
     public String toString() {
-        return "Movimentacao{" +
-                "idMovimentacao=" + idMovimentacao +
-                ", idVeiculo=" + idVeiculo +
-                ", idTipoDespesa=" + idTipoDespesa +
-                ", descricao='" + descricao + '\'' +
-                ", data=" + data +
-                ", valor=" + valor +
-                '}';
+        DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        NumberFormat formatadorMoeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+
+
+        String placaVeiculo;
+        if (veiculo != null) {
+            placaVeiculo = veiculo.getPlaca();
+        } else {
+            placaVeiculo = "N/A";
+        }
+
+        String descTipoDespesa;
+        if (tipoDespesa != null) {
+            descTipoDespesa = tipoDespesa.getDescricao();
+        } else {
+            descTipoDespesa = "N/A";
+        }
+
+        return "Movimentação ID: " + idMovimentacao + "\n" +
+                "  - Veículo (Placa): " + placaVeiculo + "\n" +
+                "  - Data: " + data.format(formatadorData) + "\n" +
+                "  - Tipo: " + descTipoDespesa + "\n" +
+                "  - Descrição: " + descricao + "\n" +
+                "  - Valor: " + formatadorMoeda.format(valor);
     }
-
-
 }
+
+
+

@@ -17,9 +17,15 @@ public class VeiculosView extends JFrame {
 
     VeiculoController veiculoController = new VeiculoController();
     String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado"};
+    VeiculoDAO veiculoDAO = new VeiculoDAO();
 
-    DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0);
-
+    DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            // Retorna FALSE para impedir a edição direta de qualquer célula
+            return false;
+        }
+    };
     public VeiculosView() {
         setTitle("VEÍCULOS");
         setSize(800, 600);
@@ -82,7 +88,7 @@ public class VeiculosView extends JFrame {
         painel.add(campoPlaca,gbc);
 
 
-         //======MARCA=======
+        //======MARCA=======
 
         //RÓTULo
         gbc.gridx = 0;
@@ -196,12 +202,12 @@ public class VeiculosView extends JFrame {
                                 "Ano: " + ano + "\n" +
                                 "Estado: " + estadoTexto);
 
-               veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos);
             }
         });
 
 
-                return painel;
+        return painel;
     }
 
     private JPanel criarPainelListagemVeiculos() {
@@ -224,14 +230,17 @@ public class VeiculosView extends JFrame {
                     boolean hasFocus,
                     int row,
                     int column) {
-            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
 
-            label.setHorizontalAlignment(CENTER);
-            Font originalFont = label.getFont();
-            label.setFont(originalFont.deriveFont(Font.BOLD));
-            return label;
+
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
+
+                label.setHorizontalAlignment(CENTER);
+                Font originalFont = label.getFont();
+                label.setFont(originalFont.deriveFont(Font.BOLD));
+                return label;
             }
         });
+
 
         JScrollPane scrollPane = new JScrollPane(veiculosTable);
         painel.add(scrollPane,BorderLayout.CENTER);
@@ -241,12 +250,140 @@ public class VeiculosView extends JFrame {
         veiculosTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
 
-
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        painelBotoes.add(new JButton("Editar Selecionado"));
-        painelBotoes.add(new JButton("Excluir Selecionado"));
+
+        JButton botaoEditar = new JButton("Editar Veículos");
+        JButton botaoExcluir = new JButton("Excluir Veículos");
+
+        botaoExcluir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(),0) != null) {
+                    Long idEscolhido = Long.parseLong(String.valueOf(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(), 0)));
+                    tableModelVeiculos.removeRow(veiculosTable.getSelectedRow());
+                    veiculoDAO.ExcluirVeiculo(idEscolhido);
+                    veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                }
+            }
+        });
 
         painel.add(painelBotoes, BorderLayout.SOUTH);
+        painelBotoes.add(botaoEditar,BorderLayout.SOUTH);
+        painelBotoes.add(botaoExcluir,BorderLayout.SOUTH);
+        return painel;
+    }
+
+    private JPanel criarPainelEditarVeiculos(){
+
+        JPanel painel = new JPanel(new BorderLayout(10,10));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8,8,8,8);
+
+        JTextField campoPlaca = new JTextField(8);
+        JTextField campoMarca = new JTextField(20);
+        JTextField campoModelo = new JTextField(20);
+        JTextField campoAnoFabricacao = new JTextField(4);
+        JRadioButton botaoAtivo = new JRadioButton("Estado Veículo - ATIVO");
+        JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
+        JButton botaoAtualizar = new JButton("Atualizar Veículos");
+
+        //RÓTULO
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("PLACA:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        painel.add(campoPlaca,gbc);
+
+
+        //======MARCA=======
+
+        //RÓTULo
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("MARCA:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        painel.add(campoMarca,gbc);
+
+
+        //======MODELO=======
+
+        //RÓTULo
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("MODELO:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
+        painel.add(campoModelo,gbc);
+
+        //======ANO DE FABRICACAO=======
+
+        //RÓTULo
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("ANO DE FABRICAÇÃO:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.CENTER;
+        gbc.weightx = 1.0;
+        painel.add(campoAnoFabricacao,gbc);
+
+        //=====ESTADO=============
+
+        //RÓTULO
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("ESTADO DO VEÍCULO:"),gbc);
+
+        //GRUPO BOTÕES DE ESTADO
+        ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
+        grupoEstadoVeiculo.add(botaoAtivo);
+        grupoEstadoVeiculo.add(botaoInativo);
+
+        //PAINEL DOS BOTÕES
+        JPanel painelEstadoVeiculo = new JPanel();
+        painelEstadoVeiculo.add(botaoAtivo);
+        painelEstadoVeiculo.add(new JLabel("\t|\t"));
+        painelEstadoVeiculo.add(botaoInativo);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.WEST;
+        painel.add(painelEstadoVeiculo,gbc);
+
+        //====BOTÃO CADASTRAR========
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        painel.add(botaoAtualizar,gbc);
+
         return painel;
     }
 

@@ -11,6 +11,7 @@ public class VeiculoController {
         if(veiculoDAO.getQuantidadeDeVeiculos() == 0){
             return;
         }
+//        if(veiculoDAO.LerVeiculos("idVeiculo",linhaAtual) );
         while(linhaAtual <= veiculoDAO.getQuantidadeDeVeiculos()){
             tableModel.addRow(new Object[] {
                     veiculoDAO.LerVeiculos("idVeiculo", linhaAtual),
@@ -22,5 +23,6 @@ public class VeiculoController {
             });
             linhaAtual++;
         }
+
     }
 }
