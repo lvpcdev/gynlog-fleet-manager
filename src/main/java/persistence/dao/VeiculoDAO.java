@@ -35,12 +35,14 @@ public class VeiculoDAO {
     }
 
     // READ
-    public String LerVeiculos(String dadoEscolhido, int linhaAtual){
+    public String LerVeiculos(String dadoEscolhido, int linhaEscolhida){
         File arquivoOriginal = new File("data/veiculos/veiculos.txt");
         String linha = null;
         String[] partes = null;
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal))) {
-            for (int i = 1; i <= linhaAtual; i++) {
+            linha = br.readLine();
+            partes = linha.split(" \\| ");
+            for (int i = 1; i < linhaEscolhida; i++) {
                 linha = br.readLine();
                 partes = linha.split(" \\| ");
             }
@@ -71,9 +73,16 @@ public class VeiculoDAO {
     }
 
     // UPDATE
-    public void EditarVeiculo(Long idEscolhido){
+    public void EditarVeiculo(Veiculo veiculo){
         File arquivoOriginal = new File(caminho);
         File arquivoTemp = new File("data/veiculos/veiculos-temp.txt");
+
+        String veiculoTexto = veiculo.getIdVeiculo() + " | "
+                + veiculo.getPlaca() + " | "
+                + veiculo.getMarca() + " | "
+                + veiculo.getModelo() + " | "
+                + veiculo.getAnoDeFabricacao().format(fmtData) + " | "
+                + veiculo.isEstado();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
@@ -83,11 +92,10 @@ public class VeiculoDAO {
             while (linha != null) {
                 String[] partes = linha.split(" \\| ");
 
-                if(Long.parseLong(partes[0]) == idEscolhido){
-
+                if(Long.parseLong(partes[0]) == veiculo.getIdVeiculo()){
+                    partes = veiculoTexto.split(" \\| ");
+                    linha = String.join(" | ", partes);
                 }
-
-                linha = String.join(" | ", partes);
 
                 bw.write(linha);
                 bw.newLine();
@@ -132,10 +140,6 @@ public class VeiculoDAO {
                 bw.write(linha);
                 bw.newLine();
                 linha = br.readLine();
-                if(linha == null){
-                    System.err.println("id não encontrado");
-                    break;
-                }
             }
 
         } catch (IOException e) {
@@ -152,6 +156,28 @@ public class VeiculoDAO {
         } else {
             System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
         }
+    }
+
+    public int getQuantidadeDeVeiculos(){
+        File arquivoOriginal = new File(caminho);
+        int quantidade = 0;
+        try (LineNumberReader reader = new LineNumberReader(new FileReader(arquivoOriginal))) {
+
+            String linha = reader.readLine();
+
+            while (linha != null) {
+                quantidade++;
+                linha = reader.readLine();
+                if(linha == null){
+                    break;
+                }
+            }
+
+
+        } catch (IOException e) {
+            System.err.println("Erro ao atualiza lista: " + e.getMessage());
+        }
+        return quantidade;
     }
 
     private Long GerarId(){
@@ -189,25 +215,5 @@ public class VeiculoDAO {
         return idAtual;
     }
 
-    public int getQuantidadeDeVeiculos(){
-        File arquivoOriginal = new File(caminho);
-        int quantidade = 0;
-        try (LineNumberReader reader = new LineNumberReader(new FileReader(arquivoOriginal))) {
 
-            String linha = reader.readLine();
-
-            while (linha != null) {
-                quantidade++;
-                linha = reader.readLine();
-                if(linha == null){
-                    break;
-                }
-            }
-
-
-        } catch (IOException e) {
-            System.err.println("Erro ao atualiza lista: " + e.getMessage());
-        }
-        return quantidade;
-    }
 }
