@@ -3,10 +3,10 @@ import model.entities.Veiculo;
 
 public class Main {
     public static void main(String[] args) {
-
-        VeiculoDAO veiculoDAO = new VeiculoDAO();
+//        Veiculo veiculoTeste = new Veiculo("1","1","1",true,"2005");
+//        VeiculoDAO veiculoDAO = new VeiculoDAO();
 //        veiculoDAO.SalvarVeiculo(veiculoTeste);
-//        veiculoDAO.ExcluirVeiculo(4L);
+//        veiculoDAO.ExcluirVeiculo(6L);
 //        veiculoDAO.ExcluirVeiculo(4L);
 //        veiculoDAO.ExcluirVeiculo(4L);
 

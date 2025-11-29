@@ -17,6 +17,7 @@ public class VeiculosView extends JFrame {
 
     VeiculoController veiculoController = new VeiculoController();
     String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado"};
+    VeiculoDAO veiculoDAO = new VeiculoDAO();
 
     DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0) {
         @Override
@@ -229,6 +230,8 @@ public class VeiculosView extends JFrame {
                     boolean hasFocus,
                     int row,
                     int column) {
+
+
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
 
             label.setHorizontalAlignment(CENTER);
@@ -237,6 +240,7 @@ public class VeiculosView extends JFrame {
             return label;
             }
         });
+
 
         JScrollPane scrollPane = new JScrollPane(veiculosTable);
         painel.add(scrollPane,BorderLayout.CENTER);
@@ -254,7 +258,12 @@ public class VeiculosView extends JFrame {
         botaoExcluir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                if(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(),0) != null) {
+                    Long idEscolhido = Long.parseLong(String.valueOf(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(), 0)));
+                    tableModelVeiculos.removeRow(veiculosTable.getSelectedRow());
+                    veiculoDAO.ExcluirVeiculo(idEscolhido);
+                    veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                }
             }
         });
 

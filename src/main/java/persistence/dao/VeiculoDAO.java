@@ -129,7 +129,6 @@ public class VeiculoDAO {
                     continue;
                 }
 
-
                 bw.write(linha);
                 bw.newLine();
                 linha = br.readLine();
