@@ -13,4 +13,10 @@ public enum StatusVeiculo {
     public String getDescricao() {
         return descricao;
     }
+
+    public StatusVeiculo setStatus(String descricao) {
+        if(descricao.equals("ATIVO")) {
+            return  ATIVO;
+        } else return INATIVO;
+    }
 }

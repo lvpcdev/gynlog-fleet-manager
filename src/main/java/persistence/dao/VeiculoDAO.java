@@ -1,6 +1,7 @@
 package persistence.dao;
 
 import model.entities.Veiculo;
+import model.enums.StatusVeiculo;
 
 import java.io.*;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +23,7 @@ public class VeiculoDAO {
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
                 + veiculo.getAnoDeFabricacao().format(fmtData) + " | "
-                + veiculo.isEstado();
+                + veiculo.getStatusVeiculo();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(arquivo, true))){
             writer.write(veiculoTexto);
@@ -98,9 +99,10 @@ public class VeiculoDAO {
                         String marca = partes[2].trim();
                         String modelo = partes[3].trim();
                         String ano = partes[4].trim();
-                        boolean estado = partes[5].trim().equalsIgnoreCase("true") || partes[5].trim().equalsIgnoreCase("ATIVO");
+                        StatusVeiculo statusVeiculo = null;
+                        statusVeiculo = statusVeiculo.setStatus(partes[5].trim());
 
-                        Veiculo veiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                        Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                         veiculo.setIdVeiculo(id);
                         veiculos.add(veiculo);
 
@@ -128,7 +130,7 @@ public class VeiculoDAO {
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
                 + veiculo.getAnoDeFabricacao().format(fmtData) + " | "
-                + veiculo.isEstado();
+                + veiculo.getStatusVeiculo();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {

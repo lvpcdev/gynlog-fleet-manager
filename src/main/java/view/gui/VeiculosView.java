@@ -1,6 +1,7 @@
 package view.gui;
 
 import controller.VeiculoController;
+import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
 
@@ -11,6 +12,8 @@ import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Objects;
 
 
@@ -181,18 +184,17 @@ public class VeiculosView extends JFrame {
                 String modelo = campoModelo.getText();
                 String ano = campoAnoFabricacao.getText();
 
-                boolean estado = false;
                 String estadoTexto = "";
-
+                StatusVeiculo statusVeiculo = StatusVeiculo.INATIVO;
                 if (botaoAtivo.isSelected()) {
                     estadoTexto = "ATIVO";
-                    estado = true;
                 } else if (botaoInativo.isSelected()) {
                     estadoTexto = "INATIVO";
-                    estado = false;
                 }
 
-                Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                statusVeiculo = statusVeiculo.setStatus(estadoTexto);
+
+                Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                 VeiculoDAO veiculoDAO = new VeiculoDAO();
                 veiculoDAO.SalvarVeiculo(novoVeiculo);
                 JOptionPane.showMessageDialog(painel,
@@ -203,7 +205,7 @@ public class VeiculosView extends JFrame {
                                 "Ano: " + ano + "\n" +
                                 "Estado: " + estadoTexto);
 
-                veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
             }
         });
 
@@ -216,7 +218,7 @@ public class VeiculosView extends JFrame {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        veiculoController.AtualizarVeiculos(tableModelVeiculos);
+        veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
 
         JTable veiculosTable = new JTable(tableModelVeiculos);
         veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -253,6 +255,7 @@ public class VeiculosView extends JFrame {
 
         JButton botaoEditar = new JButton("Editar Veículos");
         JButton botaoExcluir = new JButton("Excluir Veículos");
+        JCheckBox checkBoxInativos = new JCheckBox("Apenas Inativos");
 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
@@ -299,9 +302,18 @@ public class VeiculosView extends JFrame {
             }
         });
 
+        checkBoxInativos.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                boolean estadoCheckBox = checkBoxInativos.isSelected();
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, estadoCheckBox);
+            }
+        });
+
         painel.add(painelBotoes, BorderLayout.SOUTH);
         painelBotoes.add(botaoEditar,BorderLayout.SOUTH);
         painelBotoes.add(botaoExcluir,BorderLayout.SOUTH);
+        painelBotoes.add(checkBoxInativos,BorderLayout.SOUTH);
         return painel;
     }
 
@@ -449,21 +461,20 @@ public class VeiculosView extends JFrame {
                 String modelo = campoModelo.getText();
                 String ano = campoAnoFabricacao.getText();
 
-                boolean estado = false;
                 String estadoTexto = "";
-
+                StatusVeiculo statusVeiculo = StatusVeiculo.INATIVO;
                 if (botaoAtivo.isSelected()) {
                     estadoTexto = "ATIVO";
-                    estado = true;
                 } else if (botaoInativo.isSelected()) {
                     estadoTexto = "INATIVO";
-                    estado = false;
                 }
 
-                Veiculo veiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                statusVeiculo = statusVeiculo.setStatus(estadoTexto);
+
+                Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                 veiculo.setIdVeiculo(Long.parseLong(veiculoDAO.LerVeiculos("idVeiculo",linhaEscolhida)));
                 veiculoDAO.EditarVeiculo(veiculo);
-                veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
                 JOptionPane.showMessageDialog(painel,
                         "Veículo Alterado!\n" +
                                 "Placa: " + placa + "\n" +
