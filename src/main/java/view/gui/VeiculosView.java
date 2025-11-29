@@ -89,7 +89,7 @@ public class VeiculosView extends JFrame {
         painel.add(campoPlaca,gbc);
 
 
-         //======MARCA=======
+        //======MARCA=======
 
         //RÓTULo
         gbc.gridx = 0;
@@ -203,12 +203,12 @@ public class VeiculosView extends JFrame {
                                 "Ano: " + ano + "\n" +
                                 "Estado: " + estadoTexto);
 
-               veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos);
             }
         });
 
 
-                return painel;
+        return painel;
     }
 
     private JPanel criarPainelListagemVeiculos() {
@@ -231,14 +231,12 @@ public class VeiculosView extends JFrame {
                     boolean hasFocus,
                     int row,
                     int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
 
-
-            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
-
-            label.setHorizontalAlignment(CENTER);
-            Font originalFont = label.getFont();
-            label.setFont(originalFont.deriveFont(Font.BOLD));
-            return label;
+                label.setHorizontalAlignment(CENTER);
+                Font originalFont = label.getFont();
+                label.setFont(originalFont.deriveFont(Font.BOLD));
+                return label;
             }
         });
 

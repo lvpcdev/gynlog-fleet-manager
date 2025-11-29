@@ -4,6 +4,8 @@ import model.entities.Veiculo;
 
 import java.io.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VeiculoDAO {
     Long idAtual = 0L;
@@ -70,6 +72,50 @@ public class VeiculoDAO {
             System.err.println("Erro ao processar exclusão: " + e.getMessage());
         }
         return null;
+    }
+
+    public List<Veiculo> listarTodos() {
+        List<Veiculo> veiculos = new ArrayList<>();
+        File arquivo = new File(caminho);
+
+        if (!arquivo.exists()) {
+            System.err.println("Aviso: Arquivo de veículos não encontrado. Retornando lista vazia.");
+            return veiculos;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                if (linha.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] partes = linha.split(" \\| ");
+                if (partes.length >= 6) {
+                    try {
+                        Long id = Long.parseLong(partes[0].trim());
+                        String placa = partes[1].trim();
+                        String marca = partes[2].trim();
+                        String modelo = partes[3].trim();
+                        String ano = partes[4].trim();
+                        boolean estado = partes[5].trim().equalsIgnoreCase("true") || partes[5].trim().equalsIgnoreCase("ATIVO");
+
+                        Veiculo veiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                        veiculo.setIdVeiculo(id);
+                        veiculos.add(veiculo);
+
+                    } catch (NumberFormatException e) {
+                        System.err.println("Erro ao converter dados da linha: '" + linha + "'. Linha ignorada.");
+                    }
+                } else {
+                    System.err.println("Aviso: Linha mal formatada no arquivo de veículos foi ignorada: '" + linha + "'");
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Erro de leitura no arquivo de veículos: " + e.getMessage());
+        }
+
+        return veiculos;
     }
 
     // UPDATE

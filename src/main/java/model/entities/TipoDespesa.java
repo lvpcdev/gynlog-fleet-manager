@@ -3,11 +3,10 @@ package model.entities;
 
 public class TipoDespesa {
     private Long idTipoDespesa;
-    private String descriaco;
+    private String descricao;
 
-    public TipoDespesa(String descriaco, Long idTipoDespesa) {
-        this.descriaco = descriaco;
-        this.idTipoDespesa = idTipoDespesa;
+    public TipoDespesa(String descricao) {
+        this.descricao = descricao;
     }
 
     public Long getIdTipoDespesa() {
@@ -18,19 +17,16 @@ public class TipoDespesa {
         this.idTipoDespesa = idTipoDespesa;
     }
 
-    public String getDescriaco() {
-        return descriaco;
+    public String getDescricao() {
+        return descricao;
     }
 
-    public void setDescriaco(String descriaco) {
-        this.descriaco = descriaco;
+    public void setDescricao(String descriaco) {
+        this.descricao = descricao;
     }
 
     @Override
     public String toString() {
-        return "TipoDespesa{" +
-                "idTipoDespesa=" + idTipoDespesa +
-                ", descriaco='" + descriaco + '\'' +
-                '}';
+        return getDescricao();
     }
 }
