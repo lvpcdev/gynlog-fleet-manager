@@ -38,8 +38,21 @@ public class DespesasView extends JFrame {
 
         setTitle("GESTÃO DE DESPESAS");
         setSize(900, 700);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE para não fechar a aplicação inteira
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        // Adiciona botão "Voltar" no topo (sempre visível)
+        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botaoVoltar = new JButton("Voltar");
+        topo.add(botaoVoltar);
+        this.add(topo, BorderLayout.NORTH);
+
+        botaoVoltar.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                new MenuView();
+                DespesasView.this.dispose();
+            });
+        });
 
         JTabbedPane abas = new JTabbedPane();
         this.add(abas, BorderLayout.CENTER);

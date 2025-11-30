@@ -3,6 +3,7 @@ package persistence.dao;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
+import model.enums.StatusVeiculo;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -161,9 +162,10 @@ public class MovimentacaoDAO {
                         String marca = partes[2].trim();
                         String modelo = partes[3].trim();
                         String ano = partes[4].trim();
-                        boolean estado = partes[5].trim().equalsIgnoreCase("true");
+                        StatusVeiculo statusVeiculo = StatusVeiculo.INATIVO;
+                        statusVeiculo = statusVeiculo.setStatus(partes[5].trim());
 
-                        Veiculo veiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                        Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                         veiculo.setIdVeiculo(idAtual);
                         return veiculo;
                     }
