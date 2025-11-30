@@ -1,1 +1,4 @@
-
+1 | IPVA
+2 | COMBUSTÍVEL
+3 | MANUNTENÇÃO
+4 | MULTA

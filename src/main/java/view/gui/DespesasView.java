@@ -32,6 +32,7 @@ public class DespesasView extends JFrame {
     private DefaultTableModel tableModelMovimentacoes;
 
     public DespesasView() {
+        // Instanciação dos controllers
         this.movimentacaoController = new MovimentacaoController();
         this.tipoDespesaController = new TipoDespesaController();
 
@@ -54,9 +55,12 @@ public class DespesasView extends JFrame {
             });
         });
 
+        // Sistema de locomoção de abas
         JTabbedPane abas = new JTabbedPane();
         this.add(abas, BorderLayout.CENTER);
 
+
+        // Metodos de cada aba
         JPanel painelCadastroMovimentacao = criarPainelCadastroMovimentacao();
         abas.addTab("Registrar Despesa", painelCadastroMovimentacao);
 
