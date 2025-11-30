@@ -2,10 +2,7 @@ package model.entities;
 
 import model.enums.StatusVeiculo;
 
-import java.sql.SQLOutput;
-import java.time.LocalDate;
 import java.time.Year;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class Veiculo {

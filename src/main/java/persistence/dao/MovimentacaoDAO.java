@@ -89,6 +89,53 @@ public class MovimentacaoDAO {
         return movimentacoes;
     }
 
+    // UPDATE
+    public void atualizar(Movimentacao movimentacao) {
+        File arquivoOriginal = new File(CAMINHO_MOVIMENTACOES);
+        File arquivoTemp = new File(CAMINHO_MOVIMENTACOES + ".tmp");
+
+
+        String novaLinha = movimentacao.getIdMovimentacao() + " | " +
+                movimentacao.getVeiculo().getIdVeiculo() + " | " +
+                movimentacao.getTipoDespesa().getIdTipoDespesa() + " | " +
+                movimentacao.getData().format(FORMATADOR_DATA) + " | " +
+                movimentacao.getValor() + " | " +
+                movimentacao.getDescricao();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(arquivoTemp))) {
+
+            String linhaAtual;
+            while ((linhaAtual = reader.readLine()) != null) {
+                String[] partes = linhaAtual.split(" \\| ");
+
+                Long idDaLinha = Long.parseLong(partes[0].trim());
+
+
+                if (idDaLinha.equals(movimentacao.getIdMovimentacao())) {
+                    writer.write(novaLinha);
+                    writer.newLine();
+                } else {
+
+                    writer.write(linhaAtual);
+                    writer.newLine();
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Erro ao atualizar movimentação: " + e.getMessage());
+            return;
+        }
+
+
+        if (arquivoOriginal.delete()) {
+            if (!arquivoTemp.renameTo(arquivoOriginal)) {
+                System.err.println("Erro ao renomear arquivo temporário para o original (Movimentacao).");
+            }
+        } else {
+            System.err.println("Erro ao deletar arquivo original (Movimentacao).");
+        }
+    }
+
     // DELETE
     public void excluir(Long idParaExcluir) {
         File arquivoOriginal = new File(CAMINHO_MOVIMENTACOES);
@@ -219,5 +266,15 @@ public class MovimentacaoDAO {
             writer.write(String.valueOf(proximoId));
         }
         return proximoId;
+    }
+
+    public Movimentacao buscarPorId(Long idBusca) {
+        List<Movimentacao> todas = listarTodos();
+        for (Movimentacao mov : todas) {
+            if (mov.getIdMovimentacao().equals(idBusca)) {
+                return mov;
+            }
+        }
+        return null;
     }
 }

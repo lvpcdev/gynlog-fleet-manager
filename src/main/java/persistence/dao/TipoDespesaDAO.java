@@ -50,49 +50,88 @@ public class TipoDespesaDAO {
 
     // UPDATE
     public void atualizar(TipoDespesa tipoDespesa) {
+        File arquivoOriginal = new File(CAMINHO_ARQUIVO);
+        File arquivoTemp = new File(CAMINHO_ARQUIVO + ".tmp");
 
+
+        String linhaAtualizada = tipoDespesa.getIdTipoDespesa() + " | " + tipoDespesa.getDescricao();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(arquivoTemp))) {
+
+            String linhaSendoLida;
+            while ((linhaSendoLida = reader.readLine()) != null) {
+                if (linhaSendoLida.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] partes = linhaSendoLida.split(" \\| ");
+
+
+                if (partes.length >= 2 && Long.parseLong(partes[0].trim()) == tipoDespesa.getIdTipoDespesa()) {
+                    linhaSendoLida = linhaAtualizada;
+                }
+
+
+                writer.write(linhaSendoLida);
+                writer.newLine();
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Erro ao atualizar tipo de despesa: " + e.getMessage());
+            return;
+        }
+
+        if (arquivoOriginal.delete()) {
+            if (!arquivoTemp.renameTo(arquivoOriginal)) {
+                System.err.println("Erro ao renomear arquivo temporário para o original (TipoDespesa).");
+            }
+        } else {
+            System.err.println("Erro ao deletar arquivo original (TipoDespesa). Pode estar em uso.");
+        }
     }
 
     // DELETE
     public void excluir(Long idParaExcluir) {
-        File arquivoOriginal = new File("data/despesas/tipos_despesa.txt");
-        File arquivoTemp = new File("data/despesas/tipos_despesa-temp.txt");
+        File arquivoOriginal = new File(CAMINHO_ARQUIVO);
+        File arquivoTemp = new File(CAMINHO_ARQUIVO + ".tmp");
 
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(arquivoOriginal));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(arquivoTemp))) {
 
-            String linha = br.readLine();
-            while (linha != null) {
-                String[] partes = linha.split(" \\| ");
-                Long idAtual = Long.parseLong(partes[0]);
-
-                if (idAtual.equals(idParaExcluir)) {
-                    linha = br.readLine();
+            String linhaAtual;
+            while ((linhaAtual = reader.readLine()) != null) {
+                if (linhaAtual.trim().isEmpty()) {
                     continue;
                 }
 
-                bw.write(linha);
-                bw.newLine();
-                linha = br.readLine();
-                if(linha == null){
-                    System.err.println("id não encontrado");
-                    break;
-                }
-            }
+                String[] partes = linhaAtual.split(" \\| ");
 
-        } catch (IOException e) {
-            System.err.println("Erro ao processar exclusão: " + e.getMessage());
+
+                if (partes.length >= 2) {
+                    Long idDaLinha = Long.parseLong(partes[0].trim());
+
+
+                    if (idDaLinha.equals(idParaExcluir)) {
+                        continue;
+                    }
+                }
+
+
+                writer.write(linhaAtual);
+                writer.newLine();
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Erro ao processar exclusão de tipo de despesa: " + e.getMessage());
+            return;
         }
 
 
         if (arquivoOriginal.delete()) {
-            boolean sucesso = arquivoTemp.renameTo(arquivoOriginal);
-
-            if (!sucesso) {
-                System.err.println("Erro ao atualizar a lista");
+            if (!arquivoTemp.renameTo(arquivoOriginal)) {
+                System.err.println("Erro ao renomear arquivo temporário para o original (TipoDespesa).");
             }
         } else {
-            System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
+            System.err.println("Erro ao deletar arquivo original (TipoDespesa).");
         }
     }
 

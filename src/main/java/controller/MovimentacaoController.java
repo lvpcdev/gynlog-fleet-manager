@@ -62,4 +62,32 @@ public class MovimentacaoController {
         movimentacaoDAO.excluir(id);
         System.out.println("Movimentação com ID " + id + " excluída (se existia).");
     }
+
+    public Movimentacao buscarMovimentacaoPorId(Long id) {
+        if (id == null || id <= 0) {
+            System.err.println("Tentativa de buscar movimentação com ID inválido.");
+            return null;
+        }
+        return movimentacaoDAO.buscarPorId(id);
+    }
+
+    public boolean atualizarMovimentacao(Movimentacao movimentacaoAtualizada) {
+        if (movimentacaoAtualizada == null || movimentacaoAtualizada.getIdMovimentacao() == null) {
+            System.err.println("Erro de atualização: Movimentação ou seu ID é nulo.");
+            return false;
+        }
+        if (movimentacaoAtualizada.getVeiculo() == null || movimentacaoAtualizada.getTipoDespesa() == null) {
+            System.err.println("Erro de atualização: Veículo ou Tipo de Despesa não pode ser nulo.");
+            return false;
+        }
+        if (movimentacaoAtualizada.getData() == null || movimentacaoAtualizada.getValor() == null || movimentacaoAtualizada.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+            System.err.println("Erro de atualização: Data ou valor são inválidos.");
+            return false;
+        }
+
+
+        movimentacaoDAO.atualizar(movimentacaoAtualizada);
+        System.out.println("Movimentação ID " + movimentacaoAtualizada.getIdMovimentacao() + " atualizada com sucesso.");
+        return true;
+    }
 }
