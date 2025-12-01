@@ -235,8 +235,8 @@ public class DespesasView extends JFrame {
 
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new BoxLayout(painelBotoes, BoxLayout.Y_AXIS));
-        JButton botaoEditar = new JButton("Editar Selecionado");
-        JButton botaoExcluir = new JButton("Excluir Selecionado");
+        JButton botaoEditar = new JButton("Editar");
+        JButton botaoExcluir = new JButton("Excluir");
 
 
         botaoEditar.setAlignmentX(Component.CENTER_ALIGNMENT);
