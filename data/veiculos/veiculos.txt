@@ -1,9 +1,3 @@
-0 | aaaaa | A keep Walking | No trought | 2000 | Ativo
-0 | LUI1Z23 | LUIZ | CARRO DO LUIZ | 2010 | Ativo
-0 | ABC1D23 | Fiat | Polo | 2004 | Ativo
-0 | GOA7M10 | Volkswagen | Sedan | 2008 | Ativo
-1 | a | a | a | 1234 | Ativo
-2 | ab | a | a | 1234 | Ativo
-3 | ab | ac | a | 1234 | Ativo
-4 | ab | ac | a41 | 1234 | Ativo
-5 | ABC7D12 | Chevrolet | Onix | 2022 | Ativo
+0 | LUCAS | LUCAS | LUCAS | 2025 | ATIVO
+1 | SAMUEL | SAMUEL | SAMUEL | 2010 | ATIVO
+2 | ARTHUR | ARTHUR | ARTHUR | 2020 | INATIVO

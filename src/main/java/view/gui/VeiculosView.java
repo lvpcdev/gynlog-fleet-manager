@@ -1,6 +1,7 @@
 package view.gui;
 
 import controller.VeiculoController;
+import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
 
@@ -11,33 +12,45 @@ import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Objects;
 
 
 public class VeiculosView extends JFrame {
 
     VeiculoController veiculoController = new VeiculoController();
     String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado"};
+    VeiculoDAO veiculoDAO = new VeiculoDAO();
 
-
-    DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0){
+    DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            // Retorna false para todas as células, desativando a edição
+            // Retorna FALSE para impedir a edição direta de qualquer célula
             return false;
-
-            // Caso você queira que uma coluna específica (ex: 5 - Estado) seja editável:
-            // return column == 5;
         }
     };
-
     public VeiculosView() {
         setTitle("VEÍCULOS");
         setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // <--- Alterado para permitir voltar ao Menu
         setLocationRelativeTo(null);
 
         JTabbedPane abasPrincipais = new JTabbedPane();
         this.add(abasPrincipais, BorderLayout.CENTER);
+
+        // Adiciona botão "Voltar" no topo (sempre visível)
+        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botaoVoltar = new JButton("Voltar");
+        topo.add(botaoVoltar);
+        this.add(topo, BorderLayout.NORTH);
+
+        botaoVoltar.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                new MenuView();
+                VeiculosView.this.dispose();
+            });
+        });
 
         //=====CADASTRO=======
         JPanel painelCadastro = criarPainelCadastroVeiculos();
@@ -92,7 +105,7 @@ public class VeiculosView extends JFrame {
         painel.add(campoPlaca,gbc);
 
 
-         //======MARCA=======
+        //======MARCA=======
 
         //RÓTULo
         gbc.gridx = 0;
@@ -184,18 +197,16 @@ public class VeiculosView extends JFrame {
                 String modelo = campoModelo.getText();
                 String ano = campoAnoFabricacao.getText();
 
-                boolean estado = false;
                 String estadoTexto = "";
-
                 if (botaoAtivo.isSelected()) {
                     estadoTexto = "ATIVO";
-                    estado = true;
                 } else if (botaoInativo.isSelected()) {
                     estadoTexto = "INATIVO";
-                    estado = false;
                 }
 
-                Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, estado, ano);
+                StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(estadoTexto);
+
+                Veiculo novoVeiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                 VeiculoDAO veiculoDAO = new VeiculoDAO();
                 veiculoDAO.SalvarVeiculo(novoVeiculo);
                 JOptionPane.showMessageDialog(painel,
@@ -206,12 +217,12 @@ public class VeiculosView extends JFrame {
                                 "Ano: " + ano + "\n" +
                                 "Estado: " + estadoTexto);
 
-               veiculoController.AtualizarVeiculos(tableModelVeiculos);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
             }
         });
 
 
-                return painel;
+        return painel;
     }
 
     private JPanel criarPainelListagemVeiculos() {
@@ -219,7 +230,7 @@ public class VeiculosView extends JFrame {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        veiculoController.AtualizarVeiculos(tableModelVeiculos);
+        veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
 
         JTable veiculosTable = new JTable(tableModelVeiculos);
         veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -234,14 +245,15 @@ public class VeiculosView extends JFrame {
                     boolean hasFocus,
                     int row,
                     int column) {
-            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
 
-            label.setHorizontalAlignment(CENTER);
-            Font originalFont = label.getFont();
-            label.setFont(originalFont.deriveFont(Font.BOLD));
-            return label;
+                label.setHorizontalAlignment(CENTER);
+                Font originalFont = label.getFont();
+                label.setFont(originalFont.deriveFont(Font.BOLD));
+                return label;
             }
         });
+
 
         JScrollPane scrollPane = new JScrollPane(veiculosTable);
         painel.add(scrollPane,BorderLayout.CENTER);
@@ -251,15 +263,246 @@ public class VeiculosView extends JFrame {
         veiculosTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
 
-
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        painelBotoes.add(new JButton("Editar Selecionado"));
-        painelBotoes.add(new JButton("Excluir Selecionado"));
+
+        JButton botaoEditar = new JButton("Editar Veículos");
+        JButton botaoExcluir = new JButton("Excluir Veículos");
+        JCheckBox checkBoxInativos = new JCheckBox("Apenas Inativos");
+
+        botaoEditar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int linhaEscolhida = (veiculosTable.getSelectedRow());
+                    linhaEscolhida++;
+                    if (linhaEscolhida == 0) {
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veiculo selecionado!");
+                        return;
+                    }
+                    JDialog janelaTemp = new JDialog(VeiculosView.this,"Editar Veículo", true);
+                    janelaTemp.add(criarPainelEditarVeiculos(linhaEscolhida));
+                    janelaTemp.pack();
+                    janelaTemp.setLocationRelativeTo(VeiculosView.this);
+                    janelaTemp.setVisible(true);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        botaoExcluir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                try {
+                    int linhaSelecionada = veiculosTable.getSelectedRow();
+                    if (linhaSelecionada == -1) {
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veiculo selecionado!");
+                        return;
+                    }
+                    int confirmacao = JOptionPane.showConfirmDialog(VeiculosView.this, "Tem certeza que deseja excluir o veículo selecionado?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+                    if (confirmacao != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                        Long idEscolhido = Long.parseLong(String.valueOf(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(), 0)));
+                        tableModelVeiculos.removeRow(linhaSelecionada);
+                        veiculoDAO.ExcluirVeiculo(idEscolhido);
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Veículo excluído com sucesso!");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(VeiculosView.this, "Ocorreu um erro ao excluir o veículo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        checkBoxInativos.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                boolean estadoCheckBox = checkBoxInativos.isSelected();
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, estadoCheckBox);
+            }
+        });
 
         painel.add(painelBotoes, BorderLayout.SOUTH);
+        painelBotoes.add(botaoEditar,BorderLayout.SOUTH);
+        painelBotoes.add(botaoExcluir,BorderLayout.SOUTH);
+        painelBotoes.add(checkBoxInativos,BorderLayout.SOUTH);
         return painel;
     }
 
+    private JPanel criarPainelEditarVeiculos(int linhaEscolhida){
+
+        JPanel painel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8,8,8,8);
+
+        JTextField campoPlaca = new JTextField(8);
+        JTextField campoMarca = new JTextField(20);
+        JTextField campoModelo = new JTextField(20);
+        JTextField campoAnoFabricacao = new JTextField(4);
+        JRadioButton botaoAtivo = new JRadioButton("Estado Veículo - ATIVO");
+        JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
+        JButton botaoEditar = new JButton("Editar Veículo");
+
+        botaoAtivo.setSelected(true);
+
+        //FILTROS
+        AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+
+
+
+        //======PLACA=======
+
+        //RÓTULO
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("PLACA:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        painel.add(campoPlaca,gbc);
+
+
+        //======MARCA=======
+
+        //RÓTULo
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("MARCA:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        painel.add(campoMarca,gbc);
+
+
+        //======MODELO=======
+
+        //RÓTULo
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("MODELO:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
+        painel.add(campoModelo,gbc);
+
+        //======ANO DE FABRICACAO=======
+
+        //RÓTULo
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("ANO DE FABRICAÇÃO:"),gbc);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.CENTER;
+        gbc.weightx = 1.0;
+        painel.add(campoAnoFabricacao,gbc);
+
+        //=====ESTADO=============
+
+        //RÓTULO
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("ESTADO DO VEÍCULO:"),gbc);
+
+        //GRUPO BOTÕES DE ESTADO
+        ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
+        grupoEstadoVeiculo.add(botaoAtivo);
+        grupoEstadoVeiculo.add(botaoInativo);
+
+        //PAINEL DOS BOTÕES
+        JPanel painelEstadoVeiculo = new JPanel();
+        painelEstadoVeiculo.add(botaoAtivo);
+        painelEstadoVeiculo.add(new JLabel("\t|\t"));
+        painelEstadoVeiculo.add(botaoInativo);
+
+        //LINHA
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.WEST;
+        painel.add(painelEstadoVeiculo,gbc);
+
+        //====BOTÃO CADASTRAR========
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        painel.add(botaoEditar,gbc);
+
+
+        campoPlaca.setText(veiculoDAO.LerVeiculos("placaVeiculo", linhaEscolhida));
+
+        campoMarca.setText(veiculoDAO.LerVeiculos("marcaVeiculo", linhaEscolhida));
+
+        campoModelo.setText(veiculoDAO.LerVeiculos("modeloVeiculo", linhaEscolhida));
+
+        campoAnoFabricacao.setText(veiculoDAO.LerVeiculos("anoDeFabricacao", linhaEscolhida));
+
+        if(Objects.equals(veiculoDAO.LerVeiculos("estadoVeiculo", linhaEscolhida), "ATIVO")){
+            botaoAtivo.setSelected(true);
+        } else{
+            botaoInativo.setSelected(true);
+        }
+
+
+        botaoEditar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String placa = campoPlaca.getText();
+                String marca = campoMarca.getText();
+                String modelo = campoModelo.getText();
+                String ano = campoAnoFabricacao.getText();
+
+                String estadoTexto = "";
+
+                if (botaoAtivo.isSelected()) {
+                    estadoTexto = "ATIVO";
+                } else if (botaoInativo.isSelected()) {
+                    estadoTexto = "INATIVO";
+                }
+
+                StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(estadoTexto);
+
+                Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
+                veiculo.setIdVeiculo(Long.parseLong(veiculoDAO.LerVeiculos("idVeiculo",linhaEscolhida)));
+                veiculoDAO.EditarVeiculo(veiculo);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
+                JOptionPane.showMessageDialog(painel,
+                        "Veículo Alterado!\n" +
+                                "Placa: " + placa + "\n" +
+                                "Marca: " + marca + "\n" +
+                                "Modelo: " + modelo + "\n" +
+                                "Ano: " + ano + "\n" +
+                                "Estado: " + estadoTexto);
+
+                SwingUtilities.getWindowAncestor(painel).dispose();
+
+            }
+        });
+
+
+        return painel;
+    }
 
 
 

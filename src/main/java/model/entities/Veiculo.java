@@ -1,9 +1,8 @@
 package model.entities;
 
-import java.sql.SQLOutput;
-import java.time.LocalDate;
+import model.enums.StatusVeiculo;
+
 import java.time.Year;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class Veiculo {
@@ -12,13 +11,13 @@ public class Veiculo {
     private String marca;
     private String modelo;
     private Year anoDeFabricacao;
-    private boolean estado;
+    private StatusVeiculo statusVeiculo;
 
-    public Veiculo(String placa, String marca, String modelo, boolean estado, String anoDeFabricacao) {
+    public Veiculo(String placa, String marca, String modelo, StatusVeiculo estado, String anoDeFabricacao) {
         this.placa = placa;
         this.marca = marca;
         this.modelo = modelo;
-        this.estado = estado;
+        this.statusVeiculo = estado;
         setAnoDeFabricacao(anoDeFabricacao);
     }
 
@@ -64,17 +63,11 @@ public class Veiculo {
         this.anoDeFabricacao = Year.parse(anoDeFabricacaoString, formatter);
     }
 
-    public String isEstado() {
-        if(estado){
-            return "Ativo";
-        } else  {
-            return "Inativo";
-        }
+    public StatusVeiculo getStatusVeiculo() {
+        return statusVeiculo;
     }
 
-    public void setEstado(boolean estado) {
-        this.estado = estado;
+    public void setStatusVeiculo(StatusVeiculo statusVeiculo) {
+        this.statusVeiculo = statusVeiculo;
     }
-
-
 }
