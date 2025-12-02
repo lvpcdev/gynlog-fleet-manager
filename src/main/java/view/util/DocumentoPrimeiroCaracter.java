@@ -5,7 +5,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
 
-public class CapitalizeFirstDocumentFilter extends DocumentFilter {
+public class DocumentoPrimeiroCaracter extends DocumentFilter {
 
     private String capitalize(String text, int offset, Document doc) throws BadLocationException {
         String currentText = doc.getText(0, doc.getLength());

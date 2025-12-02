@@ -4,6 +4,8 @@ import controller.VeiculoController;
 import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
+import view.util.DocumentoPrimeiroCaracter;
+import view.util.DocumentoCaixaAlta;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -30,6 +32,10 @@ public class VeiculosView extends JFrame {
             return false;
         }
     };
+
+    DocumentoCaixaAlta caixaAlta = new DocumentoCaixaAlta();//Deixar os campos em maiúsculo
+    DocumentoPrimeiroCaracter primeiroCaracterMaisculo = new DocumentoPrimeiroCaracter(); //Apenas a primeira Letra Maiscula
+
     public VeiculosView() {
         setTitle("VEÍCULOS");
         setSize(800, 600);
@@ -84,9 +90,15 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        //FILTROS
+        //===========APLICANDO MASCARA DE CAMPO SEMPRE MAISCULO===========
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+        docPlaca.setDocumentFilter(caixaAlta);
 
+        //============APLICANDO A 1° LETRA MAISUCLA=====================
+        AbstractDocument docMarca = (AbstractDocument) campoMarca.getDocument();
+        docMarca.setDocumentFilter(primeiroCaracterMaisculo);
+        AbstractDocument docModelo = (AbstractDocument) campoModelo.getDocument();
+        docModelo.setDocumentFilter(primeiroCaracterMaisculo);
 
 
         //======PLACA=======
@@ -345,8 +357,10 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        //FILTROS
+        //
+        //=====APLICANDO MASCARA DE CAMPO SEMPRE MAISCULO=========
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+        docPlaca.setDocumentFilter(caixaAlta);
 
 
 

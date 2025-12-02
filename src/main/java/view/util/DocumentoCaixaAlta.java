@@ -4,7 +4,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-public class UpperCaseDocumentFilter extends DocumentFilter {
+public class DocumentoCaixaAlta extends DocumentFilter {
     @Override
     public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
         throws BadLocationException{
