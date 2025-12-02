@@ -18,11 +18,9 @@ public class MenuView extends JFrame {
         gbc.insets = new Insets(12, 12, 12, 12);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-
         JButton botaoVeiculos = new JButton("Gerenciar Veículos");
         JButton botaoDespesas = new JButton("Gerenciar Despesas");
         JButton botaoRelatorios = new JButton("Relatórios Gerenciais");
-
 
         Dimension botaoSize = new Dimension(220, 60);
         Font botaoFont = botaoVeiculos.getFont().deriveFont(Font.BOLD, 16f);
