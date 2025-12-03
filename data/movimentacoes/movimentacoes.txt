@@ -1,5 +1,5 @@
-
-1 | 0 | 1 | 2025-11-30 | 350 | CUSTO DO IPVA
+1 | 0 | 1 | 2025-11-30 | 35000 | CUSTO DO IPVA
 2 | 1 | 2 | 2025-11-30 | 200 | ABASTECIMENTO
-3 | 2 | 3 | 2025-11-30 | 500 | BATEU O CARRO
+3 | 2 | 3 | 2025-11-30 | 500000 | BATEU O CARRO
 4 | 1 | 4 | 2025-11-30 | 250 | Excesso de velocidade
+5 | 1 | 4 | 2025-12-02 | 233 | AAA
