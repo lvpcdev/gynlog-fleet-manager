@@ -34,7 +34,6 @@ public class RelatoriosView extends JFrame {
         setVisible(true);
     }
 
-    // package-private constructor for embed usage
     RelatoriosView(boolean forEmbed) {
         this.relatorioController = new RelatorioController();
     }
@@ -48,7 +47,7 @@ public class RelatoriosView extends JFrame {
         return buildMainPanel(false);
     }
 
-    // Public method to refresh filters/data when embedded
+
     public void refreshData() {
         carregarFiltros();
     }
@@ -179,14 +178,12 @@ public class RelatoriosView extends JFrame {
 
         btnSomaIpvaAno.addActionListener(e -> {
             int ano = (int) comboAno.getSelectedItem();
-            BigDecimal total = relatorioController.calcularTotalPorTipoDespesaNoAno("IPVA", ano);
 
-            String resultado = String.format("Relatório: Somatório de IPVA da Frota\n" +
-                            "--------------------------------------\n" +
-                            "Ano: %d\n" +
-                            "Total IPVA: %s",
-                    ano, formatarMoeda(total));
-            areaResultados.setText(resultado);
+
+            String relatorioCompleto = relatorioController.gerarRelatorioSomaIpvaAno(ano);
+
+
+            areaResultados.setText(relatorioCompleto);
         });
 
         btnListarInativos.addActionListener(e -> {
@@ -216,11 +213,11 @@ public class RelatoriosView extends JFrame {
     }
 
     private void carregarFiltros() {
-        // limpar antes de repovoar para evitar duplicatas
+
         comboVeiculos.removeAllItems();
         comboAno.removeAllItems();
 
-        // adicionar uma opção "Todos" (null) seguida dos veículos atuais
+
         comboVeiculos.addItem(null);
         List<Veiculo> veiculos = new VeiculoDAO().listarTodos();
         veiculos.forEach(comboVeiculos::addItem);

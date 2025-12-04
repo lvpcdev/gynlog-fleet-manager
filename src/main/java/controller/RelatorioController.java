@@ -125,7 +125,6 @@ public class RelatorioController {
         relatorio.append("Relatório: Despesas com Combustível\n");
         relatorio.append("-------------------------------------\n");
         relatorio.append(String.format("Mês/Ano de Referência: %s de %d\n\n", nomeMes, ano));
-        // O cabeçalho não precisa da coluna "Tipo", pois já sabemos que é combustível.
         relatorio.append(String.format("%-12s | %-15s | %-35s | %s\n", "Data", "Veículo", "Descrição", "Valor"));
         relatorio.append("--------------------------------------------------------------------------------\n");
 
@@ -155,12 +154,41 @@ public class RelatorioController {
         return relatorio.toString();
     }
 
-    public BigDecimal calcularTotalPorTipoDespesaNoAno(String descricaoTipoDespesa, int ano) {
-        return getTodasMovimentacoes().stream()
+    public String gerarRelatorioSomaIpvaAno(int ano) {
+        StringBuilder relatorio = new StringBuilder();
+        final String TIPO_DESPESA_FILTRO = "IPVA";
+
+
+        relatorio.append("Relatório: Despesas com IPVA\n");
+        relatorio.append("--------------------------------\n");
+        relatorio.append(String.format("Ano de Referência: %d\n\n", ano));
+
+        relatorio.append(String.format("%-12s | %-15s | %-35s | %s\n", "Data", "Veículo", "Descrição", "Valor"));
+        relatorio.append("--------------------------------------------------------------------------------\n");
+
+
+        List<Movimentacao> despesasDeIpva = getTodasMovimentacoes().stream()
                 .filter(mov -> mov.getData().getYear() == ano &&
-                        mov.getTipoDespesa().getDescricao().equalsIgnoreCase(descricaoTipoDespesa))
+                        mov.getTipoDespesa().getDescricao().equalsIgnoreCase(TIPO_DESPESA_FILTRO))
+                .collect(Collectors.toList());
+
+
+        despesasDeIpva.forEach(mov -> relatorio.append(String.format("%-12s | %-15s | %-35s | %s\n",
+                mov.getData().format(fmtData),
+                mov.getVeiculo().getPlaca(),
+                mov.getDescricao(),
+                fmtMoeda.format(mov.getValor()))));
+
+
+        BigDecimal totalDespesas = despesasDeIpva.stream()
                 .map(Movimentacao::getValor)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+
+        relatorio.append("--------------------------------------------------------------------------------\n");
+        relatorio.append(String.format("%64s %s", "TOTAL IPVA:", fmtMoeda.format(totalDespesas)));
+
+        return relatorio.toString();
     }
 
     public String gerarRelatorioVeiculosInativos() {
