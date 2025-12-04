@@ -32,33 +32,62 @@ public class DespesasView extends JFrame {
     private DefaultTableModel tableModelMovimentacoes;
 
     public DespesasView() {
-        // Instanciação dos controllers
         this.movimentacaoController = new MovimentacaoController();
         this.tipoDespesaController = new TipoDespesaController();
-
 
         setTitle("GESTÃO DE DESPESAS");
         setSize(900, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Adiciona botão "Voltar" no topo
-        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton botaoVoltar = new JButton("Voltar");
-        topo.add(botaoVoltar);
-        this.add(topo, BorderLayout.NORTH);
+        // Usa o painel construído e mostra a janela (com botão Voltar)
+        this.setContentPane(buildMainPanel(true));
+        setVisible(true);
+    }
 
-        botaoVoltar.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                new MenuView();
-                DespesasView.this.dispose();
+    // package-private constructor for embed
+    DespesasView(boolean forEmbed) {
+        this.movimentacaoController = new MovimentacaoController();
+        this.tipoDespesaController = new TipoDespesaController();
+    }
+
+    // static helper to create embeddable panel
+    public static JPanel createMainPanel() {
+        DespesasView d = new DespesasView(false);
+        return d.buildMainPanel(false);
+    }
+
+    // public getter for panel
+    public JPanel getMainPanel() {
+        return buildMainPanel(false);
+    }
+
+    // Public method to refresh data from outside (e.g. MenuView)
+    public void refreshData() {
+        atualizarDados();
+    }
+
+    // builds the main panel; if includeTopBackButton true, adds a back button
+    private JPanel buildMainPanel(boolean includeTopBackButton) {
+        JPanel root = new JPanel(new BorderLayout());
+
+        if (includeTopBackButton) {
+            JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton botaoVoltar = new JButton("Voltar");
+            topo.add(botaoVoltar);
+            root.add(topo, BorderLayout.NORTH);
+
+            botaoVoltar.addActionListener(e -> {
+                SwingUtilities.invokeLater(() -> {
+                    new MenuView();
+                    DespesasView.this.dispose();
+                });
             });
-        });
+        }
 
         // Sistema de locomoção de abas
         JTabbedPane abas = new JTabbedPane();
-        this.add(abas, BorderLayout.CENTER);
-
+        root.add(abas, BorderLayout.CENTER);
 
         // Metodos de cada aba
         JPanel painelCadastroMovimentacao = criarPainelCadastroMovimentacao();
@@ -67,18 +96,15 @@ public class DespesasView extends JFrame {
         JPanel painelListagem = criarPainelListagem();
         abas.addTab("Histórico de Despesas", painelListagem);
 
-
         JPanel painelCadastroTipo = criarPainelCadastroTipoDespesa();
         abas.addTab("Tipos de Despesa", painelCadastroTipo);
 
-
         atualizarDados();
 
-        setVisible(true);
+        return root;
     }
 
-
-     // Painel principal para registrar uma nova despesa.
+    // Painel principal para registrar uma nova despesa.
 
     private JPanel criarPainelCadastroMovimentacao() {
         JPanel painel = new JPanel(new GridBagLayout());
@@ -152,8 +178,7 @@ public class DespesasView extends JFrame {
         return painel;
     }
 
-
-     //Painel para listar todas as movimentações em uma tabela.
+    //Painel para listar todas as movimentações em uma tabela.
 
     private JPanel criarPainelListagem() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
@@ -220,8 +245,7 @@ public class DespesasView extends JFrame {
         return painel;
     }
 
-
-     // Painel para cadastrar um novo tipo de despesa.
+    // Painel para cadastrar um novo tipo de despesa.
 
     private JPanel criarPainelCadastroTipoDespesa() {
         JPanel painelPrincipal = new JPanel(new BorderLayout(10, 10));
@@ -328,7 +352,6 @@ public class DespesasView extends JFrame {
 
         return painelPrincipal;
     }
-
 
 
     private void registrarNovaMovimentacao() {
@@ -539,5 +562,4 @@ public class DespesasView extends JFrame {
 
 
 }
-
 
