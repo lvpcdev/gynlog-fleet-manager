@@ -30,21 +30,49 @@ public class RelatoriosView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton botaoVoltar = new JButton("Voltar ao Menu");
-        topo.add(botaoVoltar);
-        this.add(topo, BorderLayout.NORTH);
+        this.setContentPane(buildMainPanel(true));
+        setVisible(true);
+    }
 
-        botaoVoltar.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                new MenuView();
-                RelatoriosView.this.dispose();
+    // package-private constructor for embed usage
+    RelatoriosView(boolean forEmbed) {
+        this.relatorioController = new RelatorioController();
+    }
+
+    public static JPanel createMainPanel() {
+        RelatoriosView r = new RelatoriosView(false);
+        return r.buildMainPanel(false);
+    }
+
+    public JPanel getMainPanel() {
+        return buildMainPanel(false);
+    }
+
+    // Public method to refresh filters/data when embedded
+    public void refreshData() {
+        carregarFiltros();
+    }
+
+    private JPanel buildMainPanel(boolean includeTopBackButton) {
+        JPanel root = new JPanel(new BorderLayout(10, 10));
+        root.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        if (includeTopBackButton) {
+            JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton botaoVoltar = new JButton("Voltar ao Menu");
+            topo.add(botaoVoltar);
+            root.add(topo, BorderLayout.NORTH);
+
+            botaoVoltar.addActionListener(e -> {
+                SwingUtilities.invokeLater(() -> {
+                    new MenuView();
+                    RelatoriosView.this.dispose();
+                });
             });
-        });
+        }
 
         JPanel painelPrincipal = new JPanel(new BorderLayout(10, 10));
-        painelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        this.add(painelPrincipal, BorderLayout.CENTER);
+        root.add(painelPrincipal, BorderLayout.CENTER);
 
         painelPrincipal.add(criarPainelFiltros(), BorderLayout.NORTH);
 
@@ -57,7 +85,7 @@ public class RelatoriosView extends JFrame {
 
         carregarFiltros();
 
-        setVisible(true);
+        return root;
     }
 
     private JPanel criarPainelFiltros() {
@@ -199,6 +227,11 @@ public class RelatoriosView extends JFrame {
     }
 
     private void carregarFiltros() {
+        // limpar antes de repovoar para evitar duplicatas
+        comboVeiculos.removeAllItems();
+        comboAno.removeAllItems();
+
+        // adicionar uma opção "Todos" (null) seguida dos veículos atuais
         comboVeiculos.addItem(null);
         List<Veiculo> veiculos = new VeiculoDAO().listarTodos();
         veiculos.forEach(comboVeiculos::addItem);
