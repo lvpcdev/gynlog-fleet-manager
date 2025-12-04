@@ -77,11 +77,42 @@ public class RelatorioController {
         return relatorio.toString();
     }
 
-    public BigDecimal calcularTotalDespesasPorMes(int mes, int ano) {
-        return getTodasMovimentacoes().stream()
+    public String gerarRelatorioSomaGeralMes(int mes, int ano) {
+        StringBuilder relatorio = new StringBuilder();
+
+        String nomeMes = java.time.Month.of(mes).getDisplayName(java.time.format.TextStyle.FULL, new Locale("pt", "BR"));
+        nomeMes = nomeMes.substring(0, 1).toUpperCase() + nomeMes.substring(1);
+
+        relatorio.append("Relatório: Despesas Gerais da Frota\n");
+        relatorio.append("-------------------------------------\n");
+        relatorio.append(String.format("Mês/Ano de Referência: %s de %d\n\n", nomeMes, ano));
+
+        relatorio.append(String.format("%-12s | %-15s | %-15s | %-25s | %s\n", "Data", "Veículo", "Tipo", "Descrição", "Valor"));
+        relatorio.append("------------------------------------------------------------------------------------------\n");
+
+        List<Movimentacao> despesasDoMes = getTodasMovimentacoes().stream()
                 .filter(mov -> mov.getData().getMonthValue() == mes && mov.getData().getYear() == ano)
+                .collect(Collectors.toList());
+
+
+        despesasDoMes.forEach(mov -> relatorio.append(String.format("%-12s | %-15s | %-15s | %-25s | %s\n",
+                mov.getData().format(fmtData),
+                mov.getVeiculo().getPlaca(),
+                mov.getTipoDespesa().getDescricao(),
+                mov.getDescricao(),
+                fmtMoeda.format(mov.getValor()))));
+
+
+        BigDecimal totalDespesas = despesasDoMes.stream()
                 .map(Movimentacao::getValor)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+
+        relatorio.append("------------------------------------------------------------------------------------------\n");
+
+        relatorio.append(String.format("%75s %s", "TOTAL GERAL:", fmtMoeda.format(totalDespesas)));
+
+        return relatorio.toString();
     }
 
     public BigDecimal calcularTotalPorTipoDespesaNoMes(String descricaoTipoDespesa, int mes, int ano) {
