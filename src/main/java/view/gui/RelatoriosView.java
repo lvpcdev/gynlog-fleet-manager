@@ -169,17 +169,12 @@ public class RelatoriosView extends JFrame {
         btnSomaCombustivelMes.addActionListener(e -> {
             Month mes = (Month) comboMes.getSelectedItem();
             int ano = (int) comboAno.getSelectedItem();
-            BigDecimal total = relatorioController.calcularTotalPorTipoDespesaNoMes("Combustível", mes.getValue(), ano);
 
-            String nomeMesFormatado = mes.getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-            nomeMesFormatado = nomeMesFormatado.substring(0, 1).toUpperCase() + nomeMesFormatado.substring(1);
 
-            String resultado = String.format("Relatório: Total de Gastos com Combustível\n" +
-                            "-------------------------------------------\n" +
-                            "Mês/Ano: %s/%d\n" +
-                            "Total Combustível: %s",
-                    nomeMesFormatado, ano, formatarMoeda(total));
-            areaResultados.setText(resultado);
+            String relatorioCompleto = relatorioController.gerarRelatorioSomaCombustivelMes(mes.getValue(), ano);
+
+
+            areaResultados.setText(relatorioCompleto);
         });
 
         btnSomaIpvaAno.addActionListener(e -> {

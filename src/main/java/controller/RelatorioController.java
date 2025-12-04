@@ -115,13 +115,44 @@ public class RelatorioController {
         return relatorio.toString();
     }
 
-    public BigDecimal calcularTotalPorTipoDespesaNoMes(String descricaoTipoDespesa, int mes, int ano) {
-        return getTodasMovimentacoes().stream()
+    public String gerarRelatorioSomaCombustivelMes(int mes, int ano) {
+        StringBuilder relatorio = new StringBuilder();
+        final String TIPO_DESPESA_FILTRO = "Combustível";
+
+        String nomeMes = java.time.Month.of(mes).getDisplayName(java.time.format.TextStyle.FULL, new Locale("pt", "BR"));
+        nomeMes = nomeMes.substring(0, 1).toUpperCase() + nomeMes.substring(1);
+
+        relatorio.append("Relatório: Despesas com Combustível\n");
+        relatorio.append("-------------------------------------\n");
+        relatorio.append(String.format("Mês/Ano de Referência: %s de %d\n\n", nomeMes, ano));
+        // O cabeçalho não precisa da coluna "Tipo", pois já sabemos que é combustível.
+        relatorio.append(String.format("%-12s | %-15s | %-35s | %s\n", "Data", "Veículo", "Descrição", "Valor"));
+        relatorio.append("--------------------------------------------------------------------------------\n");
+
+
+        List<Movimentacao> despesasDeCombustivel = getTodasMovimentacoes().stream()
                 .filter(mov -> mov.getData().getMonthValue() == mes &&
                         mov.getData().getYear() == ano &&
-                        mov.getTipoDespesa().getDescricao().equalsIgnoreCase(descricaoTipoDespesa))
+                        mov.getTipoDespesa().getDescricao().equalsIgnoreCase(TIPO_DESPESA_FILTRO))
+                .collect(Collectors.toList());
+
+
+        despesasDeCombustivel.forEach(mov -> relatorio.append(String.format("%-12s | %-15s | %-35s | %s\n",
+                mov.getData().format(fmtData),
+                mov.getVeiculo().getPlaca(),
+                mov.getDescricao(),
+                fmtMoeda.format(mov.getValor()))));
+
+
+        BigDecimal totalDespesas = despesasDeCombustivel.stream()
                 .map(Movimentacao::getValor)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+
+        relatorio.append("--------------------------------------------------------------------------------\n");
+        relatorio.append(String.format("%64s %s", "TOTAL COMBUSTÍVEL:", fmtMoeda.format(totalDespesas)));
+
+        return relatorio.toString();
     }
 
     public BigDecimal calcularTotalPorTipoDespesaNoAno(String descricaoTipoDespesa, int ano) {
