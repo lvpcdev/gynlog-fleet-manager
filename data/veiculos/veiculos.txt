@@ -4,4 +4,5 @@
 9 | AADADCA | Chevrolet | Onix | 2022 | INATIVO
 11 | PRM | Fiat | Palio | 2002 | ATIVO
 12 | VIN7J20 | Volkswagen | Sedan | 2022 | ATIVO
-13 | VIN7J20 | Volkswagen | Sedan | 2022 | ATIVO
+13 | VIN7J20 | Volkswagen | Sedan | 2022 | ATIVO14 | A | Aa | A | 2025 | ATIVO
+15 | A | Aa | A | 2026 | ATIVO
