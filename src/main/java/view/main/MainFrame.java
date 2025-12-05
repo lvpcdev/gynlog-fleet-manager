@@ -9,8 +9,8 @@ import javax.swing.*;
 public class MainFrame {
     public static void main(String[] args) {
 
-        try {
-//            UIManager.setLookAndFeel(new FlatLightLaf());
+       try {
+            //UIManager.setLookAndFeel(new FlatLightLaf());
              UIManager.setLookAndFeel(new FlatDarkLaf());
         } catch (Exception ex) {
             ex.printStackTrace();

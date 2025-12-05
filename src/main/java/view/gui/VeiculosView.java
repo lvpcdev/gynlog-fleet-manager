@@ -363,7 +363,6 @@ public class VeiculosView extends JFrame {
         docPlaca.setDocumentFilter(caixaAlta);
 
 
-
         //======PLACA=======
 
         //RÓTULO
