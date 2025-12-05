@@ -166,45 +166,6 @@ public class VeiculoDAO {
         }
     }
 
-    // DELETE
-    public void ExcluirVeiculo(Long idParaExcluir) {
-        File arquivoOriginal = new File("data/veiculos/veiculos.txt");
-        File arquivoTemp = new File("data/veiculos/veiculos-temp.txt");
-
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
-
-            String linha = br.readLine();
-            while (linha != null) {
-                String[] partes = linha.split(" \\| ");
-                Long idAtual = Long.parseLong(partes[0]);
-
-                if (idAtual.equals(idParaExcluir)) {
-                    linha = br.readLine();
-                    continue;
-                }
-
-                bw.write(linha);
-                bw.newLine();
-                linha = br.readLine();
-            }
-
-        } catch (IOException e) {
-            System.err.println("Erro ao processar exclusão: " + e.getMessage());
-        }
-
-
-        if (arquivoOriginal.delete()) {
-            boolean sucesso = arquivoTemp.renameTo(arquivoOriginal);
-
-            if (!sucesso) {
-                System.err.println("Erro ao atualizar a lista");
-            }
-        } else {
-            System.err.println("Não foi possível apagar o arquivo original (pode estar aberto).");
-        }
-    }
-
     public int getQuantidadeDeVeiculos(){
         File arquivoOriginal = new File(caminho);
         int quantidade = 0;
@@ -261,6 +222,5 @@ public class VeiculoDAO {
         }
         return idAtual;
     }
-
 
 }
