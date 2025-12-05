@@ -10,10 +10,8 @@ public class MainFrame {
     public static void main(String[] args) {
 
         try {
-//           UIManager.setLookAndFeel(new FlatLightLaf());
+//            UIManager.setLookAndFeel(new FlatLightLaf());
              UIManager.setLookAndFeel(new FlatDarkLaf());
-
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
