@@ -1,7 +1,5 @@
 package view.gui;
 
-import view.util.ColorPalette;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
