@@ -4,8 +4,6 @@ import controller.VeiculoController;
 import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
-import view.util.DocumentoPrimeiroCaracter;
-import view.util.DocumentoCaixaAlta;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -33,47 +31,65 @@ public class VeiculosView extends JFrame {
         }
     };
 
-    DocumentoCaixaAlta caixaAlta = new DocumentoCaixaAlta();//Deixar os campos em maiúsculo
-    DocumentoPrimeiroCaracter primeiroCaracterMaisculo = new DocumentoPrimeiroCaracter(); //Apenas a primeira Letra Maiscula
-
     public VeiculosView() {
         setTitle("VEÍCULOS");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // <--- Alterado para permitir voltar ao Menu
         setLocationRelativeTo(null);
 
-        JTabbedPane abasPrincipais = new JTabbedPane();
-        this.add(abasPrincipais, BorderLayout.CENTER);
+        // Usa o painel construído e mostra a janela (com botão Voltar)
+        this.setContentPane(buildMainPanel(true));
+        setVisible(true);
+    }
 
-        // Adiciona botão "Voltar" no topo (sempre visível)
-        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton botaoVoltar = new JButton("Voltar");
-        topo.add(botaoVoltar);
-        this.add(topo, BorderLayout.NORTH);
+    // package-private constructor used to build an embeddable panel without showing a JFrame
+    VeiculosView(boolean forEmbed) {
+        // no window initialization here; fields are initialized by field initializers
+    }
 
-        botaoVoltar.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                new MenuView();
-                VeiculosView.this.dispose();
+    // Static helper to create the embeddable main panel without opening a window
+    public static JPanel createMainPanel() {
+        VeiculosView v = new VeiculosView(false);
+        return v.buildMainPanel(false);
+    }
+
+    // Retorna o painel principal sem criar/mostrar janela (para embed no MenuView)
+    public JPanel getMainPanel() {
+        return buildMainPanel(false);
+    }
+
+    // Constrói o painel principal; se includeTopBackButton for true, adiciona o botão "Voltar" no topo
+    private JPanel buildMainPanel(boolean includeTopBackButton) {
+        JPanel container = new JPanel(new BorderLayout());
+
+        if (includeTopBackButton) {
+            JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton botaoVoltar = new JButton("Voltar");
+            topo.add(botaoVoltar);
+            container.add(topo, BorderLayout.NORTH);
+
+            botaoVoltar.addActionListener(e -> {
+                SwingUtilities.invokeLater(() -> {
+                    new MenuView();
+                    VeiculosView.this.dispose();
+                });
             });
-        });
+        }
+
+        JTabbedPane abasPrincipais = new JTabbedPane();
+        container.add(abasPrincipais, BorderLayout.CENTER);
 
         //=====CADASTRO=======
         JPanel painelCadastro = criarPainelCadastroVeiculos();
-        abasPrincipais.addTab("Cadastro de Veículos",painelCadastro);
-        setVisible(true);
-
+        abasPrincipais.addTab("Cadastro de Veículos", painelCadastro);
 
         //====LISTAGEM========
         JPanel painelListagem = criarPainelListagemVeiculos();
         abasPrincipais.addTab("LISTAGEM", painelListagem);
-        setVisible(true);
 
-        //====ATUALIZA=======
-
-
-
+        return container;
     }
+
     private JPanel criarPainelCadastroVeiculos() {
 
         JPanel painel = new JPanel(new GridBagLayout());
@@ -90,16 +106,8 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        //===========APLICANDO MASCARA DE CAMPO SEMPRE MAISCULO===========
+        //FILTROS
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
-        docPlaca.setDocumentFilter(caixaAlta);
-
-        //============APLICANDO A 1° LETRA MAISUCLA=====================
-        AbstractDocument docMarca = (AbstractDocument) campoMarca.getDocument();
-        docMarca.setDocumentFilter(primeiroCaracterMaisculo);
-        AbstractDocument docModelo = (AbstractDocument) campoModelo.getDocument();
-        docModelo.setDocumentFilter(primeiroCaracterMaisculo);
-
 
         //======PLACA=======
 
@@ -116,7 +124,6 @@ public class VeiculosView extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(campoPlaca,gbc);
 
-
         //======MARCA=======
 
         //RÓTULo
@@ -132,7 +139,6 @@ public class VeiculosView extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1.0;
         painel.add(campoMarca,gbc);
-
 
         //======MODELO=======
 
@@ -357,10 +363,8 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        //
-        //=====APLICANDO MASCARA DE CAMPO SEMPRE MAISCULO=========
+        //FILTROS
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
-        docPlaca.setDocumentFilter(caixaAlta);
 
 
         //======PLACA=======
@@ -517,6 +521,8 @@ public class VeiculosView extends JFrame {
         return painel;
     }
 
-
-
+    // Public method to refresh the vehicles table from outside (e.g. MenuView)
+    public void refreshData() {
+        veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
+    }
 }

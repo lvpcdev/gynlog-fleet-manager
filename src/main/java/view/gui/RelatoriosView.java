@@ -30,21 +30,48 @@ public class RelatoriosView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton botaoVoltar = new JButton("Voltar ao Menu");
-        topo.add(botaoVoltar);
-        this.add(topo, BorderLayout.NORTH);
+        this.setContentPane(buildMainPanel(true));
+        setVisible(true);
+    }
 
-        botaoVoltar.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                new MenuView();
-                RelatoriosView.this.dispose();
+    RelatoriosView(boolean forEmbed) {
+        this.relatorioController = new RelatorioController();
+    }
+
+    public static JPanel createMainPanel() {
+        RelatoriosView r = new RelatoriosView(false);
+        return r.buildMainPanel(false);
+    }
+
+    public JPanel getMainPanel() {
+        return buildMainPanel(false);
+    }
+
+
+    public void refreshData() {
+        carregarFiltros();
+    }
+
+    private JPanel buildMainPanel(boolean includeTopBackButton) {
+        JPanel root = new JPanel(new BorderLayout(10, 10));
+        root.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        if (includeTopBackButton) {
+            JPanel topo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton botaoVoltar = new JButton("Voltar ao Menu");
+            topo.add(botaoVoltar);
+            root.add(topo, BorderLayout.NORTH);
+
+            botaoVoltar.addActionListener(e -> {
+                SwingUtilities.invokeLater(() -> {
+                    new MenuView();
+                    RelatoriosView.this.dispose();
+                });
             });
-        });
+        }
 
         JPanel painelPrincipal = new JPanel(new BorderLayout(10, 10));
-        painelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        this.add(painelPrincipal, BorderLayout.CENTER);
+        root.add(painelPrincipal, BorderLayout.CENTER);
 
         painelPrincipal.add(criarPainelFiltros(), BorderLayout.NORTH);
 
@@ -57,7 +84,7 @@ public class RelatoriosView extends JFrame {
 
         carregarFiltros();
 
-        setVisible(true);
+        return root;
     }
 
     private JPanel criarPainelFiltros() {
@@ -131,45 +158,32 @@ public class RelatoriosView extends JFrame {
         btnSomaGeralMes.addActionListener(e -> {
             Month mes = (Month) comboMes.getSelectedItem();
             int ano = (int) comboAno.getSelectedItem();
-            BigDecimal total = relatorioController.calcularTotalDespesasPorMes(mes.getValue(), ano);
 
-            String nomeMesFormatado = mes.getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-            nomeMesFormatado = nomeMesFormatado.substring(0, 1).toUpperCase() + nomeMesFormatado.substring(1);
+            String relatorioCompleto = relatorioController.gerarRelatorioSomaGeralMes(mes.getValue(), ano);
 
-            String resultado = String.format("Relatório: Somatório Geral da Frota\n" +
-                            "-------------------------------------\n" +
-                            "Mês/Ano: %s/%d\n" +
-                            "Total Geral: %s",
-                    nomeMesFormatado, ano, formatarMoeda(total));
-            areaResultados.setText(resultado);
+
+            areaResultados.setText(relatorioCompleto);
         });
 
         btnSomaCombustivelMes.addActionListener(e -> {
             Month mes = (Month) comboMes.getSelectedItem();
             int ano = (int) comboAno.getSelectedItem();
-            BigDecimal total = relatorioController.calcularTotalPorTipoDespesaNoMes("Combustível", mes.getValue(), ano);
 
-            String nomeMesFormatado = mes.getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-            nomeMesFormatado = nomeMesFormatado.substring(0, 1).toUpperCase() + nomeMesFormatado.substring(1);
 
-            String resultado = String.format("Relatório: Total de Gastos com Combustível\n" +
-                            "-------------------------------------------\n" +
-                            "Mês/Ano: %s/%d\n" +
-                            "Total Combustível: %s",
-                    nomeMesFormatado, ano, formatarMoeda(total));
-            areaResultados.setText(resultado);
+            String relatorioCompleto = relatorioController.gerarRelatorioSomaCombustivelMes(mes.getValue(), ano);
+
+
+            areaResultados.setText(relatorioCompleto);
         });
 
         btnSomaIpvaAno.addActionListener(e -> {
             int ano = (int) comboAno.getSelectedItem();
-            BigDecimal total = relatorioController.calcularTotalPorTipoDespesaNoAno("IPVA", ano);
 
-            String resultado = String.format("Relatório: Somatório de IPVA da Frota\n" +
-                            "--------------------------------------\n" +
-                            "Ano: %d\n" +
-                            "Total IPVA: %s",
-                    ano, formatarMoeda(total));
-            areaResultados.setText(resultado);
+
+            String relatorioCompleto = relatorioController.gerarRelatorioSomaIpvaAno(ano);
+
+
+            areaResultados.setText(relatorioCompleto);
         });
 
         btnListarInativos.addActionListener(e -> {
@@ -199,6 +213,11 @@ public class RelatoriosView extends JFrame {
     }
 
     private void carregarFiltros() {
+
+        comboVeiculos.removeAllItems();
+        comboAno.removeAllItems();
+
+
         comboVeiculos.addItem(null);
         List<Veiculo> veiculos = new VeiculoDAO().listarTodos();
         veiculos.forEach(comboVeiculos::addItem);
