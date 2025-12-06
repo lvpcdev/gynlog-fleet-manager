@@ -8,4 +8,6 @@
 8 | 1 | 11 | 1 | 2026 | ATIVO
 9 | 123 | aa | aa | 2024 | ATIVO
 10 | LUCAS | AAA | AAA | 2024 | ATIVO
-11 | a | a | a | 2025 | ATIVO
+11 | arta | a | a | 2025 | INATIVO
+12 | gbz4l87 | Honda | Fit | 2014 | ATIVO
+13 | GBZ4L87 | a | a | 2025 | ATIVO

@@ -8,6 +8,7 @@ import model.entities.Veiculo;
 import persistence.dao.VeiculoDAO;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.math.BigDecimal;
@@ -196,6 +197,12 @@ public class DespesasView extends JFrame {
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
 
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < tabela.getColumnCount(); i++) {
+            tabela.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
         // Painel de botões
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton botaoEditar = new JButton("Editar Despesa Selecionada");
@@ -364,6 +371,8 @@ public class DespesasView extends JFrame {
 
             BigDecimal valor = new BigDecimal(campoValor.getText().replace(",", "."));
             String descricao = campoDescricao.getText();
+
+
 
             boolean sucesso = movimentacaoController.registrarMovimentacao(veiculo, tipo, descricao, data, valor);
 

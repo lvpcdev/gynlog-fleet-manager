@@ -4,6 +4,7 @@ import controller.VeiculoController;
 import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
+import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -30,8 +31,6 @@ public class VeiculosView extends JFrame {
             return false;
         }
     };
-
-    //===================FILTROS==============================
 
     public VeiculosView() {
         setTitle("VEÍCULOS");
@@ -110,6 +109,16 @@ public class VeiculosView extends JFrame {
 
         //FILTROS
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+        docPlaca.setDocumentFilter(new CaixaAltaComLimiteFilter(7));
+
+        AbstractDocument docMarca = (AbstractDocument) campoMarca.getDocument();
+        docMarca.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
+
+        AbstractDocument docModelo = (AbstractDocument) campoModelo.getDocument();
+        docModelo.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
+
+        AbstractDocument docAnoFabricacao = (AbstractDocument) campoAnoFabricacao.getDocument();
+        docAnoFabricacao.setDocumentFilter(new CaixaAltaComLimiteFilter(4));
 
         //======PLACA=======
 
@@ -280,38 +289,19 @@ public class VeiculosView extends JFrame {
         JTable veiculosTable = new JTable(tableModelVeiculos);
         veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        //Deixar em negrito o cabeçalho
-        veiculosTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(
-                    JTable table,
-                    Object value,
-                    boolean isSelected,
-                    boolean hasFocus,
-                    int row,
-                    int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
-
-                label.setHorizontalAlignment(CENTER);
-                Font originalFont = label.getFont();
-                label.setFont(originalFont.deriveFont(Font.BOLD));
-                return label;
-            }
-        });
-
-
         JScrollPane scrollPane = new JScrollPane(veiculosTable);
         painel.add(scrollPane,BorderLayout.CENTER);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        veiculosTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        for (int i = 0; i < veiculosTable.getColumnCount(); i++) {
+            veiculosTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
 
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton botaoEditar = new JButton("Editar Veículos");
-        JButton botaoExcluir = new JButton("Excluir Veículos");
         JCheckBox checkBoxInativos = new JCheckBox("Apenas Inativos");
 
         botaoEditar.addActionListener(new ActionListener() {
@@ -335,29 +325,6 @@ public class VeiculosView extends JFrame {
             }
         });
 
-        botaoExcluir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                try {
-                    int linhaSelecionada = veiculosTable.getSelectedRow();
-                    if (linhaSelecionada == -1) {
-                        JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veiculo selecionado!");
-                        return;
-                    }
-                    int confirmacao = JOptionPane.showConfirmDialog(VeiculosView.this, "Tem certeza que deseja excluir o veículo selecionado?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
-                    if (confirmacao != JOptionPane.YES_OPTION) {
-                        return;
-                    }
-                        Long idEscolhido = Long.parseLong(String.valueOf(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(), 0)));
-                        tableModelVeiculos.removeRow(linhaSelecionada);
-                        veiculoDAO.ExcluirVeiculo(idEscolhido);
-                        JOptionPane.showMessageDialog(VeiculosView.this, "Veículo excluído com sucesso!");
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(VeiculosView.this, "Ocorreu um erro ao excluir o veículo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
 
         checkBoxInativos.addItemListener(new ItemListener() {
             @Override
@@ -369,7 +336,6 @@ public class VeiculosView extends JFrame {
 
         painel.add(painelBotoes, BorderLayout.SOUTH);
         painelBotoes.add(botaoEditar,BorderLayout.SOUTH);
-        painelBotoes.add(botaoExcluir,BorderLayout.SOUTH);
         painelBotoes.add(checkBoxInativos,BorderLayout.SOUTH);
         return painel;
     }
