@@ -1,9 +1,11 @@
 package view.gui;
 
 import controller.VeiculoController;
+import exception.PlacaJaCadastradaException;
 import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
+import view.util.DocumentoCaixaAlta;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -30,6 +32,8 @@ public class VeiculosView extends JFrame {
             return false;
         }
     };
+
+    //===================FILTROS==============================
 
     public VeiculosView() {
         setTitle("VEÍCULOS");
@@ -85,7 +89,7 @@ public class VeiculosView extends JFrame {
 
         //====LISTAGEM========
         JPanel painelListagem = criarPainelListagemVeiculos();
-        abasPrincipais.addTab("LISTAGEM", painelListagem);
+        abasPrincipais.addTab("Listagem de Veículos", painelListagem);
 
         return container;
     }
@@ -215,6 +219,32 @@ public class VeiculosView extends JFrame {
                 String modelo = campoModelo.getText();
                 String ano = campoAnoFabricacao.getText();
 
+
+                if ((placa.isEmpty())|| marca.isEmpty() || modelo.isEmpty() || ano.isEmpty()) {
+                    JOptionPane.showMessageDialog(painel,
+                            "Por favor, preencha todos os campos obrigatórios (Placa, Marca, Modelo, Ano).",
+                            "ERRO DE VALIDAÇÃO!",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                try {
+                    int anoFabricacao = Integer.parseInt(ano);
+                    if (anoFabricacao < 1950 || anoFabricacao > java.time.Year.now().getValue()) {
+                        JOptionPane.showMessageDialog(painel,
+                                "O Ano de Fabricação (" + ano + ") parece inválido.",
+                                "Erro de Validação",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(painel,
+                            "O Ano de Fabricação deve ser um número válido.",
+                            "Erro de Formato",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 String estadoTexto = "";
                 if (botaoAtivo.isSelected()) {
                     estadoTexto = "ATIVO";
@@ -235,10 +265,9 @@ public class VeiculosView extends JFrame {
                                 "Ano: " + ano + "\n" +
                                 "Estado: " + estadoTexto);
 
-                veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, false, null);
             }
         });
-
 
         return painel;
     }
@@ -248,7 +277,7 @@ public class VeiculosView extends JFrame {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
+        veiculoController.AtualizarVeiculos(tableModelVeiculos, false, null);
 
         JTable veiculosTable = new JTable(tableModelVeiculos);
         veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -272,7 +301,6 @@ public class VeiculosView extends JFrame {
             }
         });
 
-
         JScrollPane scrollPane = new JScrollPane(veiculosTable);
         painel.add(scrollPane,BorderLayout.CENTER);
 
@@ -280,12 +308,11 @@ public class VeiculosView extends JFrame {
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         veiculosTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
-
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton botaoEditar = new JButton("Editar Veículos");
-        JButton botaoExcluir = new JButton("Excluir Veículos");
         JCheckBox checkBoxInativos = new JCheckBox("Apenas Inativos");
+        JCheckBox checkBoxAtivos = new JCheckBox("Apenas Ativos");
 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
@@ -308,42 +335,36 @@ public class VeiculosView extends JFrame {
             }
         });
 
-        botaoExcluir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                try {
-                    int linhaSelecionada = veiculosTable.getSelectedRow();
-                    if (linhaSelecionada == -1) {
-                        JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veiculo selecionado!");
-                        return;
-                    }
-                    int confirmacao = JOptionPane.showConfirmDialog(VeiculosView.this, "Tem certeza que deseja excluir o veículo selecionado?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
-                    if (confirmacao != JOptionPane.YES_OPTION) {
-                        return;
-                    }
-                        Long idEscolhido = Long.parseLong(String.valueOf(veiculosTable.getModel().getValueAt(veiculosTable.getSelectedRow(), 0)));
-                        tableModelVeiculos.removeRow(linhaSelecionada);
-                        veiculoDAO.ExcluirVeiculo(idEscolhido);
-                        JOptionPane.showMessageDialog(VeiculosView.this, "Veículo excluído com sucesso!");
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(VeiculosView.this, "Ocorreu um erro ao excluir o veículo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
         checkBoxInativos.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                boolean estadoCheckBox = checkBoxInativos.isSelected();
-                veiculoController.AtualizarVeiculos(tableModelVeiculos, estadoCheckBox);
+                if(!checkBoxAtivos.isSelected()) {
+                    boolean estadoCheckBox = checkBoxInativos.isSelected();
+                    veiculoController.AtualizarVeiculos(tableModelVeiculos, estadoCheckBox, "INATIVO");
+                } else{
+                    JOptionPane.showMessageDialog(VeiculosView.this, "Filtro de ativos selecionado!");
+                }
+            }
+
+        });
+
+        checkBoxAtivos.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                    if(!checkBoxInativos.isSelected()) {
+                        boolean estadoCheckBox = checkBoxAtivos.isSelected();
+                        veiculoController.AtualizarVeiculos(tableModelVeiculos, estadoCheckBox, "ATIVO");
+                    } else{
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Filtro de inativos selecionado!");
+                    }
             }
         });
 
+
         painel.add(painelBotoes, BorderLayout.SOUTH);
         painelBotoes.add(botaoEditar,BorderLayout.SOUTH);
-        painelBotoes.add(botaoExcluir,BorderLayout.SOUTH);
         painelBotoes.add(checkBoxInativos,BorderLayout.SOUTH);
+        painelBotoes.add(checkBoxAtivos, BorderLayout.SOUTH);
         return painel;
     }
 
@@ -503,7 +524,7 @@ public class VeiculosView extends JFrame {
                 Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                 veiculo.setIdVeiculo(Long.parseLong(veiculoDAO.LerVeiculos("idVeiculo",linhaEscolhida)));
                 veiculoDAO.EditarVeiculo(veiculo);
-                veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
+                veiculoController.AtualizarVeiculos(tableModelVeiculos, false, null);
                 JOptionPane.showMessageDialog(painel,
                         "Veículo Alterado!\n" +
                                 "Placa: " + placa + "\n" +
@@ -523,6 +544,6 @@ public class VeiculosView extends JFrame {
 
     // Public method to refresh the vehicles table from outside (e.g. MenuView)
     public void refreshData() {
-        veiculoController.AtualizarVeiculos(tableModelVeiculos, false);
+        veiculoController.AtualizarVeiculos(tableModelVeiculos, false, null);
     }
 }

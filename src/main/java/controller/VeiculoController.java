@@ -5,7 +5,7 @@ import persistence.dao.VeiculoDAO;
 import javax.swing.table.DefaultTableModel;
 
 public class VeiculoController {
-    public void AtualizarVeiculos(DefaultTableModel tableModel, boolean estadoCheckBox) {
+    public void AtualizarVeiculos(DefaultTableModel tableModel, boolean estadoCheckBox, String estadoDesejado) {
         int linhaAtual = 1;
         VeiculoDAO veiculoDAO = new VeiculoDAO();
         if (veiculoDAO.getQuantidadeDeVeiculos() == 0) {
@@ -28,9 +28,10 @@ public class VeiculoController {
             for (int i = 0; i < quantidadeDeLinhas; i++) {
                 tableModel.removeRow(0);
             }
+
             if (estadoCheckBox) {
                 while (linhaAtual <= veiculoDAO.getQuantidadeDeVeiculos()) {
-                    if (veiculoDAO.LerVeiculos("estadoVeiculo", linhaAtual).equals("INATIVO")) {
+                    if (veiculoDAO.LerVeiculos("estadoVeiculo", linhaAtual).equals(estadoDesejado)) {
                         tableModel.addRow(new Object[]{
                                 veiculoDAO.LerVeiculos("idVeiculo", linhaAtual),
                                 veiculoDAO.LerVeiculos("placaVeiculo", linhaAtual),
