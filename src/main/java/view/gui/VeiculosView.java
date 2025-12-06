@@ -1,11 +1,9 @@
 package view.gui;
 
 import controller.VeiculoController;
-import exception.PlacaJaCadastradaException;
 import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
-import view.util.DocumentoCaixaAlta;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
