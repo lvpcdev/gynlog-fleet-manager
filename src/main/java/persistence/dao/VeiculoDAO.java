@@ -14,7 +14,7 @@ public class VeiculoDAO {
 
     private DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("yyyy");
 
-    // CREATE
+
     public void SalvarVeiculo(Veiculo veiculo) {
         File arquivo = new File(caminho);
         veiculo.setIdVeiculo(GerarId());
@@ -37,7 +37,7 @@ public class VeiculoDAO {
 
     }
 
-    // READ
+
     public String LerVeiculos(String dadoEscolhido, int linhaEscolhida){
         File arquivoOriginal = new File("data/veiculos/veiculos.txt");
         String linha = null;
@@ -52,22 +52,22 @@ public class VeiculoDAO {
 
             switch (dadoEscolhido) {
                 case "idVeiculo":
-                    return partes[0]; // retorna o Id
+                    return partes[0];
 
                 case "placaVeiculo":
-                    return partes[1]; // retorna a placa
+                    return partes[1];
 
                 case "marcaVeiculo":
-                    return partes[2]; // retorna a marca
+                    return partes[2];
 
                 case "modeloVeiculo":
-                    return partes[3]; // retorna o modelo
+                    return partes[3];
 
                 case "anoDeFabricacao":
-                    return partes[4]; // retorna o ano de fabricação
+                    return partes[4];
 
                 case "estadoVeiculo":
-                    return partes[5]; // retorna o estado(ativo ou inativo)
+                    return partes[5];
             }
         } catch (IOException e) {
             System.err.println("Erro ao processar exclusão: " + e.getMessage());
@@ -119,7 +119,7 @@ public class VeiculoDAO {
         return veiculos;
     }
 
-    // UPDATE
+
     public void EditarVeiculo(Veiculo veiculo){
         File arquivoOriginal = new File(caminho);
         File arquivoTemp = new File("data/veiculos/veiculos-temp.txt");

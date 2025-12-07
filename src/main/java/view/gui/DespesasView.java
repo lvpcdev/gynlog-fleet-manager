@@ -6,9 +6,12 @@ import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
 import persistence.dao.VeiculoDAO;
+import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -19,11 +22,10 @@ import java.util.Locale;
 
 public class DespesasView extends JFrame {
 
-    // --- Controladores ---
     private final MovimentacaoController movimentacaoController;
     private final TipoDespesaController tipoDespesaController;
 
-    // --- Componentes da UI ---
+
     private JComboBox<Veiculo> comboBoxVeiculos;
     private JComboBox<TipoDespesa> comboBoxTiposDespesa;
     private JTextField campoValor;
@@ -40,34 +42,34 @@ public class DespesasView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Usa o painel construído e mostra a janela (com botão Voltar)
+
         this.setContentPane(buildMainPanel(true));
         setVisible(true);
     }
 
-    // package-private constructor for embed
+
     DespesasView(boolean forEmbed) {
         this.movimentacaoController = new MovimentacaoController();
         this.tipoDespesaController = new TipoDespesaController();
     }
 
-    // static helper to create embeddable panel
+
     public static JPanel createMainPanel() {
         DespesasView d = new DespesasView(false);
         return d.buildMainPanel(false);
     }
 
-    // public getter for panel
+
     public JPanel getMainPanel() {
         return buildMainPanel(false);
     }
 
-    // Public method to refresh data from outside (e.g. MenuView)
+
     public void refreshData() {
         atualizarDados();
     }
 
-    // builds the main panel; if includeTopBackButton true, adds a back button
+
     private JPanel buildMainPanel(boolean includeTopBackButton) {
         JPanel root = new JPanel(new BorderLayout());
 
@@ -85,11 +87,11 @@ public class DespesasView extends JFrame {
             });
         }
 
-        // Sistema de locomoção de abas
+
         JTabbedPane abas = new JTabbedPane();
         root.add(abas, BorderLayout.CENTER);
 
-        // Metodos de cada aba
+
         JPanel painelCadastroMovimentacao = criarPainelCadastroMovimentacao();
         abas.addTab("Registrar Despesa", painelCadastroMovimentacao);
 
@@ -104,7 +106,7 @@ public class DespesasView extends JFrame {
         return root;
     }
 
-    // Painel principal para registrar uma nova despesa.
+
 
     private JPanel criarPainelCadastroMovimentacao() {
         JPanel painel = new JPanel(new GridBagLayout());
@@ -112,7 +114,7 @@ public class DespesasView extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // --- Componentes ---
+
         comboBoxVeiculos = new JComboBox<>();
         comboBoxVeiculos.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -136,8 +138,7 @@ public class DespesasView extends JFrame {
         campoDescricao = new JTextField(25);
         JButton botaoSalvar = new JButton("Salvar Despesa");
 
-        // --- Layout ---
-        // Rótulos
+
         gbc.gridx = 0;
         gbc.gridy = 0;
         painel.add(new JLabel("Veículo:"), gbc);
@@ -150,7 +151,7 @@ public class DespesasView extends JFrame {
         gbc.gridy++;
         painel.add(new JLabel("Descrição:"), gbc);
 
-        // Campos
+
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -164,7 +165,7 @@ public class DespesasView extends JFrame {
         gbc.gridy++;
         painel.add(campoDescricao, gbc);
 
-        // Botão
+
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.gridwidth = 2;
@@ -172,13 +173,12 @@ public class DespesasView extends JFrame {
         gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvar, gbc);
 
-        // --- Ação do Botão ---
+
         botaoSalvar.addActionListener(e -> registrarNovaMovimentacao());
 
         return painel;
     }
 
-    //Painel para listar todas as movimentações em uma tabela.
 
     private JPanel criarPainelListagem() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
@@ -196,7 +196,13 @@ public class DespesasView extends JFrame {
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
 
-        // Painel de botões
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < tabela.getColumnCount(); i++) {
+            tabela.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton botaoEditar = new JButton("Editar Despesa Selecionada");
         JButton botaoExcluir = new JButton("Excluir Despesa Selecionada");
@@ -245,7 +251,7 @@ public class DespesasView extends JFrame {
         return painel;
     }
 
-    // Painel para cadastrar um novo tipo de despesa.
+
 
     private JPanel criarPainelCadastroTipoDespesa() {
         JPanel painelPrincipal = new JPanel(new BorderLayout(10, 10));
@@ -275,6 +281,8 @@ public class DespesasView extends JFrame {
 
         JPanel painelAdicionar = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JTextField campoNovoTipo = new JTextField(20);
+        AbstractDocument docNovoTipo = (AbstractDocument) campoNovoTipo.getDocument();
+        docNovoTipo.setDocumentFilter(new CaixaAltaComLimiteFilter(25));
         JButton botaoSalvarNovo = new JButton("Salvar Novo Tipo");
         painelAdicionar.add(new JLabel("Novo Tipo:"));
         painelAdicionar.add(campoNovoTipo);
@@ -364,6 +372,8 @@ public class DespesasView extends JFrame {
 
             BigDecimal valor = new BigDecimal(campoValor.getText().replace(",", "."));
             String descricao = campoDescricao.getText();
+
+
 
             boolean sucesso = movimentacaoController.registrarMovimentacao(veiculo, tipo, descricao, data, valor);
 
@@ -469,7 +479,7 @@ public class DespesasView extends JFrame {
         gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER; gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvarAlteracoes, gbc);
 
-        //  Ação do Botão Salvar Alterações
+
         botaoSalvarAlteracoes.addActionListener(e -> {
             try {
 
@@ -510,13 +520,13 @@ public class DespesasView extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // --- Componentes do Painel de Edição ---
+
         JTextField campoDescricao = new JTextField(20);
         JButton botaoSalvarAlteracoes = new JButton("Salvar Alterações");
 
         campoDescricao.setText(tipoParaEditar.getDescricao());
 
-        // --- Layout ---
+
         gbc.gridx = 0;
         gbc.gridy = 0;
         painel.add(new JLabel("Nova Descrição:"), gbc);
@@ -532,7 +542,7 @@ public class DespesasView extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoSalvarAlteracoes, gbc);
 
-        // --- Ação do Botão "Salvar Alterações" ---
+
         botaoSalvarAlteracoes.addActionListener(e -> {
             String novaDescricao = campoDescricao.getText();
 
@@ -562,4 +572,3 @@ public class DespesasView extends JFrame {
 
 
 }
-

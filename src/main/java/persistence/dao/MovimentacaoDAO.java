@@ -23,7 +23,7 @@ public class MovimentacaoDAO {
 
     private final DateTimeFormatter FORMATADOR_DATA = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-   //CREATE
+
 
     public void salvar(Movimentacao movimentacao) {
         try {
@@ -49,7 +49,7 @@ public class MovimentacaoDAO {
         }
     }
 
-    // READ
+
     public List<Movimentacao> listarTodos() {
         List<Movimentacao> movimentacoes = new ArrayList<>();
         File arquivo = new File(CAMINHO_MOVIMENTACOES);
@@ -70,7 +70,7 @@ public class MovimentacaoDAO {
                     BigDecimal valor = new BigDecimal(partes[4]);
                     String descricao = partes[5];
 
-                    // Usa os métodos auxiliares internos para buscar os objetos
+
                     Veiculo veiculo = buscarVeiculoPorId(idVeiculo);
                     TipoDespesa tipoDespesa = buscarTipoDespesaPorId(idTipoDespesa);
 
@@ -89,7 +89,7 @@ public class MovimentacaoDAO {
         return movimentacoes;
     }
 
-    // UPDATE
+
     public void atualizar(Movimentacao movimentacao) {
         File arquivoOriginal = new File(CAMINHO_MOVIMENTACOES);
         File arquivoTemp = new File(CAMINHO_MOVIMENTACOES + ".tmp");
@@ -136,7 +136,7 @@ public class MovimentacaoDAO {
         }
     }
 
-    // DELETE
+
     public void excluir(Long idParaExcluir) {
         File arquivoOriginal = new File(CAMINHO_MOVIMENTACOES);
         File arquivoTemp = new File(CAMINHO_MOVIMENTACOES + ".tmp");
@@ -196,7 +196,7 @@ public class MovimentacaoDAO {
         }
     }
 
-    // METODOS AUXILIARES
+
     private Veiculo buscarVeiculoPorId(Long idBusca) {
         try (BufferedReader reader = new BufferedReader(new FileReader(CAMINHO_VEICULOS))) {
             String linha;
