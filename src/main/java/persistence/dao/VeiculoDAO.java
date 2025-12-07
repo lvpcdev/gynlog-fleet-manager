@@ -11,9 +11,7 @@ import java.util.List;
 public class VeiculoDAO {
     Long idAtual = 0L;
     private final String caminho = "data/veiculos/veiculos.txt";
-
     private DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("yyyy");
-
 
     public void SalvarVeiculo(Veiculo veiculo) {
         File arquivo = new File(caminho);
@@ -36,7 +34,6 @@ public class VeiculoDAO {
         }
 
     }
-
 
     public String LerVeiculos(String dadoEscolhido, int linhaEscolhida){
         File arquivoOriginal = new File("data/veiculos/veiculos.txt");
@@ -118,7 +115,6 @@ public class VeiculoDAO {
 
         return veiculos;
     }
-
 
     public void EditarVeiculo(Veiculo veiculo){
         File arquivoOriginal = new File(caminho);

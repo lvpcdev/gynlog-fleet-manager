@@ -499,6 +499,32 @@ public class VeiculosView extends JFrame {
                     estadoTexto = "INATIVO";
                 }
 
+
+                if ((placa.isEmpty())|| marca.isEmpty() || modelo.isEmpty() || ano.isEmpty()) {
+                    JOptionPane.showMessageDialog(painel,
+                            "Por favor, preencha todos os campos obrigatórios (Placa, Marca, Modelo, Ano).",
+                            "ERRO DE VALIDAÇÃO!",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                try {
+                    int anoFabricacao = Integer.parseInt(ano);
+                    if (anoFabricacao < 1950 || anoFabricacao > java.time.Year.now().getValue()) {
+                        JOptionPane.showMessageDialog(painel,
+                                "O Ano de Fabricação (" + ano + ") parece inválido.",
+                                "Erro de Validação",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(painel,
+                            "O Ano de Fabricação deve ser um número válido.",
+                            "Erro de Formato",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(estadoTexto);
 
                 Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
