@@ -218,7 +218,18 @@ public class VeiculosView extends JFrame {
                 String marca = campoMarca.getText();
                 String modelo = campoModelo.getText();
                 String ano = campoAnoFabricacao.getText();
+                int linhaAtual = 1;
 
+                while (linhaAtual <= veiculoDAO.getQuantidadeDeVeiculos()) {
+                    if (veiculoDAO.LerVeiculos("placaVeiculo", linhaAtual).equals(placa)) {
+                        JOptionPane.showMessageDialog(painel,
+                                "Existe uma placa idêntica a que você colocou, por favor, reescrever!",
+                                "ERRO DE VALIDAÇÃO!",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    linhaAtual++;
+                }
 
                 if ((placa.isEmpty())|| marca.isEmpty() || modelo.isEmpty() || ano.isEmpty()) {
                     JOptionPane.showMessageDialog(painel,

@@ -9,3 +9,4 @@
 9 | 123 | aa | aa | 2024 | ATIVO
 10 | LUCAS | AAA | AAA | 2024 | ATIVO
 11 | a | a | a | 2025 | ATIVO
+12 | LUCASs | 1 | 1 | 2000 | ATIVO
