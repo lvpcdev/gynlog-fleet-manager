@@ -10,7 +10,7 @@ public class TipoDespesaDAO {
     private final String CAMINHO_ARQUIVO = "data/despesas/tipos_despesa.txt";
     private final String CAMINHO_ID = "data/despesas/TiposDespesaUltimoId.txt";
 
-    // CREATE
+
     public void salvar(TipoDespesa tipoDespesa) {
         try {
             tipoDespesa.setIdTipoDespesa(gerarId());
@@ -21,12 +21,12 @@ public class TipoDespesaDAO {
                 writer.newLine();
             }
         } catch (IOException e) {
-            // Tratamento de Exceção
+
             System.err.println("Erro ao salvar tipo de despesa: " + e.getMessage());
         }
     }
 
-    // READ
+
     public List<TipoDespesa> listarTodos() {
         List<TipoDespesa> tiposDeDespesa = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(CAMINHO_ARQUIVO))) {
@@ -48,7 +48,7 @@ public class TipoDespesaDAO {
         return tiposDeDespesa;
     }
 
-    // UPDATE
+
     public void atualizar(TipoDespesa tipoDespesa) {
         File arquivoOriginal = new File(CAMINHO_ARQUIVO);
         File arquivoTemp = new File(CAMINHO_ARQUIVO + ".tmp");
@@ -90,7 +90,7 @@ public class TipoDespesaDAO {
         }
     }
 
-    // DELETE
+
     public void excluir(Long idParaExcluir) {
         File arquivoOriginal = new File(CAMINHO_ARQUIVO);
         File arquivoTemp = new File(CAMINHO_ARQUIVO + ".tmp");

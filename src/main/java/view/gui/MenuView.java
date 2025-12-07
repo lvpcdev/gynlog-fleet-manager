@@ -22,7 +22,7 @@ public class MenuView extends JFrame {
 
         sidebar.setPreferredSize(new Dimension(180, 0));
         final Dimension originalSidebarSize = sidebar.getPreferredSize();
-        final int collapsedWidth = 48; // width when collapsed (visual)
+        final int collapsedWidth = 48;
 
         Dimension botaoSize = new Dimension(160, 40);
         Font botaoFont = new Font("SansSerif", Font.BOLD, 14);
@@ -47,11 +47,11 @@ public class MenuView extends JFrame {
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
         }
 
-        // Painel de conteúdo com CardLayout (direita)
+
         JPanel contentPanel = new JPanel(new CardLayout());
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Instanciar as views embutidas e manter referências para atualizações
+
         VeiculosView veiculosView = new VeiculosView(false);
         DespesasView despesasView = new DespesasView(false);
         RelatoriosView relatoriosView = new RelatoriosView(false);
@@ -60,12 +60,12 @@ public class MenuView extends JFrame {
         JPanel despesasPanel = despesasView.getMainPanel();
         JPanel relatoriosPanel = relatoriosView.getMainPanel();
 
-        // Adiciona cards
+
         contentPanel.add(veiculosPanel, "VEICULOS");
         contentPanel.add(despesasPanel, "DESPESAS");
         contentPanel.add(relatoriosPanel, "RELATORIOS");
 
-        // Seleção visual dos botões
+
         Color selectedBg = new Color(0, 123, 255);
         Color defaultBg = new Color(68, 71, 90);
 
@@ -91,11 +91,11 @@ public class MenuView extends JFrame {
             botaoRelatorios.setBackground(selectedBg);
         };
 
-        // Ações dos botões (troca de card no contentPanel)
+
         botaoVeiculos.addActionListener((ActionEvent e) -> {
-            // refresh data before showing
+
             veiculosView.refreshData();
-            despesasView.refreshData(); // keep others in sync silently
+            despesasView.refreshData();
             relatoriosView.refreshData();
             selectVeiculos.run();
         });
@@ -112,7 +112,7 @@ public class MenuView extends JFrame {
             selectRelatorios.run();
         });
 
-        // Botões para colapsar/expandir a sidebar
+
         JPanel togglePanel = new JPanel();
         togglePanel.setLayout(new BoxLayout(togglePanel, BoxLayout.Y_AXIS));
         togglePanel.setOpaque(false);
@@ -124,21 +124,20 @@ public class MenuView extends JFrame {
         btnExpand.setMaximumSize(new Dimension(36, 36));
         btnCollapse.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnExpand.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // NOTE: btnExpand não fica dentro da versão reduzida da sidebar
 
-        // Painel que representa o estado colapsado na borda WEST; contém o botão de expandir
+
+
         JPanel collapsedPanel = new JPanel(new GridBagLayout());
         collapsedPanel.setOpaque(false);
         collapsedPanel.setPreferredSize(new Dimension(collapsedWidth, 0));
         collapsedPanel.add(btnExpand);
 
-        // Container WEST que contém somente a sidebar
+
         JPanel westContainer = new JPanel(new CardLayout());
         westContainer.add(sidebar, "SIDEBAR");
         westContainer.add(collapsedPanel, "COLLAPSED");
 
-        // Ações (UI apenas): esconder/exibir os botões da sidebar e ajustar largura com animação
-        // Proteção contra cliques durante animação
+
         final boolean[] animating = {false};
 
         btnCollapse.addActionListener((ActionEvent e) -> {
@@ -147,7 +146,6 @@ public class MenuView extends JFrame {
             btnCollapse.setEnabled(false);
             btnExpand.setEnabled(false);
 
-            // Animação gradual da largura
             int from = sidebar.getPreferredSize().width;
             int step = Math.max(8, (from - collapsedWidth) / 10);
 
@@ -163,14 +161,13 @@ public class MenuView extends JFrame {
                 westContainer.repaint();
                 if (current[0] <= collapsedWidth) {
                     timer.stop();
-                    // ao final da animação, mostrar o painel colapsado (com o botão de expandir)
-                    // garantir que a sidebar tenha exatamente a largura colapsada
+
                     sidebar.setPreferredSize(new Dimension(collapsedWidth, 0));
                     sidebar.revalidate();
                     sidebar.repaint();
                     CardLayout cl = (CardLayout) (westContainer.getLayout());
                     cl.show(westContainer, "COLLAPSED");
-                    // manter sidebar invisível para o painel colapsado
+
                     sidebar.setVisible(false);
                     animating[0] = false;
                     btnExpand.setEnabled(true);
@@ -185,9 +182,7 @@ public class MenuView extends JFrame {
             btnCollapse.setEnabled(false);
             btnExpand.setEnabled(false);
 
-            // garantir que a sidebar comece visível para a animação
-            // garantir que o painel WEST mude para a vista da sidebar e que a sidebar comece
-            // com a largura colapsada para a animação de expansão
+
             sidebar.setPreferredSize(new Dimension(collapsedWidth, 0));
             sidebar.setVisible(true);
             CardLayout clBefore = (CardLayout) (westContainer.getLayout());
@@ -209,7 +204,7 @@ public class MenuView extends JFrame {
                 westContainer.repaint();
                 if (current[0] >= originalSidebarSize.width) {
                     timer.stop();
-                    // voltar ao painel da sidebar (o painel colapsado permanece no westContainer para futuras colisões)
+
                     CardLayout cl = (CardLayout) (westContainer.getLayout());
                     cl.show(westContainer, "SIDEBAR");
                     sidebar.setPreferredSize(new Dimension(originalSidebarSize.width, 0));
@@ -225,17 +220,16 @@ public class MenuView extends JFrame {
 
         togglePanel.add(btnCollapse);
         togglePanel.add(Box.createRigidArea(new Dimension(0, 8)));
-        // Não adicionamos o btnExpand ao sidebar; ele fica no expandPanel que é mostrado na área principal
+
         togglePanel.add(Box.createVerticalStrut(12));
 
         sidebar.add(Box.createVerticalGlue());
         sidebar.add(togglePanel);
 
-        // Montagem do layout principal (usa westContainer para alternar entre sidebar/expandPanel)
+
         mainPanel.add(westContainer, BorderLayout.WEST);
         mainPanel.add(contentPanel, BorderLayout.CENTER);
-        // westContainer já gerencia a sidebar e o painel colapsado
-        // (não há expandHolder separado)
+
 
         add(mainPanel);
 

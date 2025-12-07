@@ -4,7 +4,7 @@ import controller.VeiculoController;
 import model.enums.StatusVeiculo;
 import persistence.dao.VeiculoDAO;
 import model.entities.Veiculo;
-import view.util.DocumentoCaixaAlta;
+import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -27,41 +27,38 @@ public class VeiculosView extends JFrame {
     DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            // Retorna FALSE para impedir a edição direta de qualquer célula
+
             return false;
         }
     };
 
-    //===================FILTROS==============================
-
     public VeiculosView() {
         setTitle("VEÍCULOS");
         setSize(800, 600);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // <--- Alterado para permitir voltar ao Menu
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Usa o painel construído e mostra a janela (com botão Voltar)
         this.setContentPane(buildMainPanel(true));
         setVisible(true);
     }
 
-    // package-private constructor used to build an embeddable panel without showing a JFrame
+
     VeiculosView(boolean forEmbed) {
-        // no window initialization here; fields are initialized by field initializers
+
     }
 
-    // Static helper to create the embeddable main panel without opening a window
+
     public static JPanel createMainPanel() {
         VeiculosView v = new VeiculosView(false);
         return v.buildMainPanel(false);
     }
 
-    // Retorna o painel principal sem criar/mostrar janela (para embed no MenuView)
+
     public JPanel getMainPanel() {
         return buildMainPanel(false);
     }
 
-    // Constrói o painel principal; se includeTopBackButton for true, adiciona o botão "Voltar" no topo
+
     private JPanel buildMainPanel(boolean includeTopBackButton) {
         JPanel container = new JPanel(new BorderLayout());
 
@@ -82,11 +79,11 @@ public class VeiculosView extends JFrame {
         JTabbedPane abasPrincipais = new JTabbedPane();
         container.add(abasPrincipais, BorderLayout.CENTER);
 
-        //=====CADASTRO=======
+
         JPanel painelCadastro = criarPainelCadastroVeiculos();
         abasPrincipais.addTab("Cadastro de Veículos", painelCadastro);
 
-        //====LISTAGEM========
+
         JPanel painelListagem = criarPainelListagemVeiculos();
         abasPrincipais.addTab("Listagem de Veículos", painelListagem);
 
@@ -109,43 +106,46 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        //FILTROS
+
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+        docPlaca.setDocumentFilter(new CaixaAltaComLimiteFilter(7));
 
-        //======PLACA=======
+        AbstractDocument docMarca = (AbstractDocument) campoMarca.getDocument();
+        docMarca.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
 
-        //RÓTULO
+        AbstractDocument docModelo = (AbstractDocument) campoModelo.getDocument();
+        docModelo.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
+
+        AbstractDocument docAnoFabricacao = (AbstractDocument) campoAnoFabricacao.getDocument();
+        docAnoFabricacao.setDocumentFilter(new CaixaAltaComLimiteFilter(4));
+
+
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.weightx = 0.0;
         painel.add(new JLabel("PLACA:"),gbc);
 
-        //LINHA
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(campoPlaca,gbc);
 
-        //======MARCA=======
 
-        //RÓTULo
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.weightx = 0.0;
         painel.add(new JLabel("MARCA:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1.0;
         painel.add(campoMarca,gbc);
 
-        //======MODELO=======
 
-        //RÓTULo
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
@@ -153,56 +153,51 @@ public class VeiculosView extends JFrame {
         gbc.weightx = 0.0;
         painel.add(new JLabel("MODELO:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 0.0;
         painel.add(campoModelo,gbc);
 
-        //======ANO DE FABRICACAO=======
 
-        //RÓTULo
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
         painel.add(new JLabel("ANO DE FABRICAÇÃO:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.fill = GridBagConstraints.CENTER;
         gbc.weightx = 1.0;
         painel.add(campoAnoFabricacao,gbc);
 
-        //=====ESTADO=============
 
-        //RÓTULO
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
         painel.add(new JLabel("ESTADO DO VEÍCULO:"),gbc);
 
-        //GRUPO BOTÕES DE ESTADO
+
         ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
         grupoEstadoVeiculo.add(botaoAtivo);
         grupoEstadoVeiculo.add(botaoInativo);
 
-        //PAINEL DOS BOTÕES
+
         JPanel painelEstadoVeiculo = new JPanel();
         painelEstadoVeiculo.add(botaoAtivo);
         painelEstadoVeiculo.add(new JLabel("\t|\t"));
         painelEstadoVeiculo.add(botaoInativo);
 
-        //LINHA
         gbc.gridx = 1;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(painelEstadoVeiculo,gbc);
 
-        //====BOTÃO CADASTRAR========
+
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
@@ -292,31 +287,16 @@ public class VeiculosView extends JFrame {
         JTable veiculosTable = new JTable(tableModelVeiculos);
         veiculosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        //Deixar em negrito o cabeçalho
-        veiculosTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(
-                    JTable table,
-                    Object value,
-                    boolean isSelected,
-                    boolean hasFocus,
-                    int row,
-                    int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,column);
 
-                label.setHorizontalAlignment(CENTER);
-                Font originalFont = label.getFont();
-                label.setFont(originalFont.deriveFont(Font.BOLD));
-                return label;
-            }
-        });
 
         JScrollPane scrollPane = new JScrollPane(veiculosTable);
         painel.add(scrollPane,BorderLayout.CENTER);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        veiculosTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        for (int i = 0; i < veiculosTable.getColumnCount(); i++) {
+            veiculosTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
@@ -394,36 +374,32 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        //FILTROS
+
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
 
 
-        //======PLACA=======
 
-        //RÓTULO
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.weightx = 0.0;
         painel.add(new JLabel("PLACA:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(campoPlaca,gbc);
 
 
-        //======MARCA=======
 
-        //RÓTULo
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.weightx = 0.0;
         painel.add(new JLabel("MARCA:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
@@ -431,9 +407,7 @@ public class VeiculosView extends JFrame {
         painel.add(campoMarca,gbc);
 
 
-        //======MODELO=======
 
-        //RÓTULo
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
@@ -441,56 +415,52 @@ public class VeiculosView extends JFrame {
         gbc.weightx = 0.0;
         painel.add(new JLabel("MODELO:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 0.0;
         painel.add(campoModelo,gbc);
 
-        //======ANO DE FABRICACAO=======
 
-        //RÓTULo
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
         painel.add(new JLabel("ANO DE FABRICAÇÃO:"),gbc);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.fill = GridBagConstraints.CENTER;
         gbc.weightx = 1.0;
         painel.add(campoAnoFabricacao,gbc);
 
-        //=====ESTADO=============
 
-        //RÓTULO
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
         painel.add(new JLabel("ESTADO DO VEÍCULO:"),gbc);
 
-        //GRUPO BOTÕES DE ESTADO
+
         ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
         grupoEstadoVeiculo.add(botaoAtivo);
         grupoEstadoVeiculo.add(botaoInativo);
 
-        //PAINEL DOS BOTÕES
+
         JPanel painelEstadoVeiculo = new JPanel();
         painelEstadoVeiculo.add(botaoAtivo);
         painelEstadoVeiculo.add(new JLabel("\t|\t"));
         painelEstadoVeiculo.add(botaoInativo);
 
-        //LINHA
+
         gbc.gridx = 1;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(painelEstadoVeiculo,gbc);
 
-        //====BOTÃO CADASTRAR========
+
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
@@ -552,7 +522,7 @@ public class VeiculosView extends JFrame {
         return painel;
     }
 
-    // Public method to refresh the vehicles table from outside (e.g. MenuView)
+
     public void refreshData() {
         veiculoController.AtualizarVeiculos(tableModelVeiculos, false, null);
     }
