@@ -223,7 +223,7 @@ public class RelatoriosView extends JFrame {
         veiculos.forEach(comboVeiculos::addItem);
 
         int anoAtual = Year.now().getValue();
-        for (int i = anoAtual; i >= anoAtual - 10; i--) {
+        for (int i = anoAtual; i >= anoAtual - 40; i--) {
             comboAno.addItem(i);
         }
 

@@ -376,6 +376,16 @@ public class VeiculosView extends JFrame {
 
 
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
+        docPlaca.setDocumentFilter(new CaixaAltaComLimiteFilter(7));
+
+        AbstractDocument docMarca = (AbstractDocument) campoMarca.getDocument();
+        docMarca.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
+
+        AbstractDocument docModelo = (AbstractDocument) campoModelo.getDocument();
+        docModelo.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
+
+        AbstractDocument docAnoFabricacao = (AbstractDocument) campoAnoFabricacao.getDocument();
+        docAnoFabricacao.setDocumentFilter(new CaixaAltaComLimiteFilter(4));
 
 
 
@@ -498,6 +508,7 @@ public class VeiculosView extends JFrame {
                 } else if (botaoInativo.isSelected()) {
                     estadoTexto = "INATIVO";
                 }
+
 
 
                 if ((placa.isEmpty())|| marca.isEmpty() || modelo.isEmpty() || ano.isEmpty()) {
