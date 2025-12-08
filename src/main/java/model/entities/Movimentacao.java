@@ -80,7 +80,6 @@ public class Movimentacao {
         DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         NumberFormat formatadorMoeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
-
         String placaVeiculo;
         if (veiculo != null) {
             placaVeiculo = veiculo.getPlaca();

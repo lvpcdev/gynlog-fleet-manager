@@ -52,9 +52,9 @@ public class MenuView extends JFrame {
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
 
-        VeiculosView veiculosView = new VeiculosView(false);
-        DespesasView despesasView = new DespesasView(false);
-        RelatoriosView relatoriosView = new RelatoriosView(false);
+        VeiculosView veiculosView = new VeiculosView();
+        DespesasView despesasView = new DespesasView();
+        RelatoriosView relatoriosView = new RelatoriosView();
 
         JPanel veiculosPanel = veiculosView.getMainPanel();
         JPanel despesasPanel = despesasView.getMainPanel();
@@ -93,7 +93,6 @@ public class MenuView extends JFrame {
 
 
         botaoVeiculos.addActionListener((ActionEvent e) -> {
-
             veiculosView.refreshData();
             despesasView.refreshData();
             relatoriosView.refreshData();

@@ -36,34 +36,12 @@ public class DespesasView extends JFrame {
     public DespesasView() {
         this.movimentacaoController = new MovimentacaoController();
         this.tipoDespesaController = new TipoDespesaController();
-
-        setTitle("GESTÃO DE DESPESAS");
-        setSize(900, 700);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-
-        this.setContentPane(buildMainPanel(true));
-        setVisible(true);
-    }
-
-
-    DespesasView(boolean forEmbed) {
-        this.movimentacaoController = new MovimentacaoController();
-        this.tipoDespesaController = new TipoDespesaController();
-    }
-
-
-    public static JPanel createMainPanel() {
-        DespesasView d = new DespesasView(false);
-        return d.buildMainPanel(false);
     }
 
 
     public JPanel getMainPanel() {
         return buildMainPanel(false);
     }
-
 
     public void refreshData() {
         atualizarDados();

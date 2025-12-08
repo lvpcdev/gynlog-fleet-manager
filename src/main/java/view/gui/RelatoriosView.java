@@ -24,29 +24,12 @@ public class RelatoriosView extends JFrame {
 
     public RelatoriosView() {
         this.relatorioController = new RelatorioController();
-
-        setTitle("RELATÓRIOS GERENCIAIS");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        this.setContentPane(buildMainPanel(true));
-        setVisible(true);
     }
 
-    RelatoriosView(boolean forEmbed) {
-        this.relatorioController = new RelatorioController();
-    }
-
-    public static JPanel createMainPanel() {
-        RelatoriosView r = new RelatoriosView(false);
-        return r.buildMainPanel(false);
-    }
 
     public JPanel getMainPanel() {
         return buildMainPanel(false);
     }
-
 
     public void refreshData() {
         carregarFiltros();

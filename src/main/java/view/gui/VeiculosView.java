@@ -32,24 +32,12 @@ public class VeiculosView extends JFrame {
         }
     };
 
-    public VeiculosView() {
-        setTitle("VEÍCULOS");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        this.setContentPane(buildMainPanel(true));
-        setVisible(true);
-    }
 
 
-    VeiculosView(boolean forEmbed) {
-
-    }
 
 
     public static JPanel createMainPanel() {
-        VeiculosView v = new VeiculosView(false);
+        VeiculosView v = new VeiculosView();
         return v.buildMainPanel(false);
     }
 

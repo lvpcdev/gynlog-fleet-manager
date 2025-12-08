@@ -80,7 +80,7 @@ public class MovimentacaoController {
             System.err.println("Erro de atualização: Veículo ou Tipo de Despesa não pode ser nulo.");
             return false;
         }
-        if (movimentacaoAtualizada.getData() == null || movimentacaoAtualizada.getValor() == null || movimentacaoAtualizada.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+        if (movimentacaoAtualizada.getData() == null || movimentacaoAtualizada.getValor() == null || movimentacaoAtualizada.getValor().compareTo(BigDecimal.ZERO) <= 0 || movimentacaoAtualizada.getData().isAfter(LocalDate.now())) {
             System.err.println("Erro de atualização: Data ou valor são inválidos.");
             return false;
         }
