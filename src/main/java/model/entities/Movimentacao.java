@@ -1,7 +1,7 @@
 package model.entities;
 
 
-import persistence.dao.TipoDespesaDAO;
+
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -11,7 +11,7 @@ import java.util.Locale;
 
 public class Movimentacao {
 
-    private Long idMovimentacao;
+    private Long id;
     private String descricao;
     private LocalDate data;
     private BigDecimal valor;
@@ -27,12 +27,12 @@ public class Movimentacao {
         this.valor = valor;
     }
 
-    public Long getIdMovimentacao() {
-        return idMovimentacao;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdMovimentacao(Long idMovimentacao) {
-        this.idMovimentacao = idMovimentacao;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Veiculo getVeiculo() {
@@ -95,7 +95,7 @@ public class Movimentacao {
             descTipoDespesa = "N/A";
         }
 
-        return "Movimentação ID: " + idMovimentacao + "\n" +
+        return "Movimentação ID: " + id + "\n" +
                 "  - Veículo (Placa): " + placaVeiculo + "\n" +
                 "  - Data: " + data.format(formatadorData) + "\n" +
                 "  - Tipo: " + descTipoDespesa + "\n" +
