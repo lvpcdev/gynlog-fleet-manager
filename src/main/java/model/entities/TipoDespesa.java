@@ -5,6 +5,9 @@ public class TipoDespesa {
     private Long id;
     private String descricao;
 
+    public TipoDespesa() {
+    }
+
     public TipoDespesa(String descricao) {
         this.descricao = descricao;
     }

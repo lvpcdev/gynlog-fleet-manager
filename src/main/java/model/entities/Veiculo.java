@@ -3,7 +3,6 @@ package model.entities;
 import model.enums.StatusVeiculo;
 
 import java.time.Year;
-import java.time.format.DateTimeFormatter;
 
 public class Veiculo {
     private Long id;
@@ -12,6 +11,9 @@ public class Veiculo {
     private String modelo;
     private Year anoDeFabricacao;
     private StatusVeiculo statusVeiculo;
+
+    public Veiculo() {
+    }
 
     public Veiculo(String placa, String marca, String modelo, StatusVeiculo estado, Year anoDeFabricacao) {
         this.placa = placa;

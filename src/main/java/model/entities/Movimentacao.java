@@ -19,6 +19,9 @@ public class Movimentacao {
     private Veiculo veiculo;
     private TipoDespesa tipoDespesa;
 
+    public Movimentacao() {
+    }
+
     public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor) {
         this.veiculo = veiculo;
         this.tipoDespesa = tipoDespesa;
