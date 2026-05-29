@@ -2,6 +2,7 @@ package dao;
 
 import exceptions.ArquivoNaoEncontradoException;
 import model.entities.TipoDespesa;
+import model.enums.StatusTipoDespesa;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -17,7 +18,9 @@ public class TipoDespesaDAO {
         File arquivo = new File(caminhoArquivo);
 
         tipoDespesa.setId(gerarId());
-        String linha = tipoDespesa.getId() + " | " + tipoDespesa.getDescricao();
+        String linha = tipoDespesa.getId() + " | "
+                + tipoDespesa.getDescricao() + " | "
+                + tipoDespesa.getStatusTipoDespesa();
 
 
 
@@ -48,13 +51,14 @@ public class TipoDespesaDAO {
 
 
                 String[] partes = linha.split(" \\| ");
-                if (partes.length == 2) {
+                if (partes.length == 3) {
 
                     try {
                         Long id = Long.parseLong(partes[0].trim());
                         String descricao = partes[1].trim();
+                        StatusTipoDespesa statusTipoDespesa = StatusTipoDespesa.valueOf(partes[2].trim());
 
-                        TipoDespesa tipoDeDespesa = new TipoDespesa(descricao);
+                        TipoDespesa tipoDeDespesa = new TipoDespesa(descricao, statusTipoDespesa);
                         tipoDeDespesa.setId(id);
                         tiposDeDespesa.add(tipoDeDespesa);
 
@@ -81,7 +85,8 @@ public class TipoDespesaDAO {
         }
 
         String tipoDespesaTexto = tipoDespesa.getId() + " | "
-                + tipoDespesa.getDescricao();
+                + tipoDespesa.getDescricao() + " | "
+                + tipoDespesa.getStatusTipoDespesa();
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
@@ -108,48 +113,6 @@ public class TipoDespesaDAO {
             System.err.println("Erro ao atualizar tipo de despesa: " + e.getMessage());
             return;
         }
-
-        if (arquivoOriginal.delete()) {
-            if (!arquivoTemp.renameTo(arquivoOriginal)) {
-                System.err.println("Erro ao renomear arquivo temporário");
-            }
-        } else {
-            System.err.println("Erro ao deletar arquivo original");
-        }
-    }
-
-
-    public void excluir(Long id) {
-        File arquivoOriginal = new File(caminhoArquivo);
-        File arquivoTemp = new File("data/despesas/tiposDespesaTemp.txt");
-
-        if (!arquivoOriginal.exists()) {
-            throw new ArquivoNaoEncontradoException("Arquivo tipos de despesa não encontrado.");
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {
-
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                if (linha.trim().isEmpty()) {
-                    continue;
-                }
-
-                String[] partes = linha.split(" \\| ");
-
-                if (Long.parseLong(partes[0]) == id) {
-                    continue;
-                }
-
-                bw.write(linha);
-                bw.newLine();
-            }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Erro ao processar exclusão de tipo de despesa: " + e.getMessage());
-            return;
-        }
-
 
         if (arquivoOriginal.delete()) {
             if (!arquivoTemp.renameTo(arquivoOriginal)) {
