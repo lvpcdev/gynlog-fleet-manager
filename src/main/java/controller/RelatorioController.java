@@ -1,10 +1,10 @@
-package controller;
+/*package controller;
 
 import model.entities.Movimentacao;
 import model.entities.Veiculo;
 import model.enums.StatusVeiculo;
-import persistence.dao.MovimentacaoDAO;
-import persistence.dao.VeiculoDAO;
+import dao.MovimentacaoDAO;
+import dao.VeiculoDAO;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -238,3 +238,4 @@ public class RelatorioController {
         return relatorio.toString();
     }
 }
+*/

@@ -1,11 +1,11 @@
-package view.gui;
+/*package view.gui;
 
 import controller.MovimentacaoController;
 import controller.TipoDespesaController;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import persistence.dao.VeiculoDAO;
+import dao.VeiculoDAO;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
@@ -572,3 +572,4 @@ public class DespesasView extends JFrame {
 
 
 }
+*/

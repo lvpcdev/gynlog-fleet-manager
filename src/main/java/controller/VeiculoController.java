@@ -1,6 +1,6 @@
-package controller;
+/*package controller;
 
-import persistence.dao.VeiculoDAO;
+import dao.VeiculoDAO;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -59,3 +59,4 @@ public class VeiculoController {
         }
     }
 }
+ */

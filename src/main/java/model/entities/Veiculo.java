@@ -3,30 +3,32 @@ package model.entities;
 import model.enums.StatusVeiculo;
 
 import java.time.Year;
-import java.time.format.DateTimeFormatter;
 
 public class Veiculo {
-    private Long idVeiculo;
+    private Long id;
     private String placa;
     private String marca;
     private String modelo;
     private Year anoDeFabricacao;
     private StatusVeiculo statusVeiculo;
 
-    public Veiculo(String placa, String marca, String modelo, StatusVeiculo estado, String anoDeFabricacao) {
+    public Veiculo() {
+    }
+
+    public Veiculo(String placa, String marca, String modelo, StatusVeiculo estado, Year anoDeFabricacao) {
         this.placa = placa;
         this.marca = marca;
         this.modelo = modelo;
         this.statusVeiculo = estado;
-        setAnoDeFabricacao(anoDeFabricacao);
+        this.anoDeFabricacao = anoDeFabricacao;
     }
 
-    public Long getIdVeiculo() {
-        return idVeiculo;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdVeiculo(Long idVeiculo) {
-        this.idVeiculo = idVeiculo;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getPlaca() {
@@ -57,10 +59,8 @@ public class Veiculo {
         return anoDeFabricacao;
     }
 
-    public void setAnoDeFabricacao(String anoDeFabricacaoString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
-
-        this.anoDeFabricacao = Year.parse(anoDeFabricacaoString, formatter);
+    public void setAnoDeFabricacao(Year anoDeFabricacao) {
+        this.anoDeFabricacao = anoDeFabricacao;
     }
 
     public StatusVeiculo getStatusVeiculo() {
