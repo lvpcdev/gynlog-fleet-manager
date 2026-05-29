@@ -1,8 +1,8 @@
-package view.gui;
+/*package view.gui;
 
 import controller.VeiculoController;
 import model.enums.StatusVeiculo;
-import persistence.dao.VeiculoDAO;
+import dao.VeiculoDAO;
 import model.entities.Veiculo;
 import view.util.CaixaAltaComLimiteFilter;
 
@@ -553,3 +553,4 @@ public class VeiculosView extends JFrame {
         veiculoController.AtualizarVeiculos(tableModelVeiculos, false, null);
     }
 }
+*/

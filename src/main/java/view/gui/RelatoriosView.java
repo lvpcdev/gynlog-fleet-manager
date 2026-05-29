@@ -1,8 +1,8 @@
-package view.gui;
+/*package view.gui;
 
 import controller.RelatorioController;
 import model.entities.Veiculo;
-import persistence.dao.VeiculoDAO;
+import dao.VeiculoDAO;
 
 import javax.swing.*;
 import java.awt.*;
@@ -235,3 +235,4 @@ public class RelatoriosView extends JFrame {
         return NumberFormat.getCurrencyInstance(new Locale("pt", "BR")).format(valor);
     }
 }
+*/
