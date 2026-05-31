@@ -1,75 +1,34 @@
-/*package controller;
+package controller;
 
-import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
-import dao.MovimentacaoDAO;
-import dao.TipoDespesaDAO;
+import service.TipoDespesaService;
 
 import java.util.List;
 
 public class TipoDespesaController {
+    private TipoDespesaService tipoDespesaService = new TipoDespesaService();
 
-    private final TipoDespesaDAO tipoDespesaDAO;
-    private final MovimentacaoDAO movimentacaoDAO;
-
-    public TipoDespesaController() {
-        this.tipoDespesaDAO = new TipoDespesaDAO();
-        this.movimentacaoDAO = new MovimentacaoDAO();
+    public void salvar(TipoDespesa tipoDespesa) {
+        tipoDespesaService.salvar(tipoDespesa);
     }
 
-
-    public void criarTipoDespesa(String descricao) {
-        if (descricao == null || descricao.trim().isEmpty()) {
-            System.err.println("A descrição do tipo de despesa não pode ser vazia.");
-            return;
-        }
-
-        TipoDespesa novoTipoDespesa = new TipoDespesa(descricao.trim());
-        tipoDespesaDAO.salvar(novoTipoDespesa);
-        System.out.println("Tipo de despesa '" + descricao + "' salvo com sucesso!");
+    public void atualizar(TipoDespesa tipoDespesa) {
+        tipoDespesaService.atualizar(tipoDespesa);
     }
 
-
-    public List<TipoDespesa> listarTodosTiposDespesa() {
-        return tipoDespesaDAO.listarTodos();
+    public List<TipoDespesa> listarTodos() {
+        return tipoDespesaService.listarTodos();
     }
 
-
-    public void atualizarTipoDespesa(TipoDespesa tipoDespesa) {
-        if (tipoDespesa == null || tipoDespesa.getDescricao() == null || tipoDespesa.getDescricao().trim().isEmpty()) {
-            System.err.println("Erro de atualização: dados do tipo de despesa são inválidos.");
-            return;
-        }
-        tipoDespesaDAO.atualizar(tipoDespesa);
+    public List<TipoDespesa> listarAtivos() {
+        return tipoDespesaService.listarAtivos();
     }
 
-
-    public boolean excluirTipoDespesa(Long id) {
-        if (id == null || id <= 0) {
-            System.err.println("ID inválido para exclusão.");
-            return false;
-        }
-
-
-        if (tipoDespesaEmUso(id)) {
-            System.err.println("Operação bloqueada: O tipo de despesa está vinculado a uma ou mais movimentações.");
-            return false;
-        }
-
-        tipoDespesaDAO.excluir(id);
-        return true;
+    public List<TipoDespesa> listarInativos() {
+        return tipoDespesaService.listarInativos();
     }
 
-    private boolean tipoDespesaEmUso(Long idTipoDespesa) {
-        List<Movimentacao> todasMovimentacoes = movimentacaoDAO.listarTodos();
-        for (Movimentacao mov : todasMovimentacoes) {
-            if (mov.getTipoDespesa().getIdTipoDespesa().equals(idTipoDespesa)) {
-                return true;
-            }
-        }
-        return false;
+    public TipoDespesa buscarPorId(Long id) {
+        return tipoDespesaService.buscarPorId(id);
     }
-
-
 }
-*/
