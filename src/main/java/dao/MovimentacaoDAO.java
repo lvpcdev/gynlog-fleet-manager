@@ -1,6 +1,7 @@
 package dao;
 
 import exceptions.ArquivoNaoEncontradoException;
+import exceptions.PersistenciaException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
@@ -38,9 +39,8 @@ public class MovimentacaoDAO {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo, true))) {
             bw.write(linha);
             bw.newLine();
-            System.out.println("Movimentação salva com sucesso!");
         } catch (IOException e) {
-            System.err.println("Erro ao salvar movimentação: " + e.getMessage());
+            throw new PersistenciaException("Erro ao salvar movimentação: ", e);
         }
     }
 
@@ -63,29 +63,33 @@ public class MovimentacaoDAO {
 
                 String[] partes = linha.split(" \\| ");
                 if (partes.length == 6) {
-                    Long idMovimentacao = Long.parseLong(partes[0]);
-                    Long idVeiculo = Long.parseLong(partes[1]);
-                    Long idTipoDespesa = Long.parseLong(partes[2]);
-                    LocalDate data = LocalDate.parse(partes[3], formatadorData);
-                    BigDecimal valor = new BigDecimal(partes[4]);
-                    String descricao = partes[5];
+                    try {
+                        Long idMovimentacao = Long.parseLong(partes[0]);
+                        Long idVeiculo = Long.parseLong(partes[1]);
+                        Long idTipoDespesa = Long.parseLong(partes[2]);
+                        LocalDate data = LocalDate.parse(partes[3], formatadorData);
+                        BigDecimal valor = new BigDecimal(partes[4]);
+                        String descricao = partes[5];
 
 
-                    Veiculo veiculo = new Veiculo();
-                    veiculo.setId(idVeiculo);
+                        Veiculo veiculo = new Veiculo();
+                        veiculo.setId(idVeiculo);
 
-                    TipoDespesa tipoDespesa = new TipoDespesa();
-                    tipoDespesa.setId(idTipoDespesa);
+                        TipoDespesa tipoDespesa = new TipoDespesa();
+                        tipoDespesa.setId(idTipoDespesa);
 
 
-                    Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor);
-                    movimentacao.setId(idMovimentacao);
-                    movimentacoes.add(movimentacao);
+                        Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor);
+                        movimentacao.setId(idMovimentacao);
+                        movimentacoes.add(movimentacao);
+                    } catch (NumberFormatException e) {
+                        throw new PersistenciaException("Erro ao converter linha: " + linha, e);
 
+                    }
                 }
             }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Erro ao listar movimentações: " + e.getMessage());
+        } catch (IOException e) {
+            throw new PersistenciaException("Erro ao listar tipos de despesa", e);
         }
         return movimentacoes;
     }
@@ -128,17 +132,16 @@ public class MovimentacaoDAO {
 
             }
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Erro ao atualizar movimentação: " + e.getMessage());
-            return;
+            throw new PersistenciaException("Erro ao atualizar movimentação", e);
         }
 
 
         if (arquivoOriginal.delete()) {
             if (!arquivoTemp.renameTo(arquivoOriginal)) {
-                System.err.println("Erro ao renomear arquivo temporário");
+                throw new PersistenciaException("Erro ao renomear arquivo temporário");
             }
         } else {
-            System.err.println("Erro ao deletar arquivo original");
+            throw new PersistenciaException("Erro ao deletar arquivo original");
         }
     }
 
@@ -167,17 +170,16 @@ public class MovimentacaoDAO {
                 bw.newLine();
             }
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Erro ao processar a exclusão da movimentação: " + e.getMessage());
-            return;
+            throw new PersistenciaException("Erro ao processar a exclusão da movimentação: ", e);
         }
 
 
         if (arquivoOriginal.delete()) {
             if (!arquivoTemp.renameTo(arquivoOriginal)) {
-                System.err.println("Erro ao renomear arquivo temporário");
+                throw new PersistenciaException("Erro ao renomear arquivo temporário");
             }
         } else {
-            System.err.println("Erro ao deletar arquivo original");
+            throw new PersistenciaException("Erro ao deletar arquivo original");
         }
     }
 
@@ -199,13 +201,13 @@ public class MovimentacaoDAO {
                 novoId++;
             }
         } catch (IOException e) {
-            System.err.println("Erro ao ler ID: " + e.getMessage());
+            throw new PersistenciaException("Erro ao ler ID", e);
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoUltimoId))) {
             bw.write(String.valueOf(novoId));
         } catch (IOException e) {
-            System.err.println("Erro ao salvar ID: " + e.getMessage());
+            throw new PersistenciaException("Erro ao salvar ID", e);
         }
         return novoId;
     }

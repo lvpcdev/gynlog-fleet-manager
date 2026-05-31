@@ -1,6 +1,7 @@
 package dao;
 
 import exceptions.ArquivoNaoEncontradoException;
+import exceptions.PersistenciaException;
 import model.entities.Veiculo;
 import model.enums.StatusVeiculo;
 
@@ -26,9 +27,8 @@ public class VeiculoDAO {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo, true))) {
             bw.write(linha);
             bw.newLine();
-            System.out.println("Veiculo salvo com sucesso!");
         } catch (IOException e) {
-            System.err.println("Erro ao salvar veiculo: " + e.getMessage());
+            throw new PersistenciaException("Erro ao salvar veiculo: ", e);
         }
 
     }
@@ -63,14 +63,12 @@ public class VeiculoDAO {
                         veiculos.add(veiculo);
 
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter dados da linha: '" + linha + "'. Linha ignorada.");
+                        throw new PersistenciaException("Erro ao converter linha: " + linha, e);
                     }
-                } else {
-                    System.err.println("Aviso: Linha mal formatada no arquivo de veículos foi ignorada: '" + linha + "'");
                 }
             }
         } catch (IOException e) {
-            System.err.println("Erro ao listar todos os veículos: " + e.getMessage());
+            throw new PersistenciaException("Erro ao listar veiculos", e);
         }
 
         return veiculos;
@@ -115,16 +113,16 @@ public class VeiculoDAO {
             }
 
         } catch (IOException e) {
-            System.err.println("Erro ao atualiza lista: " + e.getMessage());
+            throw new PersistenciaException("Erro ao atualizar veiculo", e);
         }
 
 
         if (arquivoOriginal.delete()) {
             if (!arquivoTemp.renameTo(arquivoOriginal)) {
-                System.err.println("Erro ao renomear arquivo temporário");
+                throw new PersistenciaException("Erro ao renomear arquivo temporário");
             }
         } else {
-            System.err.println("Erro ao deletar arquivo original");
+            throw new PersistenciaException("Erro ao deletar arquivo original");
         }
     }
 
@@ -146,13 +144,13 @@ public class VeiculoDAO {
             }
 
         } catch (IOException e) {
-            System.err.println("Erro ao ler ID: " + e.getMessage());
+            throw new PersistenciaException("Erro ao ler ID", e);
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoUltimoId))) {
             bw.write(String.valueOf(novoId));
         } catch (IOException e) {
-            System.err.println("Erro ao salvar ID: " + e.getMessage());
+            throw new PersistenciaException("Erro ao salvar ID", e);
         }
         return novoId;
     }

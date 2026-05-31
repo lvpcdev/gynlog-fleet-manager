@@ -1,6 +1,7 @@
 package dao;
 
 import exceptions.ArquivoNaoEncontradoException;
+import exceptions.PersistenciaException;
 import model.entities.TipoDespesa;
 import model.enums.StatusTipoDespesa;
 
@@ -27,9 +28,8 @@ public class TipoDespesaDAO {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo, true))) {
             bw.write(linha);
             bw.newLine();
-            System.out.println("Tipo de despesa salva com sucesso!");
         } catch (IOException e) {
-            System.err.println("Erro ao salvar tipo de despesa: " + e.getMessage());
+            throw new PersistenciaException("Erro ao salvar tipo de despesa: ", e);
         }
     }
 
@@ -63,14 +63,12 @@ public class TipoDespesaDAO {
                         tiposDeDespesa.add(tipoDeDespesa);
 
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter dados da linha: '" + linha + "'. Linha ignorada.");
+                        throw new PersistenciaException("Erro ao converter linha: " + linha, e);
                     }
-                } else {
-                    System.err.println("Aviso: Linha mal formatada no arquivo de tipo de despesa foi ignorada: '" + linha + "'");
                 }
             }
         } catch (IOException e) {
-            System.err.println("Erro ao listar todos os tipos de despesa: " + e.getMessage());
+            throw new PersistenciaException("Erro ao listar tipos de despesa", e);
         }
         return tiposDeDespesa;
     }
@@ -110,16 +108,15 @@ public class TipoDespesaDAO {
                 bw.newLine();
             }
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Erro ao atualizar tipo de despesa: " + e.getMessage());
-            return;
+            throw new PersistenciaException("Erro ao atualizar tipo de despesa", e);
         }
 
         if (arquivoOriginal.delete()) {
             if (!arquivoTemp.renameTo(arquivoOriginal)) {
-                System.err.println("Erro ao renomear arquivo temporário");
+                throw new PersistenciaException("Erro ao renomear arquivo temporário");
             }
         } else {
-            System.err.println("Erro ao deletar arquivo original");
+            throw new PersistenciaException("Erro ao deletar arquivo original");
         }
     }
 
@@ -140,13 +137,13 @@ public class TipoDespesaDAO {
                 novoId++;
             }
         } catch (IOException e) {
-            System.err.println("Erro ao ler ID: " + e.getMessage());
+            throw new PersistenciaException("Erro ao ler ID", e);
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoUltimoId))) {
             bw.write(String.valueOf(novoId));
         } catch (IOException e) {
-            System.err.println("Erro ao salvar ID: " + e.getMessage());
+            throw new PersistenciaException("Erro ao salvar ID", e);
         }
         return novoId;
     }
