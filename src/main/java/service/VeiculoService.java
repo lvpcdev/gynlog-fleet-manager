@@ -41,6 +41,10 @@ public class VeiculoService {
             throw new ValidacaoException("Ano inválido");
         }
 
+        if (!placaValida(veiculo.getPlaca())) {
+            throw new ValidacaoException("Placa inválida. Use o formato ABC1234 ou ABC1D23");
+        }
+
         if (existePlaca(veiculo.getPlaca())) {
             throw new ValidacaoException("Placa já cadastrada");
         }
@@ -74,6 +78,10 @@ public class VeiculoService {
         Year anoVeiculo = veiculo.getAnoDeFabricacao();
         if (anoVeiculo.isBefore(Year.of(1950)) || anoVeiculo.isAfter(anoAtual)) {
             throw new ValidacaoException("Ano inválido");
+        }
+
+        if (!placaValida(veiculo.getPlaca())) {
+            throw new ValidacaoException("Placa inválida. Use o formato ABC1234 ou ABC1D23");
         }
 
         if (existePlacaParaOutroVeiculo(veiculo.getPlaca(), veiculo.getId())) {
@@ -145,5 +153,11 @@ public class VeiculoService {
         }
 
         return false;
+    }
+
+    private boolean placaValida(String placa) {
+        String formatoAntigo = "[A-Z]{3}[0-9]{4}";
+        String formatoMercosul = "[A-Z]{3}[0-9][A-Z][0-9]{2}";
+        return placa.matches(formatoAntigo) || placa.matches(formatoMercosul);
     }
 }

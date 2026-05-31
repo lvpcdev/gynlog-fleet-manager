@@ -14,6 +14,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -67,6 +70,49 @@ public class DespesasView extends JFrame {
 
     public void refreshData() {
         atualizarDados();
+    }
+
+    private void aplicarFiltroValor(JTextField campo) {
+        AbstractDocument doc = (AbstractDocument) campo.getDocument();
+        doc.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                String textoAtual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String textoResultante = textoAtual.substring(0, offset) + string + textoAtual.substring(offset);
+                if (textoValido(textoResultante)) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                String textoAtual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String textoResultante = textoAtual.substring(0, offset) + text + textoAtual.substring(offset + length);
+                if (textoValido(textoResultante)) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+
+            private boolean textoValido(String texto) {
+                if (!texto.matches("[0-9]*[.,]?[0-9]{0,2}")) {
+                    return false;
+                }
+                String normalizado = texto.replace(",", ".");
+                if (normalizado.isEmpty()) return true;
+                try {
+                    BigDecimal valor = new BigDecimal(normalizado);
+                    return valor.compareTo(new BigDecimal("99999999.99")) <= 0;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        });
+    }
+
+    private BigDecimal extrairValor(String texto) {
+        String normalizado = texto.replace(",", ".").trim();
+        if (normalizado.isEmpty()) return BigDecimal.ZERO;
+        return new BigDecimal(normalizado);
     }
 
     private JPanel buildMainPanel(boolean includeTopBackButton) {
@@ -129,6 +175,8 @@ public class DespesasView extends JFrame {
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         campoDescricao = new JTextField(25);
         JButton botaoSalvar = new JButton("Salvar Despesa");
+
+        aplicarFiltroValor(campoValor);
 
         gbc.gridx = 0; gbc.gridy = 0;
         painel.add(new JLabel("Veículo:"), gbc);
@@ -257,9 +305,7 @@ public class DespesasView extends JFrame {
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new BoxLayout(painelBotoes, BoxLayout.Y_AXIS));
         JButton botaoEditar = new JButton("Editar");
-
         botaoEditar.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         painelBotoes.add(botaoEditar);
         painelPrincipal.add(painelBotoes, BorderLayout.EAST);
 
@@ -313,8 +359,6 @@ public class DespesasView extends JFrame {
             }
         });
 
-
-
         return painelPrincipal;
     }
 
@@ -332,7 +376,7 @@ public class DespesasView extends JFrame {
             TipoDespesa tipo = (TipoDespesa) comboBoxTiposDespesa.getSelectedItem();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate data = LocalDate.parse(campoData.getText(), formatter);
-            BigDecimal valor = new BigDecimal(campoValor.getText().replace(",", "."));
+            BigDecimal valor = extrairValor(campoValor.getText());
             String descricao = campoDescricao.getText();
 
             Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor);
@@ -401,6 +445,8 @@ public class DespesasView extends JFrame {
 
         editComboBoxVeiculos.setRenderer(comboBoxVeiculos.getRenderer());
 
+        aplicarFiltroValor(editCampoValor);
+
         List<Veiculo> todosVeiculos = veiculoController.listarTodos();
         for (Veiculo v : todosVeiculos) {
             editComboBoxVeiculos.addItem(v);
@@ -447,7 +493,7 @@ public class DespesasView extends JFrame {
                     Veiculo veiculoSelecionado = (Veiculo) editComboBoxVeiculos.getSelectedItem();
                     TipoDespesa tipoSelecionado = (TipoDespesa) editComboBoxTiposDespesa.getSelectedItem();
                     LocalDate data = LocalDate.parse(editCampoData.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                    BigDecimal valor = new BigDecimal(editCampoValor.getText().replace(",", "."));
+                    BigDecimal valor = extrairValor(editCampoValor.getText());
                     String descricao = editCampoDescricao.getText();
 
                     Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor);
