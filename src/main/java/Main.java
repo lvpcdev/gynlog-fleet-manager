@@ -1,4 +1,4 @@
-/*
+
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import view.gui.MenuView;
@@ -19,4 +19,4 @@ public class Main {
             tela.setVisible(true);
         });
     }
-}*/
+}
