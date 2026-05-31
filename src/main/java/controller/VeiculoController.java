@@ -1,61 +1,35 @@
 package controller;
 
-import persistence.dao.VeiculoDAO;
 
-import javax.swing.table.DefaultTableModel;
+import model.entities.Veiculo;
+import service.VeiculoService;
+
+import java.util.List;
 
 public class VeiculoController {
-    public void AtualizarVeiculos(DefaultTableModel tableModel, boolean estadoCheckBox, String estadoDesejado) {
-        int linhaAtual = 1;
-        VeiculoDAO veiculoDAO = new VeiculoDAO();
-        if (veiculoDAO.getQuantidadeDeVeiculos() == 0) {
-            return;
-        }
-        if (tableModel.getRowCount() == 0) {
-            while (linhaAtual <= veiculoDAO.getQuantidadeDeVeiculos()) {
-                tableModel.addRow(new Object[]{
-                        veiculoDAO.LerVeiculos("idVeiculo", linhaAtual),
-                        veiculoDAO.LerVeiculos("placaVeiculo", linhaAtual),
-                        veiculoDAO.LerVeiculos("marcaVeiculo", linhaAtual),
-                        veiculoDAO.LerVeiculos("modeloVeiculo", linhaAtual),
-                        veiculoDAO.LerVeiculos("anoDeFabricacao", linhaAtual),
-                        veiculoDAO.LerVeiculos("estadoVeiculo", linhaAtual)
-                });
-                linhaAtual++;
-            }
-        } else {
-            int quantidadeDeLinhas = tableModel.getRowCount();
-            for (int i = 0; i < quantidadeDeLinhas; i++) {
-                tableModel.removeRow(0);
-            }
+    private VeiculoService veiculoService = new VeiculoService();
 
-            if (estadoCheckBox) {
-                while (linhaAtual <= veiculoDAO.getQuantidadeDeVeiculos()) {
-                    if (veiculoDAO.LerVeiculos("estadoVeiculo", linhaAtual).equals(estadoDesejado)) {
-                        tableModel.addRow(new Object[]{
-                                veiculoDAO.LerVeiculos("idVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("placaVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("marcaVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("modeloVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("anoDeFabricacao", linhaAtual),
-                                veiculoDAO.LerVeiculos("estadoVeiculo", linhaAtual)
-                        });
-                    }
-                        linhaAtual++;
-                }
-            } else{
-                    while (linhaAtual <= veiculoDAO.getQuantidadeDeVeiculos()) {
-                        tableModel.addRow(new Object[]{
-                                veiculoDAO.LerVeiculos("idVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("placaVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("marcaVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("modeloVeiculo", linhaAtual),
-                                veiculoDAO.LerVeiculos("anoDeFabricacao", linhaAtual),
-                                veiculoDAO.LerVeiculos("estadoVeiculo", linhaAtual)
-                        });
-                        linhaAtual++;
-                    }
-            }
-        }
+    public void salvar(Veiculo veiculo) {
+        veiculoService.salvar(veiculo);
+    }
+
+    public void atualizar(Veiculo veiculo) {
+        veiculoService.atualizar(veiculo);
+    }
+
+    public List<Veiculo> listarTodos() {
+        return veiculoService.listarTodos();
+    }
+
+    public List<Veiculo> listarAtivos() {
+        return veiculoService.listarAtivos();
+    }
+
+    public List<Veiculo> listarInativos() {
+        return veiculoService.listarInativos();
+    }
+
+    public Veiculo buscarPorId(Long id) {
+        return veiculoService.buscarPorId(id);
     }
 }

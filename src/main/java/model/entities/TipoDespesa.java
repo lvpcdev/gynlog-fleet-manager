@@ -1,28 +1,43 @@
 package model.entities;
 
 
+import model.enums.StatusTipoDespesa;
+
 public class TipoDespesa {
-    private Long idTipoDespesa;
+    private Long id;
     private String descricao;
+    private StatusTipoDespesa statusTipoDespesa;
 
-    public TipoDespesa(String descricao) {
+    public TipoDespesa() {
+    }
+
+    public TipoDespesa(String descricao, StatusTipoDespesa statusTipoDespesa) {
         this.descricao = descricao;
+        this.statusTipoDespesa = statusTipoDespesa;
     }
 
-    public Long getIdTipoDespesa() {
-        return idTipoDespesa;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdTipoDespesa(Long idTipoDespesa) {
-        this.idTipoDespesa = idTipoDespesa;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDescricao() {
         return descricao;
     }
 
-    public void setDescricao(String descriaco) {
+    public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public StatusTipoDespesa getStatusTipoDespesa() {
+        return statusTipoDespesa;
+    }
+
+    public void setStatusTipoDespesa(StatusTipoDespesa statusTipoDespesa) {
+        this.statusTipoDespesa = statusTipoDespesa;
     }
 
     @Override

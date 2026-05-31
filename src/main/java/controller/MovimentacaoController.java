@@ -1,93 +1,77 @@
 package controller;
 
+
 import model.entities.Movimentacao;
-import model.entities.TipoDespesa;
-import model.entities.Veiculo;
-import persistence.dao.MovimentacaoDAO;
+import service.MovimentacaoService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.List;
 
 public class MovimentacaoController {
 
-    private final MovimentacaoDAO movimentacaoDAO;
+    private MovimentacaoService movimentacaoService = new MovimentacaoService();
 
-
-    public MovimentacaoController() {
-        this.movimentacaoDAO = new MovimentacaoDAO();
+    public void salvar(Movimentacao movimentacao) {
+        movimentacaoService.salvar(movimentacao);
     }
 
-    public boolean registrarMovimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor) {
-        if (veiculo == null) {
-            System.err.println("Erro de registro: O veículo não pode ser nulo.");
-            return false;
-        }
-        if (tipoDespesa == null) {
-            System.err.println("Erro de registro: O tipo de despesa não pode ser nulo.");
-            return false;
-        }
-        if (data == null || data.isAfter(LocalDate.now())) {
-            System.err.println("Erro de registro: A data é inválida ou está no futuro.");
-            return false;
-        }
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            System.err.println("Erro de registro: O valor deve ser maior que zero.");
-            return false;
-        }
-        if (descricao == null || descricao.trim().isEmpty()) {
-            descricao = tipoDespesa.getDescricao();
-        }
+    public void atualizar(Movimentacao movimentacao) {
+        movimentacaoService.atualizar(movimentacao);
+    }
 
+    public void excluir(Long id) {
+        movimentacaoService.excluir(id);
+    }
 
-        Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor);
+    public List<Movimentacao> listarTodos() {
+        return movimentacaoService.listarTodos();
+    }
 
+    public Movimentacao buscarPorId(Long id) {
+        return movimentacaoService.buscarPorId(id);
+    }
 
-        movimentacaoDAO.salvar(novaMovimentacao);
-        System.out.println("Movimentação registrada com sucesso para o veículo " + veiculo.getPlaca());
-        return true;
+    public List<Movimentacao> listarPorVeiculo(Long id) {
+        return movimentacaoService.listarPorVeiculo(id);
+    }
+
+    public BigDecimal totalPorVeiculo(Long id) {
+        return movimentacaoService.totalPorVeiculo(id);
+    }
+
+    public List<Movimentacao> listarPorMes(YearMonth mesAno) {
+        return movimentacaoService.listarPorMes(mesAno);
+    }
+
+    public BigDecimal totalPorMes(YearMonth mesAno) {
+        return movimentacaoService.totalPorMes(mesAno);
+    }
+
+    public List<Movimentacao> listarCombustivelPorMes(YearMonth mesAno) {
+        return movimentacaoService.listarCombustivelPorMes(mesAno);
+    }
+
+    public BigDecimal totalCombustivelPorMes(YearMonth mesAno) {
+        return movimentacaoService.totalCombustivelPorMes(mesAno);
+    }
+
+    public List<Movimentacao> listarIpvaPorAno(Year ano) {
+        return movimentacaoService.listarIpvaPorAno(ano);
+    }
+
+    public BigDecimal totalIpvaPorAno(Year ano) {
+        return movimentacaoService.totalIpvaPorAno(ano);
+    }
+
+    public List<Movimentacao> listarMultasPorVeiculo(Long id, Year ano) {
+        return movimentacaoService.listarMultasPorVeiculo(id, ano);
+    }
+
+    public BigDecimal totalMultasPorVeiculo(Long id, Year ano) {
+        return movimentacaoService.totalMultasPorVeiculo(id, ano);
     }
 
 
-    public List<Movimentacao> listarTodasMovimentacoes() {
-        return movimentacaoDAO.listarTodos();
-    }
-
-
-    public void excluirMovimentacao(Long id) {
-        if (id == null || id <= 0) {
-            System.err.println("ID inválido para exclusão.");
-            return;
-        }
-        movimentacaoDAO.excluir(id);
-        System.out.println("Movimentação com ID " + id + " excluída (se existia).");
-    }
-
-    public Movimentacao buscarMovimentacaoPorId(Long id) {
-        if (id == null || id <= 0) {
-            System.err.println("Tentativa de buscar movimentação com ID inválido.");
-            return null;
-        }
-        return movimentacaoDAO.buscarPorId(id);
-    }
-
-    public boolean atualizarMovimentacao(Movimentacao movimentacaoAtualizada) {
-        if (movimentacaoAtualizada == null || movimentacaoAtualizada.getIdMovimentacao() == null) {
-            System.err.println("Erro de atualização: Movimentação ou seu ID é nulo.");
-            return false;
-        }
-        if (movimentacaoAtualizada.getVeiculo() == null || movimentacaoAtualizada.getTipoDespesa() == null) {
-            System.err.println("Erro de atualização: Veículo ou Tipo de Despesa não pode ser nulo.");
-            return false;
-        }
-        if (movimentacaoAtualizada.getData() == null || movimentacaoAtualizada.getValor() == null || movimentacaoAtualizada.getValor().compareTo(BigDecimal.ZERO) <= 0) {
-            System.err.println("Erro de atualização: Data ou valor são inválidos.");
-            return false;
-        }
-
-
-        movimentacaoDAO.atualizar(movimentacaoAtualizada);
-        System.out.println("Movimentação ID " + movimentacaoAtualizada.getIdMovimentacao() + " atualizada com sucesso.");
-        return true;
-    }
 }

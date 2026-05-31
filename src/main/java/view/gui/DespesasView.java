@@ -2,17 +2,24 @@ package view.gui;
 
 import controller.MovimentacaoController;
 import controller.TipoDespesaController;
+import controller.VeiculoController;
+import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import persistence.dao.VeiculoDAO;
+import model.enums.StatusTipoDespesa;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -24,7 +31,7 @@ public class DespesasView extends JFrame {
 
     private final MovimentacaoController movimentacaoController;
     private final TipoDespesaController tipoDespesaController;
-
+    private final VeiculoController veiculoController;
 
     private JComboBox<Veiculo> comboBoxVeiculos;
     private JComboBox<TipoDespesa> comboBoxTiposDespesa;
@@ -36,39 +43,77 @@ public class DespesasView extends JFrame {
     public DespesasView() {
         this.movimentacaoController = new MovimentacaoController();
         this.tipoDespesaController = new TipoDespesaController();
+        this.veiculoController = new VeiculoController();
 
         setTitle("GESTÃO DE DESPESAS");
         setSize(900, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-
-
         this.setContentPane(buildMainPanel(true));
         setVisible(true);
     }
 
-
     DespesasView(boolean forEmbed) {
         this.movimentacaoController = new MovimentacaoController();
         this.tipoDespesaController = new TipoDespesaController();
+        this.veiculoController = new VeiculoController();
     }
-
 
     public static JPanel createMainPanel() {
         DespesasView d = new DespesasView(false);
         return d.buildMainPanel(false);
     }
 
-
     public JPanel getMainPanel() {
         return buildMainPanel(false);
     }
-
 
     public void refreshData() {
         atualizarDados();
     }
 
+    private void aplicarFiltroValor(JTextField campo) {
+        AbstractDocument doc = (AbstractDocument) campo.getDocument();
+        doc.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                String textoAtual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String textoResultante = textoAtual.substring(0, offset) + string + textoAtual.substring(offset);
+                if (textoValido(textoResultante)) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                String textoAtual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String textoResultante = textoAtual.substring(0, offset) + text + textoAtual.substring(offset + length);
+                if (textoValido(textoResultante)) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+
+            private boolean textoValido(String texto) {
+                if (!texto.matches("[0-9]*[.,]?[0-9]{0,2}")) {
+                    return false;
+                }
+                String normalizado = texto.replace(",", ".");
+                if (normalizado.isEmpty()) return true;
+                try {
+                    BigDecimal valor = new BigDecimal(normalizado);
+                    return valor.compareTo(new BigDecimal("99999999.99")) <= 0;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        });
+    }
+
+    private BigDecimal extrairValor(String texto) {
+        String normalizado = texto.replace(",", ".").trim();
+        if (normalizado.isEmpty()) return BigDecimal.ZERO;
+        return new BigDecimal(normalizado);
+    }
 
     private JPanel buildMainPanel(boolean includeTopBackButton) {
         JPanel root = new JPanel(new BorderLayout());
@@ -79,34 +124,31 @@ public class DespesasView extends JFrame {
             topo.add(botaoVoltar);
             root.add(topo, BorderLayout.NORTH);
 
-            botaoVoltar.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> {
-                    new MenuView();
-                    DespesasView.this.dispose();
-                });
+            botaoVoltar.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            new MenuView();
+                            DespesasView.this.dispose();
+                        }
+                    });
+                }
             });
         }
-
 
         JTabbedPane abas = new JTabbedPane();
         root.add(abas, BorderLayout.CENTER);
 
-
-        JPanel painelCadastroMovimentacao = criarPainelCadastroMovimentacao();
-        abas.addTab("Registrar Despesa", painelCadastroMovimentacao);
-
-        JPanel painelListagem = criarPainelListagem();
-        abas.addTab("Histórico de Despesas", painelListagem);
-
-        JPanel painelCadastroTipo = criarPainelCadastroTipoDespesa();
-        abas.addTab("Tipos de Despesa", painelCadastroTipo);
+        abas.addTab("Registrar Despesa", criarPainelCadastroMovimentacao());
+        abas.addTab("Histórico de Despesas", criarPainelListagem());
+        abas.addTab("Tipos de Despesa", criarPainelCadastroTipoDespesa());
 
         atualizarDados();
 
         return root;
     }
-
-
 
     private JPanel criarPainelCadastroMovimentacao() {
         JPanel painel = new JPanel(new GridBagLayout());
@@ -114,33 +156,29 @@ public class DespesasView extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-
-        comboBoxVeiculos = new JComboBox<>();
+        comboBoxVeiculos = new JComboBox<Veiculo>();
         comboBoxVeiculos.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-
                 if (value instanceof Veiculo) {
                     Veiculo veiculo = (Veiculo) value;
-
                     setText(veiculo.getPlaca() + " (" + veiculo.getModelo() + ")");
                 }
                 return this;
             }
         });
-        comboBoxTiposDespesa = new JComboBox<>();
+
+        comboBoxTiposDespesa = new JComboBox<TipoDespesa>();
         campoValor = new JTextField(10);
         campoData = new JTextField(10);
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         campoDescricao = new JTextField(25);
         JButton botaoSalvar = new JButton("Salvar Despesa");
 
+        aplicarFiltroValor(campoValor);
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridx = 0; gbc.gridy = 0;
         painel.add(new JLabel("Veículo:"), gbc);
         gbc.gridy++;
         painel.add(new JLabel("Tipo de Despesa:"), gbc);
@@ -151,9 +189,7 @@ public class DespesasView extends JFrame {
         gbc.gridy++;
         painel.add(new JLabel("Descrição:"), gbc);
 
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbc.gridx = 1; gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         painel.add(comboBoxVeiculos, gbc);
         gbc.gridy++;
@@ -165,20 +201,21 @@ public class DespesasView extends JFrame {
         gbc.gridy++;
         painel.add(campoDescricao, gbc);
 
-
-        gbc.gridx = 0;
-        gbc.gridy++;
+        gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvar, gbc);
 
-
-        botaoSalvar.addActionListener(e -> registrarNovaMovimentacao());
+        botaoSalvar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                registrarNovaMovimentacao();
+            }
+        });
 
         return painel;
     }
-
 
     private JPanel criarPainelListagem() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
@@ -202,82 +239,75 @@ public class DespesasView extends JFrame {
             tabela.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton botaoEditar = new JButton("Editar Despesa Selecionada");
         JButton botaoExcluir = new JButton("Excluir Despesa Selecionada");
-
         painelBotoes.add(botaoEditar);
         painelBotoes.add(botaoExcluir);
         painel.add(painelBotoes, BorderLayout.SOUTH);
 
-        botaoEditar.addActionListener(e -> {
-            int selectedRow = tabela.getSelectedRow();
-            if (selectedRow >= 0) {
-                Long idMovimentacao = (Long) tableModelMovimentacoes.getValueAt(selectedRow, 0);
-
-                Movimentacao movimentacaoParaEditar = movimentacaoController.buscarMovimentacaoPorId(idMovimentacao);
-
-                if (movimentacaoParaEditar != null) {
-
-                    JDialog janelaEdicao = new JDialog(this, "Editar Despesa", true);
+        botaoEditar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = tabela.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Por favor, selecione uma despesa para editar.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                try {
+                    Long idMovimentacao = Long.parseLong(tableModelMovimentacoes.getValueAt(selectedRow, 0).toString());
+                    Movimentacao movimentacaoParaEditar = movimentacaoController.buscarPorId(idMovimentacao);
+                    JDialog janelaEdicao = new JDialog(DespesasView.this, "Editar Despesa", true);
                     janelaEdicao.setContentPane(criarPainelEdicao(movimentacaoParaEditar, janelaEdicao));
                     janelaEdicao.pack();
-                    janelaEdicao.setLocationRelativeTo(this);
+                    janelaEdicao.setLocationRelativeTo(DespesasView.this);
                     janelaEdicao.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Não foi possível encontrar os dados da despesa para edição.", "Erro", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "Por favor, selecione uma despesa na tabela para editar.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
             }
         });
 
-
-        botaoExcluir.addActionListener(e -> {
-            int selectedRow = tabela.getSelectedRow();
-            if (selectedRow >= 0) {
-                Long id = (Long) tableModelMovimentacoes.getValueAt(selectedRow, 0);
-                int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir a despesa ID " + id + "?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
-                if (confirm == JOptionPane.YES_OPTION) {
-                    movimentacaoController.excluirMovimentacao(id);
-                    atualizarDados();
+        botaoExcluir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = tabela.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Por favor, selecione uma despesa para excluir.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
+                    return;
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "Por favor, selecione uma despesa na tabela para excluir.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
+                Long id = Long.parseLong(tableModelMovimentacoes.getValueAt(selectedRow, 0).toString());
+                int confirm = JOptionPane.showConfirmDialog(DespesasView.this, "Tem certeza que deseja excluir a despesa ID " + id + "?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    try {
+                        movimentacaoController.excluir(id);
+                        atualizarDados();
+                        JOptionPane.showMessageDialog(DespesasView.this, "Despesa excluída com sucesso!");
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(DespesasView.this, "Erro ao excluir: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 
         return painel;
     }
 
-
-
     private JPanel criarPainelCadastroTipoDespesa() {
         JPanel painelPrincipal = new JPanel(new BorderLayout(10, 10));
         painelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        DefaultListModel<TipoDespesa> listModel = new DefaultListModel<>();
-        JList<TipoDespesa> listaTiposDespesa = new JList<>(listModel);
+        DefaultListModel<TipoDespesa> listModel = new DefaultListModel<TipoDespesa>();
+        JList<TipoDespesa> listaTiposDespesa = new JList<TipoDespesa>(listModel);
         listaTiposDespesa.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         painelPrincipal.add(new JScrollPane(listaTiposDespesa), BorderLayout.CENTER);
 
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new BoxLayout(painelBotoes, BoxLayout.Y_AXIS));
         JButton botaoEditar = new JButton("Editar");
-        JButton botaoExcluir = new JButton("Excluir");
-
-
         botaoEditar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        botaoExcluir.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         painelBotoes.add(botaoEditar);
-        painelBotoes.add(Box.createRigidArea(new Dimension(0, 5)));
-        painelBotoes.add(botaoExcluir);
-
         painelPrincipal.add(painelBotoes, BorderLayout.EAST);
-
 
         JPanel painelAdicionar = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JTextField campoNovoTipo = new JTextField(20);
@@ -287,141 +317,116 @@ public class DespesasView extends JFrame {
         painelAdicionar.add(new JLabel("Novo Tipo:"));
         painelAdicionar.add(campoNovoTipo);
         painelAdicionar.add(botaoSalvarNovo);
-
         painelPrincipal.add(painelAdicionar, BorderLayout.SOUTH);
 
-        Runnable atualizarLista = () -> {
-            listModel.clear();
-            tipoDespesaController.listarTodosTiposDespesa().forEach(listModel::addElement);
-        };
+        atualizarListaTipos(listModel);
 
-
-        atualizarLista.run();
-
-
-
-
-        botaoSalvarNovo.addActionListener(e -> {
-            String descricao = campoNovoTipo.getText();
-            if (descricao != null && !descricao.trim().isEmpty()) {
-                tipoDespesaController.criarTipoDespesa(descricao);
-                campoNovoTipo.setText("");
-                atualizarLista.run();
-                atualizarDados();
-            } else {
-                JOptionPane.showMessageDialog(this, "A descrição não pode ser vazia.", "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-
-        botaoEditar.addActionListener(e -> {
-            TipoDespesa tipoSelecionado = listaTiposDespesa.getSelectedValue();
-            if (tipoSelecionado == null) {
-                JOptionPane.showMessageDialog(this, "Selecione um tipo de despesa para editar.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            JDialog janelaEdicao = new JDialog(this, "Editar Tipo de Despesa", true);
-
-            janelaEdicao.setContentPane(criarPainelEdicaoTipoDespesa(tipoSelecionado, janelaEdicao, atualizarLista));
-
-            janelaEdicao.pack();
-            janelaEdicao.setLocationRelativeTo(this);
-            janelaEdicao.setVisible(true);
-        });
-
-
-        botaoExcluir.addActionListener(e -> {
-            TipoDespesa tipoSelecionado = listaTiposDespesa.getSelectedValue();
-            if (tipoSelecionado == null) {
-                JOptionPane.showMessageDialog(this, "Selecione um tipo de despesa para excluir.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir o tipo '" + tipoSelecionado.getDescricao() + "'?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
-
-            if (confirmacao == JOptionPane.YES_OPTION) {
-
-                boolean sucesso = tipoDespesaController.excluirTipoDespesa(tipoSelecionado.getIdTipoDespesa());
-
-
-                if (sucesso) {
-                    JOptionPane.showMessageDialog(this, "Tipo de despesa excluído com sucesso!");
-                    atualizarLista.run();
-                    atualizarDados();
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Não foi possível excluir. Este tipo de despesa já está sendo usado em um ou mais registros.",
-                            "Operação Bloqueada",
-                            JOptionPane.ERROR_MESSAGE);
+        botaoSalvarNovo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String descricao = campoNovoTipo.getText();
+                if (descricao == null || descricao.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "A descrição não pode ser vazia.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+                try {
+                    TipoDespesa novo = new TipoDespesa(descricao.trim(), StatusTipoDespesa.ATIVO);
+                    tipoDespesaController.salvar(novo);
+                    campoNovoTipo.setText("");
+                    atualizarListaTipos(listModel);
+                    atualizarDados();
+                } catch (ValidacaoException ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        botaoEditar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TipoDespesa tipoSelecionado = listaTiposDespesa.getSelectedValue();
+                if (tipoSelecionado == null) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Selecione um tipo de despesa para editar.", "Nenhuma seleção", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                JDialog janelaEdicao = new JDialog(DespesasView.this, "Editar Tipo de Despesa", true);
+                janelaEdicao.setContentPane(criarPainelEdicaoTipoDespesa(tipoSelecionado, janelaEdicao, listModel));
+                janelaEdicao.pack();
+                janelaEdicao.setLocationRelativeTo(DespesasView.this);
+                janelaEdicao.setVisible(true);
             }
         });
 
         return painelPrincipal;
     }
 
+    private void atualizarListaTipos(DefaultListModel<TipoDespesa> listModel) {
+        listModel.clear();
+        List<TipoDespesa> tipos = tipoDespesaController.listarTodos();
+        for (TipoDespesa td : tipos) {
+            listModel.addElement(td);
+        }
+    }
 
     private void registrarNovaMovimentacao() {
         try {
             Veiculo veiculo = (Veiculo) comboBoxVeiculos.getSelectedItem();
             TipoDespesa tipo = (TipoDespesa) comboBoxTiposDespesa.getSelectedItem();
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate data = LocalDate.parse(campoData.getText(), formatter);
-
-            BigDecimal valor = new BigDecimal(campoValor.getText().replace(",", "."));
+            BigDecimal valor = extrairValor(campoValor.getText());
             String descricao = campoDescricao.getText();
 
-
-
-            boolean sucesso = movimentacaoController.registrarMovimentacao(veiculo, tipo, descricao, data, valor);
-
-            if (sucesso) {
-                JOptionPane.showMessageDialog(this, "Despesa registrada com sucesso!");
-                limparCamposCadastro();
-                atualizarDados();
-            } else {
-                JOptionPane.showMessageDialog(this, "Falha ao registrar despesa. Verifique os dados e tente novamente.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-            }
+            Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor);
+            movimentacaoController.salvar(novaMovimentacao);
+            JOptionPane.showMessageDialog(this, "Despesa registrada com sucesso!");
+            limparCamposCadastro();
+            atualizarDados();
+        } catch (ValidacaoException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro ao registrar despesa: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-
     private void limparCamposCadastro() {
         campoValor.setText("");
         campoDescricao.setText("");
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        comboBoxVeiculos.setSelectedIndex(0);
-        comboBoxTiposDespesa.setSelectedIndex(0);
+        if (comboBoxVeiculos.getItemCount() > 0) comboBoxVeiculos.setSelectedIndex(0);
+        if (comboBoxTiposDespesa.getItemCount() > 0) comboBoxTiposDespesa.setSelectedIndex(0);
     }
 
     private void atualizarDados() {
-
         comboBoxVeiculos.removeAllItems();
-        new VeiculoDAO().listarTodos().forEach(comboBoxVeiculos::addItem);
-
+        List<Veiculo> veiculos = veiculoController.listarAtivos();
+        for (Veiculo v : veiculos) {
+            comboBoxVeiculos.addItem(v);
+        }
 
         comboBoxTiposDespesa.removeAllItems();
-        tipoDespesaController.listarTodosTiposDespesa().forEach(comboBoxTiposDespesa::addItem);
+        List<TipoDespesa> tipos = tipoDespesaController.listarAtivos();
+        for (TipoDespesa td : tipos) {
+            comboBoxTiposDespesa.addItem(td);
+        }
 
-
-        tableModelMovimentacoes.setRowCount(0);
-        List<Movimentacao> movimentacoes = movimentacaoController.listarTodasMovimentacoes();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-
-        for (Movimentacao mov : movimentacoes) {
-            tableModelMovimentacoes.addRow(new Object[]{
-                    mov.getIdMovimentacao(),
-                    mov.getData().format(formatter),
-                    mov.getVeiculo().getPlaca(),
-                    mov.getTipoDespesa().getDescricao(),
-                    mov.getDescricao(),
-                    currencyFormatter.format(mov.getValor())
-            });
+        if (tableModelMovimentacoes != null) {
+            tableModelMovimentacoes.setRowCount(0);
+            List<Movimentacao> movimentacoes = movimentacaoController.listarTodos();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+            for (Movimentacao mov : movimentacoes) {
+                tableModelMovimentacoes.addRow(new Object[]{
+                        mov.getId(),
+                        mov.getData().format(formatter),
+                        mov.getVeiculo().getPlaca(),
+                        mov.getTipoDespesa().getDescricao(),
+                        mov.getDescricao(),
+                        currencyFormatter.format(mov.getValor())
+                });
+            }
         }
     }
 
@@ -431,37 +436,36 @@ public class DespesasView extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-
-        JComboBox<Veiculo> editComboBoxVeiculos = new JComboBox<>();
-        JComboBox<TipoDespesa> editComboBoxTiposDespesa = new JComboBox<>();
+        JComboBox<Veiculo> editComboBoxVeiculos = new JComboBox<Veiculo>();
+        JComboBox<TipoDespesa> editComboBoxTiposDespesa = new JComboBox<TipoDespesa>();
         JTextField editCampoValor = new JTextField(10);
         JTextField editCampoData = new JTextField(10);
         JTextField editCampoDescricao = new JTextField(25);
         JButton botaoSalvarAlteracoes = new JButton("Salvar Alterações");
 
+        editComboBoxVeiculos.setRenderer(comboBoxVeiculos.getRenderer());
 
-        List<TipoDespesa> todosTipos = tipoDespesaController.listarTodosTiposDespesa();
-        for (TipoDespesa td : todosTipos) {
-            editComboBoxTiposDespesa.addItem(td);
-            if (td.getIdTipoDespesa().equals(movimentacaoParaEditar.getTipoDespesa().getIdTipoDespesa())) {
-                editComboBoxTiposDespesa.setSelectedItem(td);
-            }
-        }
+        aplicarFiltroValor(editCampoValor);
 
-        List<Veiculo> todosVeiculos = new VeiculoDAO().listarTodos();
+        List<Veiculo> todosVeiculos = veiculoController.listarTodos();
         for (Veiculo v : todosVeiculos) {
             editComboBoxVeiculos.addItem(v);
-            if (v.getIdVeiculo().equals(movimentacaoParaEditar.getVeiculo().getIdVeiculo())) {
+            if (v.getId().equals(movimentacaoParaEditar.getVeiculo().getId())) {
                 editComboBoxVeiculos.setSelectedItem(v);
             }
         }
 
-        editComboBoxVeiculos.setRenderer(comboBoxVeiculos.getRenderer());
+        List<TipoDespesa> todosTipos = tipoDespesaController.listarTodos();
+        for (TipoDespesa td : todosTipos) {
+            editComboBoxTiposDespesa.addItem(td);
+            if (td.getId().equals(movimentacaoParaEditar.getTipoDespesa().getId())) {
+                editComboBoxTiposDespesa.setSelectedItem(td);
+            }
+        }
 
         editCampoData.setText(movimentacaoParaEditar.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         editCampoValor.setText(movimentacaoParaEditar.getValor().toPlainString());
         editCampoDescricao.setText(movimentacaoParaEditar.getDescricao());
-
 
         gbc.gridx = 0; gbc.gridy = 0; painel.add(new JLabel("Veículo:"), gbc);
         gbc.gridy++; painel.add(new JLabel("Tipo de Despesa:"), gbc);
@@ -476,99 +480,114 @@ public class DespesasView extends JFrame {
         gbc.gridy++; painel.add(editCampoValor, gbc);
         gbc.gridy++; painel.add(editCampoDescricao, gbc);
 
-        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER; gbc.fill = GridBagConstraints.NONE;
+        gbc.gridx = 0; gbc.gridy++;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvarAlteracoes, gbc);
 
+        botaoSalvarAlteracoes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Veiculo veiculoSelecionado = (Veiculo) editComboBoxVeiculos.getSelectedItem();
+                    TipoDespesa tipoSelecionado = (TipoDespesa) editComboBoxTiposDespesa.getSelectedItem();
+                    LocalDate data = LocalDate.parse(editCampoData.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                    BigDecimal valor = extrairValor(editCampoValor.getText());
+                    String descricao = editCampoDescricao.getText();
 
-        botaoSalvarAlteracoes.addActionListener(e -> {
-            try {
+                    Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor);
+                    movimentacaoAtualizada.setId(movimentacaoParaEditar.getId());
 
-                Veiculo veiculoSelecionado = (Veiculo) editComboBoxVeiculos.getSelectedItem();
-                TipoDespesa tipoSelecionado = (TipoDespesa) editComboBoxTiposDespesa.getSelectedItem();
-                LocalDate data = LocalDate.parse(editCampoData.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                BigDecimal valor = new BigDecimal(editCampoValor.getText().replace(",", "."));
-                String descricao = editCampoDescricao.getText();
-
-
-                Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor);
-
-
-                movimentacaoAtualizada.setIdMovimentacao(movimentacaoParaEditar.getIdMovimentacao());
-
-
-                boolean sucesso = movimentacaoController.atualizarMovimentacao(movimentacaoAtualizada);
-
-                if (sucesso) {
+                    movimentacaoController.atualizar(movimentacaoAtualizada);
                     JOptionPane.showMessageDialog(janelaPai, "Despesa atualizada com sucesso!");
                     janelaPai.dispose();
                     atualizarDados();
-                } else {
-                    JOptionPane.showMessageDialog(janelaPai, "Falha ao atualizar. Verifique os dados inseridos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                } catch (ValidacaoException ex) {
+                    JOptionPane.showMessageDialog(janelaPai, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(janelaPai, "Erro ao atualizar despesa: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                 }
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(janelaPai, "Erro ao atualizar despesa: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         return painel;
     }
 
-    private JPanel criarPainelEdicaoTipoDespesa(TipoDespesa tipoParaEditar, JDialog janelaPai, Runnable acaoAposSalvar) {
+    private JPanel criarPainelEdicaoTipoDespesa(TipoDespesa tipoParaEditar, JDialog janelaPai, DefaultListModel<TipoDespesa> listModel) {
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-
         JTextField campoDescricao = new JTextField(20);
+        JRadioButton botaoAtivo = new JRadioButton("Status - ATIVO");
+        JRadioButton botaoInativo = new JRadioButton("Status - INATIVO");
         JButton botaoSalvarAlteracoes = new JButton("Salvar Alterações");
 
         campoDescricao.setText(tipoParaEditar.getDescricao());
 
+        ButtonGroup grupoStatus = new ButtonGroup();
+        grupoStatus.add(botaoAtivo);
+        grupoStatus.add(botaoInativo);
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        painel.add(new JLabel("Nova Descrição:"), gbc);
+        if (tipoParaEditar.getStatusTipoDespesa() == StatusTipoDespesa.ATIVO) {
+            botaoAtivo.setSelected(true);
+        } else {
+            botaoInativo.setSelected(true);
+        }
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        painel.add(new JLabel("Descrição:"), gbc);
 
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         painel.add(campoDescricao, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        painel.add(new JLabel("Status:"), gbc);
+
+        JPanel painelStatus = new JPanel();
+        painelStatus.add(botaoAtivo);
+        painelStatus.add(new JLabel("|"));
+        painelStatus.add(botaoInativo);
+
+        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        painel.add(painelStatus, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoSalvarAlteracoes, gbc);
 
-
-        botaoSalvarAlteracoes.addActionListener(e -> {
-            String novaDescricao = campoDescricao.getText();
-
-            if (novaDescricao == null || novaDescricao.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(janelaPai, "A descrição não pode ser vazia.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-                return;
+        botaoSalvarAlteracoes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String novaDescricao = campoDescricao.getText();
+                if (novaDescricao == null || novaDescricao.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(janelaPai, "A descrição não pode ser vazia.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                try {
+                    StatusTipoDespesa status = botaoAtivo.isSelected() ? StatusTipoDespesa.ATIVO : StatusTipoDespesa.INATIVO;
+                    tipoParaEditar.setDescricao(novaDescricao.trim());
+                    tipoParaEditar.setStatusTipoDespesa(status);
+                    tipoDespesaController.atualizar(tipoParaEditar);
+                    JOptionPane.showMessageDialog(janelaPai, "Tipo de despesa atualizado com sucesso!");
+                    janelaPai.dispose();
+                    atualizarListaTipos(listModel);
+                    atualizarDados();
+                } catch (ValidacaoException ex) {
+                    JOptionPane.showMessageDialog(janelaPai, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(janelaPai, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             }
-
-            TipoDespesa tipoAtualizado = new TipoDespesa(novaDescricao.trim());
-
-
-            tipoAtualizado.setIdTipoDespesa(tipoParaEditar.getIdTipoDespesa());
-
-            tipoDespesaController.atualizarTipoDespesa(tipoAtualizado);
-
-
-            JOptionPane.showMessageDialog(janelaPai, "Tipo de despesa atualizado com sucesso!");
-            janelaPai.dispose();
-
-
-            acaoAposSalvar.run();
-            atualizarDados();
         });
 
         return painel;
     }
-
-
 }

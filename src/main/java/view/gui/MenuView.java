@@ -96,7 +96,7 @@ public class MenuView extends JFrame {
 
             veiculosView.refreshData();
             despesasView.refreshData();
-            relatoriosView.refreshData();
+           relatoriosView.refreshData();
             selectVeiculos.run();
         });
         botaoDespesas.addActionListener((ActionEvent e) -> {
