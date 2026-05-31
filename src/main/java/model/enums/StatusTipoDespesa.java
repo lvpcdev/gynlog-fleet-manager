@@ -1,5 +1,7 @@
 package model.enums;
 
-public enum StatusVeiculo {
+public enum StatusTipoDespesa {
     ATIVO, INATIVO
 }
+
+
