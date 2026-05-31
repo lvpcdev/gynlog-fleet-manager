@@ -198,6 +198,7 @@ public class VeiculosView extends JFrame {
                     );
                     veiculoController.salvar(novoVeiculo);
                     JOptionPane.showMessageDialog(painel, "Veículo cadastrado com sucesso!");
+                    limparCampos(campoPlaca, campoMarca, campoModelo, campoAnoFabricacao, botaoAtivo);
                     atualizarTabela(veiculoController.listarTodos());
                 } catch (ValidacaoException ex) {
                     JOptionPane.showMessageDialog(painel, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
@@ -401,6 +402,16 @@ public class VeiculosView extends JFrame {
         });
 
         return painel;
+    }
+
+    private void limparCampos(JTextField campoPlaca, JTextField campoMarca,
+                              JTextField campoModelo, JTextField campoAnoFabricacao,
+                              JRadioButton botaoAtivo) {
+        campoPlaca.setText("");
+        campoMarca.setText("");
+        campoModelo.setText("");
+        campoAnoFabricacao.setText("");
+        botaoAtivo.setSelected(true);
     }
 
     public void refreshData() {
