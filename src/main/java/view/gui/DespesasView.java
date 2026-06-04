@@ -7,7 +7,9 @@ import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
+import model.enums.StatusMovimentacao;
 import model.enums.StatusTipoDespesa;
+import util.Fila;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
@@ -39,6 +41,8 @@ public class DespesasView extends JFrame {
     private JTextField campoData;
     private JTextField campoDescricao;
     private DefaultTableModel tableModelMovimentacoes;
+    private DefaultTableModel tableModelPendentes;
+    private Fila<Movimentacao> filaPendentes;
 
     public DespesasView() {
         this.movimentacaoController = new MovimentacaoController();
@@ -143,6 +147,7 @@ public class DespesasView extends JFrame {
 
         abas.addTab("Registrar Despesa", criarPainelCadastroMovimentacao());
         abas.addTab("Histórico de Despesas", criarPainelListagem());
+        abas.addTab("Fila de Aprovação", criarPainelFilaAprovacao());
         abas.addTab("Tipos de Despesa", criarPainelCadastroTipoDespesa());
 
         atualizarDados();
@@ -293,6 +298,121 @@ public class DespesasView extends JFrame {
         return painel;
     }
 
+    private JPanel criarPainelFilaAprovacao() {
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        String[] colunas = {"ID", "Data", "Veículo", "Tipo", "Descrição", "Valor", "Status"};
+        tableModelPendentes = new DefaultTableModel(colunas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable tabelaPendentes = new JTable(tableModelPendentes);
+        tabelaPendentes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        painel.add(new JScrollPane(tabelaPendentes), BorderLayout.CENTER);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < tabelaPendentes.getColumnCount(); i++) {
+            tabelaPendentes.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        JLabel labelInfo = new JLabel("Movimentações pendentes são aprovadas ou reprovadas respeitando a ordem de cadastro.", JLabel.CENTER);
+        painel.add(labelInfo, BorderLayout.NORTH);
+
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton botaoAprovarProxima = new JButton("Aprovar Próxima da Fila");
+        JButton botaoRejeitarProxima = new JButton("Rejeitar Próxima da Fila");
+        JButton botaoRecarregar = new JButton("Recarregar Fila");
+
+        painelBotoes.add(botaoAprovarProxima);
+        painelBotoes.add(botaoRejeitarProxima);
+        painelBotoes.add(botaoRecarregar);
+        painel.add(painelBotoes, BorderLayout.SOUTH);
+
+        botaoRecarregar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                atualizarTabelaPendentes();
+            }
+        });
+
+        botaoAprovarProxima.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (filaPendentes == null || filaPendentes.estaVazia()) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Não há movimentações pendentes na fila!", "Fila Vazia", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                try {
+                    Movimentacao aprovada = movimentacaoController.aprovarProxima(filaPendentes);
+                    JOptionPane.showMessageDialog(DespesasView.this,
+                            "Movimentação aprovada!\n" +
+                                    "ID: " + aprovada.getId() + "\n" +
+                                    "Veículo: " + aprovada.getVeiculo().getPlaca() + "\n" +
+                                    "Valor: " + aprovada.getValor(),
+                            "Aprovada com sucesso!", JOptionPane.INFORMATION_MESSAGE);
+                    atualizarTabelaPendentes();
+                    atualizarDados();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Erro ao aprovar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        botaoRejeitarProxima.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (filaPendentes == null || filaPendentes.estaVazia()) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Não há movimentações pendentes na fila!", "Fila Vazia", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                try {
+                    Movimentacao rejeitada = filaPendentes.removerInicio();
+                    movimentacaoController.excluir(rejeitada.getId());
+                    JOptionPane.showMessageDialog(DespesasView.this,
+                            "Movimentação rejeitada e removida!\n" +
+                                    "ID: " + rejeitada.getId() + "\n" +
+                                    "Veículo: " + rejeitada.getVeiculo().getPlaca() + "\n" +
+                                    "Valor: " + rejeitada.getValor(),
+                            "Rejeitada!", JOptionPane.WARNING_MESSAGE);
+                    atualizarTabelaPendentes();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Erro ao rejeitar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        atualizarTabelaPendentes();
+
+        return painel;
+    }
+
+    private void atualizarTabelaPendentes() {
+        filaPendentes = movimentacaoController.listarPendentes();
+        tableModelPendentes.setRowCount(0);
+
+        Fila<Movimentacao> filaTemp = movimentacaoController.listarPendentes();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+
+        while (!filaTemp.estaVazia()) {
+            Movimentacao mov = filaTemp.removerInicio();
+            tableModelPendentes.addRow(new Object[]{
+                    mov.getId(),
+                    mov.getData().format(formatter),
+                    mov.getVeiculo().getPlaca(),
+                    mov.getTipoDespesa().getDescricao(),
+                    mov.getDescricao(),
+                    currencyFormatter.format(mov.getValor()),
+                    mov.getStatusMovimentacao()
+            });
+        }
+    }
+
     private JPanel criarPainelCadastroTipoDespesa() {
         JPanel painelPrincipal = new JPanel(new BorderLayout(10, 10));
         painelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -381,9 +501,10 @@ public class DespesasView extends JFrame {
 
             Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor);
             movimentacaoController.salvar(novaMovimentacao);
-            JOptionPane.showMessageDialog(this, "Despesa registrada com sucesso!");
+            JOptionPane.showMessageDialog(this, "Despesa registrada com sucesso! Status: PENDENTE");
             limparCamposCadastro();
             atualizarDados();
+            atualizarTabelaPendentes();
         } catch (ValidacaoException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
@@ -414,7 +535,7 @@ public class DespesasView extends JFrame {
 
         if (tableModelMovimentacoes != null) {
             tableModelMovimentacoes.setRowCount(0);
-            List<Movimentacao> movimentacoes = movimentacaoController.listarTodos();
+            List<Movimentacao> movimentacoes = movimentacaoController.listarAprovadas();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
             for (Movimentacao mov : movimentacoes) {
@@ -498,11 +619,13 @@ public class DespesasView extends JFrame {
 
                     Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor);
                     movimentacaoAtualizada.setId(movimentacaoParaEditar.getId());
+                    movimentacaoAtualizada.setStatusMovimentacao(movimentacaoParaEditar.getStatusMovimentacao());
 
                     movimentacaoController.atualizar(movimentacaoAtualizada);
                     JOptionPane.showMessageDialog(janelaPai, "Despesa atualizada com sucesso!");
                     janelaPai.dispose();
                     atualizarDados();
+                    atualizarTabelaPendentes();
                 } catch (ValidacaoException ex) {
                     JOptionPane.showMessageDialog(janelaPai, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
                 } catch (Exception ex) {

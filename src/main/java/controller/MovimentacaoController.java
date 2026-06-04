@@ -3,6 +3,7 @@ package controller;
 
 import model.entities.Movimentacao;
 import service.MovimentacaoService;
+import util.Fila;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -27,6 +28,14 @@ public class MovimentacaoController {
 
     public List<Movimentacao> listarTodos() {
         return movimentacaoService.listarTodos();
+    }
+
+    public List<Movimentacao> listarAprovadas() {
+        return movimentacaoService.listarAprovadas();
+    }
+
+    public Fila<Movimentacao> listarPendentes() {
+        return movimentacaoService.listarPendentes();
     }
 
     public Movimentacao buscarPorId(Long id) {
@@ -71,6 +80,10 @@ public class MovimentacaoController {
 
     public BigDecimal totalMultasPorVeiculo(Long id, Year ano) {
         return movimentacaoService.totalMultasPorVeiculo(id, ano);
+    }
+
+    public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
+        return movimentacaoService.aprovarProxima(fila);
     }
 
 
