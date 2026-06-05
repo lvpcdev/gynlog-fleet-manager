@@ -34,6 +34,10 @@ public class VeiculoService {
             throw new ValidacaoException("Modelo obrigatório");
         }
 
+        if (veiculo.getCategoria() == null || veiculo.getCategoria().isEmpty()) {
+            throw new ValidacaoException("Categoria obrigatória");
+        }
+
 
         Year anoAtual = Year.now();
         Year anoVeiculo = veiculo.getAnoDeFabricacao();
@@ -73,6 +77,9 @@ public class VeiculoService {
             throw new ValidacaoException("Modelo obrigatório");
         }
 
+        if (veiculo.getCategoria() == null || veiculo.getCategoria().isEmpty()) {
+            throw new ValidacaoException("Categoria obrigatória");
+        }
 
         Year anoAtual = Year.now();
         Year anoVeiculo = veiculo.getAnoDeFabricacao();

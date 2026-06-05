@@ -11,6 +11,7 @@ import model.enums.StatusMovimentacao;
 import util.Fila;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -255,6 +256,26 @@ public class MovimentacaoService {
         return fila;
     }
 
+    public BigDecimal mediaIpvaPorAno(Year ano) {
+        List<Movimentacao> movimentacoes = listarIpvaPorAno(ano);
+
+        if (movimentacoes.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal soma = BigDecimal.ZERO;
+
+        for (Movimentacao mov : movimentacoes) {
+            soma = soma.add(mov.getValor());
+        }
+
+        BigDecimal quantidade = new BigDecimal(movimentacoes.size());
+
+        return soma.divide(quantidade, 2, RoundingMode.HALF_UP);
+    }
+
+
+    
     public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
         if (fila.estaVazia()) {
             throw new FilaVaziaException("Não  há movimentações pendentes na fila");
@@ -264,5 +285,34 @@ public class MovimentacaoService {
         movimentacaoDAO.atualizar(mov);
         return mov;
     }
+  
+    public String mediaDespesasPorCategoria() {
+        List<TipoDespesa> tipos = tipoDespesaService.listarTodos();
+        List<Movimentacao> todasMovimentacoes = movimentacaoDAO.listarTodos();
+  
+        String resultado = "";
 
+        for (TipoDespesa tipo : tipos) {
+
+            BigDecimal soma = BigDecimal.ZERO;
+            int quantidade = 0;
+
+            for (Movimentacao mov : todasMovimentacoes) {
+
+                if (mov.getTipoDespesa().getId().equals(tipo.getId())) {
+                    soma = soma.add(mov.getValor());
+                    quantidade++;
+                }
+            }
+
+            if (quantidade > 0) {
+                BigDecimal media = soma.divide(new BigDecimal(quantidade), 2, RoundingMode.HALF_UP);
+                resultado = resultado + tipo.getDescricao() + ": R$ " + media + "\n";
+            } else {
+                resultado = resultado + tipo.getDescricao() + ": sem registros\n";
+            }
+        }
+
+        return resultado;
+    }
 }
