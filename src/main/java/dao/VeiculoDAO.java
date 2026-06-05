@@ -21,7 +21,6 @@ public class VeiculoDAO {
                 + veiculo.getPlaca() + " | "
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
-                + veiculo.getCategoria() + " | "
                 + veiculo.getAnoDeFabricacao() + " | "
                 + veiculo.getStatusVeiculo();
 
@@ -56,11 +55,10 @@ public class VeiculoDAO {
                         String placa = partes[1].trim();
                         String marca = partes[2].trim();
                         String modelo = partes[3].trim();
-                        String categoria = partes[4].trim();
-                        Year ano = Year.parse(partes[5].trim());
-                        StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(partes[6].trim());
+                        Year ano = Year.parse(partes[4].trim());
+                        StatusVeiculo statusVeiculo = StatusVeiculo.valueOf(partes[5].trim());
 
-                        Veiculo veiculo = new Veiculo(placa, marca, modelo,ano, statusVeiculo, categoria);
+                        Veiculo veiculo = new Veiculo(placa, marca, modelo, statusVeiculo, ano);
                         veiculo.setId(id);
                         veiculos.add(veiculo);
 
@@ -88,7 +86,6 @@ public class VeiculoDAO {
                 + veiculo.getPlaca() + " | "
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
-                + veiculo.getCategoria() + " | "
                 + veiculo.getAnoDeFabricacao() + " | "
                 + veiculo.getStatusVeiculo();
 
