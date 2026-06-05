@@ -73,5 +73,11 @@ public class MovimentacaoController {
         return movimentacaoService.totalMultasPorVeiculo(id, ano);
     }
 
+    public BigDecimal mediaIpvaPorAno(Year ano){
+        return movimentacaoService.mediaIpvaPorAno(ano);
+    }
 
+    public String mediaDespesasPorCategoria() {
+        return movimentacaoService.mediaDespesasPorCategoria();
+    }
 }
