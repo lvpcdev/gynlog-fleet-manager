@@ -236,10 +236,6 @@ public class VeiculosView extends JFrame {
         JButton botaoEditar = new JButton("Editar Veículos");
         JCheckBox checkBoxInativos = new JCheckBox("Apenas Inativos");
         JCheckBox checkBoxAtivos = new JCheckBox("Apenas Ativos");
-        JTextField campoBusca = new JTextField(15);
-        JButton botaoBuscarPlaca = new JButton("Buscar Placa");
-        JButton botaoBuscarModelo = new JButton("Buscar Modelo");
-        JButton botaoLimparBusca = new JButton("Limpar");
 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
@@ -292,62 +288,10 @@ public class VeiculosView extends JFrame {
             }
         });
 
-        botaoBuscarPlaca.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String termo = campoBusca.getText().trim();
-                if (termo.isEmpty()) {
-                    JOptionPane.showMessageDialog(VeiculosView.this, "Digite algo para buscar!");
-                    return;
-                }
-                List<Veiculo> resultado = BuscaSequencial.buscarPorPlaca(
-                        veiculoController.listarTodos(), termo
-                );
-                if (resultado.isEmpty()) {
-                    JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veículo encontrado!");
-                    return;
-                }
-                atualizarTabela(resultado);
-            }
-        });
-
-        botaoBuscarModelo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String termo = campoBusca.getText().trim();
-                if (termo.isEmpty()) {
-                    JOptionPane.showMessageDialog(VeiculosView.this, "Digite algo para buscar!");
-                    return;
-                }
-                List<Veiculo> resultado = BuscaSequencial.buscarPorModelo(
-                        veiculoController.listarTodos(), termo
-                );
-                if (resultado.isEmpty()) {
-                    JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veículo encontrado!");
-                    return;
-                }
-                atualizarTabela(resultado);
-            }
-        });
-
-        botaoLimparBusca.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                campoBusca.setText("");
-                atualizarTabela(veiculoController.listarTodos());
-            }
-        });
-
         painel.add(painelBotoes, BorderLayout.SOUTH);
-        painelBotoes.add(botaoEditar);
-        painelBotoes.add(checkBoxInativos);
-        painelBotoes.add(checkBoxAtivos);
-        painelBotoes.add(new JLabel("Buscar:"));
-        painelBotoes.add(campoBusca);
-        painelBotoes.add(botaoBuscarPlaca);
-        painelBotoes.add(botaoBuscarModelo);
-        painelBotoes.add(botaoLimparBusca);
-
+        painelBotoes.add(botaoEditar, BorderLayout.SOUTH);
+        painelBotoes.add(checkBoxInativos, BorderLayout.SOUTH);
+        painelBotoes.add(checkBoxAtivos, BorderLayout.SOUTH);
         return painel;
     }
 

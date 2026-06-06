@@ -34,8 +34,7 @@ public class MovimentacaoDAO {
                 + idTipoDespesa + " | "
                 + movimentacao.getData().format(formatadorData) + " | "
                 + movimentacao.getValor() + " | "
-                + movimentacao.getDescricao() + " | "
-                + movimentacao.getStatusMovimentacao();
+                + movimentacao.getDescricao();
 
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo, true))) {
@@ -64,7 +63,7 @@ public class MovimentacaoDAO {
                 }
 
                 String[] partes = linha.split(" \\| ");
-                if (partes.length == 7) {
+                if (partes.length == 6) {
                     try {
                         Long idMovimentacao = Long.parseLong(partes[0]);
                         Long idVeiculo = Long.parseLong(partes[1]);
@@ -72,7 +71,6 @@ public class MovimentacaoDAO {
                         LocalDate data = LocalDate.parse(partes[3], formatadorData);
                         BigDecimal valor = new BigDecimal(partes[4]);
                         String descricao = partes[5];
-                        StatusMovimentacao statusMovimentacao = StatusMovimentacao.valueOf(partes[6]);
 
 
                         Veiculo veiculo = new Veiculo();
@@ -83,7 +81,6 @@ public class MovimentacaoDAO {
 
 
                         Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor);
-                        movimentacao.setStatusMovimentacao(statusMovimentacao);
                         movimentacao.setId(idMovimentacao);
                         movimentacoes.add(movimentacao);
                     } catch (NumberFormatException e) {
@@ -112,8 +109,7 @@ public class MovimentacaoDAO {
                 movimentacao.getTipoDespesa().getId() + " | " +
                 movimentacao.getData().format(formatadorData) + " | " +
                 movimentacao.getValor() + " | " +
-                movimentacao.getDescricao() + " | " +
-                movimentacao.getStatusMovimentacao();
+                movimentacao.getDescricao();
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {

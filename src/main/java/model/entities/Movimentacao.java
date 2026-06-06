@@ -17,7 +17,6 @@ public class Movimentacao {
     private String descricao;
     private LocalDate data;
     private BigDecimal valor;
-    private StatusMovimentacao statusMovimentacao;
 
     private Veiculo veiculo;
     private TipoDespesa tipoDespesa;
@@ -31,7 +30,6 @@ public class Movimentacao {
         this.descricao = descricao;
         this.data = data;
         this.valor = valor;
-        this.statusMovimentacao = StatusMovimentacao.PENDENTE;
     }
 
     public Long getId() {
@@ -80,14 +78,6 @@ public class Movimentacao {
 
     public void setValor(BigDecimal valor) {
         this.valor = valor;
-    }
-
-    public StatusMovimentacao getStatusMovimentacao() {
-        return statusMovimentacao;
-    }
-
-    public void setStatusMovimentacao(StatusMovimentacao statusMovimentacao) {
-        this.statusMovimentacao = statusMovimentacao;
     }
 
     @Override

@@ -11,6 +11,7 @@ import model.enumss.StatusMovimentacao;
 import utils.Fila;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -97,18 +98,6 @@ public class MovimentacaoService {
         return movimentacoes;
     }
 
-    public List<Movimentacao> listarAprovadas() {
-        List<Movimentacao> movimentacoes = listarTodos();
-        List<Movimentacao> resultado = new ArrayList<>();
-
-        for (Movimentacao mov : movimentacoes) {
-            if (mov.getStatusMovimentacao().equals(StatusMovimentacao.APROVADA)) {
-                resultado.add(mov);
-            }
-        }
-        return resultado;
-    }
-
     public Movimentacao buscarPorId(Long id) {
         List<Movimentacao> movimentacoes = listarTodos();
 
@@ -122,7 +111,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarPorVeiculo(Long id){
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -146,7 +135,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarPorMes(YearMonth mesAno) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -170,7 +159,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarCombustivelPorMes(YearMonth mesAno) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -194,7 +183,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarIpvaPorAno(Year ano) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -218,7 +207,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarMultasPorVeiculo(Long id, Year ano) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -243,17 +232,47 @@ public class MovimentacaoService {
         return total;
     }
 
-    public Fila<Movimentacao> listarPendentes() {
-        List<Movimentacao> movimentacoes = listarTodos();
-        Fila<Movimentacao> fila = new Fila<>();
+
+
+    public BigDecimal mediaIpvaPorAno(Year ano) {
+        List<Movimentacao> movimentacoes = listarIpvaPorAno(ano);
+
+        if (movimentacoes.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal soma = BigDecimal.ZERO;
 
         for (Movimentacao mov : movimentacoes) {
-            if (mov.getStatusMovimentacao().equals(StatusMovimentacao.PENDENTE)) {
-                fila.inserirFim(mov);
+            soma = soma.add(mov.getValor());
+        }
+
+        BigDecimal quantidade = new BigDecimal(movimentacoes.size());
+
+        return soma.divide(quantidade, 2, RoundingMode.HALF_UP);
+    }
+
+
+    public BigDecimal mediaDespesasPorCategoria(String categoria){
+
+        List<Movimentacao> movimentacoes = listarTodos();
+
+        BigDecimal soma = BigDecimal .ZERO;
+        int quantidade = 0;
+        for(Movimentacao mov : movimentacoes){
+            if(mov.getVeiculo().getCategoria() .equalsIgnoreCase(categoria)){
+                soma = soma.add(mov.getValor());
+                quantidade++;
             }
         }
-        return fila;
+
+        if (quantidade == 0){
+            return BigDecimal .ZERO;
+        }
+
+        return soma.divide(new BigDecimal(quantidade), 2, RoundingMode.HALF_UP);
     }
+
 
     public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
         if (fila.estaVazia()) {

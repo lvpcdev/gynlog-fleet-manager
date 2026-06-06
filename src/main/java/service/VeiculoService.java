@@ -6,6 +6,7 @@ import exceptionss.ValidacaoException;
 import model.entities.Veiculo;
 import model.enumss.StatusVeiculo;
 
+import java.math.BigDecimal;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,10 @@ public class VeiculoService {
 
         if (veiculo.getModelo() == null || veiculo.getModelo().isEmpty()) {
             throw new ValidacaoException("Modelo obrigatório");
+        }
+
+        if (veiculo.getCategoria() == null || veiculo.getCategoria().isEmpty()) {
+            throw new ValidacaoException("Categoria obrigatória");
         }
 
 
@@ -72,6 +77,11 @@ public class VeiculoService {
         if (veiculo.getModelo() == null || veiculo.getModelo().isEmpty()) {
             throw new ValidacaoException("Modelo obrigatório");
         }
+
+        if (veiculo.getCategoria() == null || veiculo.getCategoria().isEmpty()) {
+            throw new ValidacaoException("Categoria obrigatória");
+        }
+
 
 
         Year anoAtual = Year.now();
@@ -160,4 +170,22 @@ public class VeiculoService {
         String formatoMercosul = "[A-Z]{3}[0-9][A-Z][0-9]{2}";
         return placa.matches(formatoAntigo) || placa.matches(formatoMercosul);
     }
+
+    public List<String> listarCategorias() {
+
+        List<Veiculo> veiculos = listarTodos();
+        List<String> categorias = new ArrayList<>();
+
+        for (Veiculo veiculo : veiculos) {
+
+            if (veiculo.getCategoria() != null && !categorias.contains(veiculo.getCategoria())) {
+                categorias.add(veiculo.getCategoria());
+            }
+        }
+
+        return categorias;
+
+    }
+
+
 }
