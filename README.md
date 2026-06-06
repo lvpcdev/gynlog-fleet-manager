@@ -99,7 +99,7 @@ Este projeto está licenciado sob a **Licença MIT**. Consulte o arquivo [LICENS
 O projeto acadêmico foi desenvolvido pelos seguintes colaboradores:
 
 *   **Lucas Vicente**
-*   **Rafael Camargo**
+*   **Samuel Tavares**
 *   **Arthur Caetano**
 *   **Ruan Carlos**
 *   **Davi Fraga**

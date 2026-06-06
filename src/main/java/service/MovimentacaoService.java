@@ -2,13 +2,10 @@ package service;
 
 import dao.MovimentacaoDAO;
 import exceptions.EntidadeNaoEncontradaException;
-import exceptions.FilaVaziaException;
 import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import model.enums.StatusMovimentacao;
-import util.Fila;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -98,18 +95,6 @@ public class MovimentacaoService {
         return movimentacoes;
     }
 
-    public List<Movimentacao> listarAprovadas() {
-        List<Movimentacao> movimentacoes = listarTodos();
-        List<Movimentacao> resultado = new ArrayList<>();
-
-        for (Movimentacao mov : movimentacoes) {
-            if (mov.getStatusMovimentacao().equals(StatusMovimentacao.APROVADA)) {
-                resultado.add(mov);
-            }
-        }
-        return resultado;
-    }
-
     public Movimentacao buscarPorId(Long id) {
         List<Movimentacao> movimentacoes = listarTodos();
 
@@ -123,7 +108,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarPorVeiculo(Long id){
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -147,7 +132,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarPorMes(YearMonth mesAno) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -171,7 +156,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarCombustivelPorMes(YearMonth mesAno) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -195,7 +180,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarIpvaPorAno(Year ano) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -219,7 +204,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarMultasPorVeiculo(Long id, Year ano) {
-        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> movimentacoes = listarTodos();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -244,17 +229,7 @@ public class MovimentacaoService {
         return total;
     }
 
-    public Fila<Movimentacao> listarPendentes() {
-        List<Movimentacao> movimentacoes = listarTodos();
-        Fila<Movimentacao> fila = new Fila<>();
 
-        for (Movimentacao mov : movimentacoes) {
-            if (mov.getStatusMovimentacao().equals(StatusMovimentacao.PENDENTE)) {
-                fila.inserirFim(mov);
-            }
-        }
-        return fila;
-    }
 
     public BigDecimal mediaIpvaPorAno(Year ano) {
         List<Movimentacao> movimentacoes = listarIpvaPorAno(ano);
@@ -275,21 +250,10 @@ public class MovimentacaoService {
     }
 
 
-    
-    public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
-        if (fila.estaVazia()) {
-            throw new FilaVaziaException("Não  há movimentações pendentes na fila");
-        }
-        Movimentacao mov = fila.removerInicio();
-        mov.setStatusMovimentacao(StatusMovimentacao.APROVADA);
-        movimentacaoDAO.atualizar(mov);
-        return mov;
-    }
-  
     public String mediaDespesasPorCategoria() {
         List<TipoDespesa> tipos = tipoDespesaService.listarTodos();
         List<Movimentacao> todasMovimentacoes = movimentacaoDAO.listarTodos();
-  
+
         String resultado = "";
 
         for (TipoDespesa tipo : tipos) {
