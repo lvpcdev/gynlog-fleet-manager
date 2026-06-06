@@ -1,4 +1,4 @@
-package model.enums;
+package model.enumss;
 
 public enum StatusTipoDespesa {
     ATIVO, INATIVO

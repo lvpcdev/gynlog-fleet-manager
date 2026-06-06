@@ -3,7 +3,7 @@ package model.entities;
 
 
 
-import model.enums.StatusMovimentacao;
+import model.enumss.StatusMovimentacao;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;

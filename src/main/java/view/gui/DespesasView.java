@@ -3,13 +3,12 @@ package view.gui;
 import controller.MovimentacaoController;
 import controller.TipoDespesaController;
 import controller.VeiculoController;
-import exceptions.ValidacaoException;
+import exceptionss.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import model.enums.StatusMovimentacao;
-import model.enums.StatusTipoDespesa;
-import util.Fila;
+import model.enumss.StatusTipoDespesa;
+import utils.Fila;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;

@@ -1,4 +1,4 @@
-package util;
+package utils;
 
 import model.entities.Movimentacao;
 import model.entities.Veiculo;

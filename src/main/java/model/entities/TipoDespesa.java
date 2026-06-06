@@ -1,7 +1,7 @@
 package model.entities;
 
 
-import model.enums.StatusTipoDespesa;
+import model.enumss.StatusTipoDespesa;
 
 public class TipoDespesa {
     private Long id;

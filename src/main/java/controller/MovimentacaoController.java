@@ -3,7 +3,7 @@ package controller;
 
 import model.entities.Movimentacao;
 import service.MovimentacaoService;
-import util.Fila;
+import utils.Fila;
 
 import java.math.BigDecimal;
 import java.time.Year;

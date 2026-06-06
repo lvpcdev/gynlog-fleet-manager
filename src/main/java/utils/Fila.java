@@ -1,6 +1,6 @@
-package util;
+package utils;
 
-import exceptions.FilaVaziaException;
+import exceptionss.FilaVaziaException;
 
 public class Fila<T> {
 

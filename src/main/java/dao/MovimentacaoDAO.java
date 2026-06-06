@@ -1,11 +1,11 @@
 package dao;
 
-import exceptions.ArquivoNaoEncontradoException;
-import exceptions.PersistenciaException;
+import exceptionss.ArquivoNaoEncontradoException;
+import exceptionss.PersistenciaException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import model.enums.StatusMovimentacao;
+import model.enumss.StatusMovimentacao;
 
 import java.io.*;
 import java.math.BigDecimal;

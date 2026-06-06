@@ -1,10 +1,10 @@
 package service;
 
 import dao.VeiculoDAO;
-import exceptions.EntidadeNaoEncontradaException;
-import exceptions.ValidacaoException;
+import exceptionss.EntidadeNaoEncontradaException;
+import exceptionss.ValidacaoException;
 import model.entities.Veiculo;
-import model.enums.StatusVeiculo;
+import model.enumss.StatusVeiculo;
 
 import java.time.Year;
 import java.util.ArrayList;
