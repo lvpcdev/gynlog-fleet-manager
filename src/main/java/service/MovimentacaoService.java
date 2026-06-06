@@ -250,44 +250,24 @@ public class MovimentacaoService {
     }
 
 
-    public String mediaDespesasPorCategoria() {
-        List<Movimentacao> todasMovimentacoes = listarTodos();
+    public BigDecimal mediaDespesasPorCategoria(String categoria){
 
-        List<String> categorias = new ArrayList<>();
+        List<Movimentacao> movimentacoes = listarTodos();
 
-        for (Movimentacao mov : todasMovimentacoes) {
-            String categoria = mov.getVeiculo().getCategoria();
-
-            if (!categorias.contains(categoria)) {
-                categorias.add(categoria);
+        BigDecimal soma = BigDecimal .ZERO;
+        int quantidade = 0;
+        for(Movimentacao mov : movimentacoes){
+            if(mov.getVeiculo().getCategoria() .equalsIgnoreCase(categoria)){
+                soma = soma.add(mov.getValor());
+                quantidade++;
             }
         }
 
-        String resultado = "";
-
-        for (String categoria : categorias) {
-
-            BigDecimal soma = BigDecimal.ZERO;
-            int quantidade = 0;
-
-            for (Movimentacao mov : todasMovimentacoes) {
-
-                if (mov.getVeiculo().getCategoria().equalsIgnoreCase(categoria)) {
-                    soma = soma.add(mov.getValor());
-                    quantidade++;
-                }
-            }
-
-            if (quantidade > 0) {
-                double mediaDouble = soma.doubleValue() / quantidade;
-                BigDecimal media = new BigDecimal(mediaDouble);
-                resultado = resultado + categoria + ": R$ " + media + "\n";
-            } else {
-                resultado = resultado + categoria + ": sem registros\n";
-            }
+        if (quantidade == 0){
+            return BigDecimal .ZERO;
         }
 
-        return resultado;
+        return soma.divide(new BigDecimal(quantidade), 2, RoundingMode.HALF_UP);
     }
 
 

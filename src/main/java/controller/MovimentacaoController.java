@@ -77,7 +77,7 @@ public class MovimentacaoController {
         return movimentacaoService.mediaIpvaPorAno(ano);
     }
 
-    public String mediaDespesasPorCategoria() {
-        return movimentacaoService.mediaDespesasPorCategoria();
+    public BigDecimal mediaDespesasPorCategoria(String categoria) {
+        return movimentacaoService.mediaDespesasPorCategoria(categoria);
     }
 }

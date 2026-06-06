@@ -32,4 +32,6 @@ public class VeiculoController {
     public Veiculo buscarPorId(Long id) {
         return veiculoService.buscarPorId(id);
     }
+
+    public List<String> listarCategorias(){return veiculoService.listarCategorias();}
 }
