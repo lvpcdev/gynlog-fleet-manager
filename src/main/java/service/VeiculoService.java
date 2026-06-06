@@ -4,7 +4,7 @@ import dao.VeiculoDAO;
 import exceptions.EntidadeNaoEncontradaException;
 import exceptions.ValidacaoException;
 import model.entities.Veiculo;
-import model.enumss.StatusVeiculo;
+import model.enums.StatusVeiculo;
 
 import java.time.Year;
 import java.util.ArrayList;

@@ -7,7 +7,7 @@ import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import model.enumss.StatusMovimentacao;
+import model.enums.StatusMovimentacao;
 import util.Fila;
 
 import java.math.BigDecimal;

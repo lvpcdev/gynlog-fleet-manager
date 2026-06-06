@@ -3,7 +3,7 @@ package dao;
 import exceptions.ArquivoNaoEncontradoException;
 import exceptions.PersistenciaException;
 import model.entities.Veiculo;
-import model.enumss.StatusVeiculo;
+import model.enums.StatusVeiculo;
 
 import java.io.*;
 import java.time.Year;

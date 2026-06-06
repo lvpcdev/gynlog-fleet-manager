@@ -3,7 +3,7 @@ package view.gui;
 import controller.VeiculoController;
 import exceptions.ValidacaoException;
 import model.entities.Veiculo;
-import model.enumss.StatusVeiculo;
+import model.enums.StatusVeiculo;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;

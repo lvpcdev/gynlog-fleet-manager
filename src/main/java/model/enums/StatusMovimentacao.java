@@ -1,4 +1,4 @@
-package model.enumss;
+package model.enums;
 
 public enum StatusMovimentacao {
     PENDENTE, APROVADA

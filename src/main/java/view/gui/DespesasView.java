@@ -7,7 +7,7 @@ import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import model.enumss.StatusTipoDespesa;
+import model.enums.StatusTipoDespesa;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;

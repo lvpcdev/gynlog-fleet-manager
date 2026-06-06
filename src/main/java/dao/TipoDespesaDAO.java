@@ -3,7 +3,7 @@ package dao;
 import exceptions.ArquivoNaoEncontradoException;
 import exceptions.PersistenciaException;
 import model.entities.TipoDespesa;
-import model.enumss.StatusTipoDespesa;
+import model.enums.StatusTipoDespesa;
 
 import java.io.*;
 import java.util.ArrayList;

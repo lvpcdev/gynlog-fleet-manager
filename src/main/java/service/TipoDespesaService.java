@@ -4,7 +4,7 @@ import dao.TipoDespesaDAO;
 import exceptions.EntidadeNaoEncontradaException;
 import exceptions.ValidacaoException;
 import model.entities.TipoDespesa;
-import model.enumss.StatusTipoDespesa;
+import model.enums.StatusTipoDespesa;
 
 import java.util.ArrayList;
 import java.util.List;
