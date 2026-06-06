@@ -3,9 +3,11 @@ package service;
 import dao.VeiculoDAO;
 import exceptions.EntidadeNaoEncontradaException;
 import exceptions.ValidacaoException;
+import model.entities.Movimentacao;
 import model.entities.Veiculo;
 import model.enums.StatusVeiculo;
 
+import java.math.BigDecimal;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,4 +162,22 @@ public class VeiculoService {
         String formatoMercosul = "[A-Z]{3}[0-9][A-Z][0-9]{2}";
         return placa.matches(formatoAntigo) || placa.matches(formatoMercosul);
     }
+
+    public List<String> listarCategorias() {
+
+        List<Veiculo> veiculos = listarTodos();
+        List<String> categorias = new ArrayList<>();
+
+        for (Veiculo veiculo : veiculos) {
+
+            if (veiculo.getCategoria() != null && !categorias.contains(veiculo.getCategoria())) {
+                categorias.add(veiculo.getCategoria());
+            }
+        }
+
+        return categorias;
+
+    }
+
+
 }

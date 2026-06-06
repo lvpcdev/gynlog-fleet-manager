@@ -23,6 +23,9 @@ public class Veiculo {
         this.anoDeFabricacao = anoDeFabricacao;
     }
 
+    public Veiculo(String text, String text1, String text2, StatusVeiculo status, Year parse) {
+    }
+
     public Long getId() {
         return id;
     }
