@@ -1,10 +1,10 @@
 package service;
 
 import dao.TipoDespesaDAO;
-import exceptions.EntidadeNaoEncontradaException;
-import exceptions.ValidacaoException;
+import exceptionss.EntidadeNaoEncontradaException;
+import exceptionss.ValidacaoException;
 import model.entities.TipoDespesa;
-import model.enums.StatusTipoDespesa;
+import model.enumss.StatusTipoDespesa;
 
 import java.util.ArrayList;
 import java.util.List;

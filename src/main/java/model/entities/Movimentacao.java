@@ -3,6 +3,8 @@ package model.entities;
 
 
 
+import model.enumss.StatusMovimentacao;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;

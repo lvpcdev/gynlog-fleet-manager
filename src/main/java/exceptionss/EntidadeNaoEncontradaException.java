@@ -1,4 +1,4 @@
-package exceptions;
+package exceptionss;
 
 public class EntidadeNaoEncontradaException extends RuntimeException {
     public EntidadeNaoEncontradaException(String message) {

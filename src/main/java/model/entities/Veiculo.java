@@ -1,6 +1,6 @@
 package model.entities;
 
-import model.enums.StatusVeiculo;
+import model.enumss.StatusVeiculo;
 
 import java.time.Year;
 

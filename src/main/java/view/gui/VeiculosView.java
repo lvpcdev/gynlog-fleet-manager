@@ -1,9 +1,10 @@
 package view.gui;
 
 import controller.VeiculoController;
-import exceptions.ValidacaoException;
+import exceptionss.ValidacaoException;
 import model.entities.Veiculo;
-import model.enums.StatusVeiculo;
+import model.enumss.StatusVeiculo;
+import utils.BuscaSequencial;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;

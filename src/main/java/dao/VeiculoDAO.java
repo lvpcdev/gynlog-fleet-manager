@@ -1,9 +1,9 @@
 package dao;
 
-import exceptions.ArquivoNaoEncontradoException;
-import exceptions.PersistenciaException;
+import exceptionss.ArquivoNaoEncontradoException;
+import exceptionss.PersistenciaException;
 import model.entities.Veiculo;
-import model.enums.StatusVeiculo;
+import model.enumss.StatusVeiculo;
 
 import java.io.*;
 import java.time.Year;

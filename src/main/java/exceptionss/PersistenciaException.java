@@ -1,4 +1,4 @@
-package exceptions;
+package exceptionss;
 
 public class PersistenciaException extends RuntimeException {
     public PersistenciaException(String message, Throwable causa) {
