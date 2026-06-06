@@ -8,6 +8,7 @@ import model.entities.TipoDespesa;
 import model.entities.Veiculo;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;

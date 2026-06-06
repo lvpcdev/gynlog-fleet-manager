@@ -9,21 +9,20 @@ public class Veiculo {
     private String placa;
     private String marca;
     private String modelo;
+    private String categoria;
     private Year anoDeFabricacao;
     private StatusVeiculo statusVeiculo;
 
     public Veiculo() {
     }
 
-    public Veiculo(String placa, String marca, String modelo, StatusVeiculo estado, Year anoDeFabricacao) {
+    public Veiculo(String placa, String marca, String modelo, String categoria, StatusVeiculo estado, Year anoDeFabricacao) {
         this.placa = placa;
         this.marca = marca;
         this.modelo = modelo;
+        this.categoria = categoria;
         this.statusVeiculo = estado;
         this.anoDeFabricacao = anoDeFabricacao;
-    }
-
-    public Veiculo(String text, String text1, String text2, StatusVeiculo status, Year parse) {
     }
 
     public Long getId() {
@@ -72,5 +71,13 @@ public class Veiculo {
 
     public void setStatusVeiculo(StatusVeiculo statusVeiculo) {
         this.statusVeiculo = statusVeiculo;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 }
