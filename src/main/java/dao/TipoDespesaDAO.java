@@ -1,6 +1,7 @@
 package dao;
 
 import exceptions.ArquivoNaoEncontradoException;
+import exceptions.EntidadeNaoEncontradaException; // Importar a exceção
 import exceptions.PersistenciaException;
 import model.entities.TipoDespesa;
 import model.enums.StatusTipoDespesa;
@@ -39,7 +40,20 @@ public class TipoDespesaDAO {
         File arquivo = new File(caminhoArquivo);
 
         if (!arquivo.exists()) {
-            throw new ArquivoNaoEncontradoException("Arquivo tipos de despesa não encontrado.");
+            // NOVO: Criar o arquivo se não existir e adicionar o tipo "COMBUSTÍVEL"
+            try {
+                arquivo.getParentFile().mkdirs(); // Garante que o diretório exista
+                arquivo.createNewFile();
+                // Adicionar "COMBUSTÍVEL" como tipo padrão se o arquivo não existir
+                TipoDespesa combustivel = new TipoDespesa("COMBUSTÍVEL", StatusTipoDespesa.ATIVO);
+                salvar(combustivel); // Salva o tipo de despesa, que também gera um ID
+                tiposDeDespesa.add(combustivel); // Adiciona à lista para retorno imediato
+            } catch (IOException e) {
+                throw new PersistenciaException("Erro ao criar arquivo de tipos de despesa: ", e);
+            }
+            // Se o arquivo foi recém-criado e "COMBUSTÍVEL" foi adicionado, não precisamos ler o arquivo novamente
+            // Apenas retornamos a lista com "COMBUSTÍVEL"
+            return tiposDeDespesa;
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
@@ -123,8 +137,17 @@ public class TipoDespesaDAO {
     private Long gerarId() {
         File arquivoUltimoId = new File(caminhoId);
 
+        // NOVO: Criar o arquivo se não existir e inicializar com 0
         if (!arquivoUltimoId.exists()) {
-            throw new ArquivoNaoEncontradoException("Arquivo tipos de despesa ultimo id não encontrado.");
+            try {
+                arquivoUltimoId.getParentFile().mkdirs(); // Garante que o diretório exista
+                arquivoUltimoId.createNewFile();
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoUltimoId))) {
+                    bw.write("0");
+                }
+            } catch (IOException e) {
+                throw new PersistenciaException("Erro ao criar arquivo de ID: ", e);
+            }
         }
 
         Long novoId = 0L;
@@ -132,9 +155,11 @@ public class TipoDespesaDAO {
 
             String linha = br.readLine();
 
-            if (linha != null) {
+            if (linha != null && !linha.trim().isEmpty()) { // NOVO: Verificar se a linha não está vazia
                 novoId = Long.parseLong(linha);
                 novoId++;
+            } else {
+                novoId = 1L; // Se o arquivo estava vazio ou só tinha espaços, começa com 1
             }
         } catch (IOException e) {
             throw new PersistenciaException("Erro ao ler ID", e);
@@ -147,5 +172,16 @@ public class TipoDespesaDAO {
         }
         return novoId;
     }
-}
 
+    // NOVO: Método para buscar TipoDespesa pela descrição
+    public TipoDespesa buscarPorDescricao(String descricao) {
+        List<TipoDespesa> tiposDeDespesa = listarTodos(); // Reutiliza o método listarTodos
+
+        for (TipoDespesa td : tiposDeDespesa) {
+            if (td.getDescricao().equalsIgnoreCase(descricao)) {
+                return td;
+            }
+        }
+        throw new EntidadeNaoEncontradaException("Tipo de despesa com descrição '" + descricao + "' não encontrado");
+    }
+}

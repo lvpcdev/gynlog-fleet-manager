@@ -73,5 +73,23 @@ public class MovimentacaoController {
         return movimentacaoService.totalMultasPorVeiculo(id, ano);
     }
 
+    // NOVO: Método para buscar a última quilometragem registrada para um veículo
+    public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
+        return movimentacaoService.buscarUltimaQuilometragemVeiculo(veiculoId);
+    }
 
+    // NOVO: Método para buscar a última quilometragem registrada para um veículo, excluindo uma movimentação específica
+    public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
+        return movimentacaoService.buscarUltimaQuilometragemVeiculoExcluindoAtual(veiculoId, movimentacaoId);
+    }
+
+    // NOVO: Método para verificar se um veículo possui movimentações de combustível
+    public boolean hasCombustivelMovimentacao(Long veiculoId) {
+        return movimentacaoService.hasCombustivelMovimentacao(veiculoId);
+    }
+
+    // NOVO: Método para listar movimentações de combustível por veículo e período
+    public List<Movimentacao> listarCombustivelPorVeiculoEPeriodo(Long veiculoId, YearMonth mesAno) {
+        return movimentacaoService.listarCombustivelPorVeiculoEPeriodo(veiculoId, mesAno);
+    }
 }

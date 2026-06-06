@@ -38,6 +38,7 @@ public class DespesasView extends JFrame {
     private JTextField campoValor;
     private JTextField campoData;
     private JTextField campoDescricao;
+    private JTextField campoQuilometragemAtual; // NOVO: Campo para quilometragem atual
     private DefaultTableModel tableModelMovimentacoes;
 
     public DespesasView() {
@@ -109,6 +110,32 @@ public class DespesasView extends JFrame {
         });
     }
 
+    // NOVO: Método para aplicar filtro de inteiros positivos
+    private void aplicarFiltroInteiroPositivo(JTextField campo) {
+        AbstractDocument doc = (AbstractDocument) campo.getDocument();
+        doc.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                String textoAtual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String textoResultante = textoAtual.substring(0, offset) + string + textoAtual.substring(offset);
+                // Permite apenas dígitos, não permite começar com zero se houver mais de um dígito, e permite string vazia
+                if (textoResultante.matches("\\d*") && (textoResultante.length() <= 1 || !textoResultante.startsWith("0"))) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                String textoAtual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String textoResultante = textoAtual.substring(0, offset) + text + textoAtual.substring(offset + length);
+                // Permite apenas dígitos, não permite começar com zero se houver mais de um dígito, e permite string vazia
+                if (textoResultante.matches("\\d*") && (textoResultante.length() <= 1 || !textoResultante.startsWith("0"))) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+        });
+    }
+
     private BigDecimal extrairValor(String texto) {
         String normalizado = texto.replace(",", ".").trim();
         if (normalizado.isEmpty()) return BigDecimal.ZERO;
@@ -174,9 +201,11 @@ public class DespesasView extends JFrame {
         campoData = new JTextField(10);
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         campoDescricao = new JTextField(25);
+        campoQuilometragemAtual = new JTextField(10); // NOVO: Inicialização do campo de quilometragem
         JButton botaoSalvar = new JButton("Salvar Despesa");
 
         aplicarFiltroValor(campoValor);
+        aplicarFiltroInteiroPositivo(campoQuilometragemAtual); // NOVO: Aplicar filtro para inteiros positivos
 
         gbc.gridx = 0; gbc.gridy = 0;
         painel.add(new JLabel("Veículo:"), gbc);
@@ -188,6 +217,12 @@ public class DespesasView extends JFrame {
         painel.add(new JLabel("Valor (R$):"), gbc);
         gbc.gridy++;
         painel.add(new JLabel("Descrição:"), gbc);
+        // NOVO: Label para quilometragem
+        gbc.gridy++;
+        JLabel labelQuilometragem = new JLabel("KM Atual do Veículo:");
+        labelQuilometragem.setVisible(false); // Inicialmente invisível
+        painel.add(labelQuilometragem, gbc);
+
 
         gbc.gridx = 1; gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -200,12 +235,30 @@ public class DespesasView extends JFrame {
         painel.add(campoValor, gbc);
         gbc.gridy++;
         painel.add(campoDescricao, gbc);
+        // NOVO: Campo de quilometragem
+        gbc.gridy++;
+        campoQuilometragemAtual.setVisible(false); // Inicialmente invisível
+        painel.add(campoQuilometragemAtual, gbc);
 
         gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvar, gbc);
+
+        // NOVO: Listener para o comboBoxTiposDespesa para controlar a visibilidade do campo de quilometragem
+        comboBoxTiposDespesa.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TipoDespesa selectedTipo = (TipoDespesa) comboBoxTiposDespesa.getSelectedItem();
+                boolean isCombustivel = selectedTipo != null && "COMBUSTÍVEL".equalsIgnoreCase(selectedTipo.getDescricao());
+                campoQuilometragemAtual.setVisible(isCombustivel);
+                labelQuilometragem.setVisible(isCombustivel);
+                if (!isCombustivel) {
+                    campoQuilometragemAtual.setText(""); // Limpa o campo se não for combustível
+                }
+            }
+        });
 
         botaoSalvar.addActionListener(new ActionListener() {
             @Override
@@ -378,8 +431,33 @@ public class DespesasView extends JFrame {
             LocalDate data = LocalDate.parse(campoData.getText(), formatter);
             BigDecimal valor = extrairValor(campoValor.getText());
             String descricao = campoDescricao.getText();
+            double quilometragem = 0.0; // Valor padrão
 
-            Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor);
+            // NOVO: Lógica de validação e obtenção da quilometragem
+            if (tipo != null && "COMBUSTÍVEL".equalsIgnoreCase(tipo.getDescricao())) {
+                if (campoQuilometragemAtual.getText().trim().isEmpty()) {
+                    throw new ValidacaoException("O campo 'KM Atual do Veículo' é obrigatório para despesas de COMBUSTÍVEL.");
+                }
+                try {
+                    quilometragem = Double.parseDouble(campoQuilometragemAtual.getText().trim());
+                    if (quilometragem <= 0) {
+                        throw new ValidacaoException("A quilometragem deve ser um número positivo.");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new ValidacaoException("A quilometragem deve ser um número inteiro válido.");
+                }
+
+                // Validação da quilometragem com a última registrada
+                if (veiculo != null) {
+                    double ultimaQuilometragem = movimentacaoController.buscarUltimaQuilometragemVeiculo(veiculo.getId());
+                    if (quilometragem <= ultimaQuilometragem) {
+                        throw new ValidacaoException("Quilometragem inválida. O valor informado deve ser maior que a última quilometragem registrada para este veículo (" + (int)ultimaQuilometragem + " km).");
+                    }
+                }
+            }
+
+
+            Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor, quilometragem); // NOVO: Passando a quilometragem
             movimentacaoController.salvar(novaMovimentacao);
             JOptionPane.showMessageDialog(this, "Despesa registrada com sucesso!");
             limparCamposCadastro();
@@ -395,6 +473,7 @@ public class DespesasView extends JFrame {
         campoValor.setText("");
         campoDescricao.setText("");
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        campoQuilometragemAtual.setText(""); // NOVO: Limpar campo de quilometragem
         if (comboBoxVeiculos.getItemCount() > 0) comboBoxVeiculos.setSelectedIndex(0);
         if (comboBoxTiposDespesa.getItemCount() > 0) comboBoxTiposDespesa.setSelectedIndex(0);
     }
@@ -441,11 +520,13 @@ public class DespesasView extends JFrame {
         JTextField editCampoValor = new JTextField(10);
         JTextField editCampoData = new JTextField(10);
         JTextField editCampoDescricao = new JTextField(25);
+        JTextField editCampoQuilometragem = new JTextField(10); // NOVO: Campo de quilometragem para edição
         JButton botaoSalvarAlteracoes = new JButton("Salvar Alterações");
 
         editComboBoxVeiculos.setRenderer(comboBoxVeiculos.getRenderer());
 
         aplicarFiltroValor(editCampoValor);
+        aplicarFiltroInteiroPositivo(editCampoQuilometragem); // NOVO: Aplicar filtro para inteiros positivos
 
         List<Veiculo> todosVeiculos = veiculoController.listarTodos();
         for (Veiculo v : todosVeiculos) {
@@ -466,12 +547,14 @@ public class DespesasView extends JFrame {
         editCampoData.setText(movimentacaoParaEditar.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         editCampoValor.setText(movimentacaoParaEditar.getValor().toPlainString());
         editCampoDescricao.setText(movimentacaoParaEditar.getDescricao());
+        editCampoQuilometragem.setText(String.valueOf((int)movimentacaoParaEditar.getQuilometragemAtual())); // NOVO: Preencher campo de quilometragem
 
         gbc.gridx = 0; gbc.gridy = 0; painel.add(new JLabel("Veículo:"), gbc);
         gbc.gridy++; painel.add(new JLabel("Tipo de Despesa:"), gbc);
         gbc.gridy++; painel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
         gbc.gridy++; painel.add(new JLabel("Valor (R$):"), gbc);
         gbc.gridy++; painel.add(new JLabel("Descrição:"), gbc);
+        gbc.gridy++; JLabel labelEditQuilometragem = new JLabel("KM Atual do Veículo:"); painel.add(labelEditQuilometragem, gbc); // NOVO: Label para quilometragem na edição
 
         gbc.gridx = 1; gbc.gridy = 0; gbc.fill = GridBagConstraints.HORIZONTAL;
         painel.add(editComboBoxVeiculos, gbc);
@@ -479,6 +562,24 @@ public class DespesasView extends JFrame {
         gbc.gridy++; painel.add(editCampoData, gbc);
         gbc.gridy++; painel.add(editCampoValor, gbc);
         gbc.gridy++; painel.add(editCampoDescricao, gbc);
+        gbc.gridy++; painel.add(editCampoQuilometragem, gbc); // NOVO: Campo de quilometragem na edição
+
+        // NOVO: Listener para controlar visibilidade do campo de quilometragem na edição
+        editComboBoxTiposDespesa.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TipoDespesa selectedTipo = (TipoDespesa) editComboBoxTiposDespesa.getSelectedItem();
+                boolean isCombustivel = selectedTipo != null && "COMBUSTÍVEL".equalsIgnoreCase(selectedTipo.getDescricao());
+                editCampoQuilometragem.setVisible(isCombustivel);
+                labelEditQuilometragem.setVisible(isCombustivel);
+                if (!isCombustivel) {
+                    editCampoQuilometragem.setText("");
+                }
+            }
+        });
+        // NOVO: Chamar o listener uma vez para configurar a visibilidade inicial
+        editComboBoxTiposDespesa.getActionListeners()[0].actionPerformed(new ActionEvent(editComboBoxTiposDespesa, ActionEvent.ACTION_PERFORMED, "init"));
+
 
         gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
@@ -495,8 +596,32 @@ public class DespesasView extends JFrame {
                     LocalDate data = LocalDate.parse(editCampoData.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                     BigDecimal valor = extrairValor(editCampoValor.getText());
                     String descricao = editCampoDescricao.getText();
+                    double quilometragem = 0.0; // Valor padrão
 
-                    Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor);
+                    // NOVO: Lógica de validação e obtenção da quilometragem para edição
+                    if (tipoSelecionado != null && "COMBUSTÍVEL".equalsIgnoreCase(tipoSelecionado.getDescricao())) {
+                        if (editCampoQuilometragem.getText().trim().isEmpty()) {
+                            throw new ValidacaoException("O campo 'KM Atual do Veículo' é obrigatório para despesas de COMBUSTÍVEL.");
+                        }
+                        try {
+                            quilometragem = Double.parseDouble(editCampoQuilometragem.getText().trim());
+                            if (quilometragem <= 0) {
+                                throw new ValidacaoException("A quilometragem deve ser um número positivo.");
+                            }
+                        } catch (NumberFormatException ex) {
+                            throw new ValidacaoException("A quilometragem deve ser um número inteiro válido.");
+                        }
+
+                        // Validação da quilometragem com a última registrada (excluindo a própria movimentação se for o caso)
+                        if (veiculoSelecionado != null) {
+                            double ultimaQuilometragem = movimentacaoController.buscarUltimaQuilometragemVeiculoExcluindoAtual(veiculoSelecionado.getId(), movimentacaoParaEditar.getId());
+                            if (quilometragem <= ultimaQuilometragem) {
+                                throw new ValidacaoException("Quilometragem inválida. O valor informado deve ser maior que a última quilometragem registrada para este veículo (" + (int)ultimaQuilometragem + " km).");
+                            }
+                        }
+                    }
+
+                    Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor, quilometragem); // NOVO: Passando a quilometragem
                     movimentacaoAtualizada.setId(movimentacaoParaEditar.getId());
 
                     movimentacaoController.atualizar(movimentacaoAtualizada);

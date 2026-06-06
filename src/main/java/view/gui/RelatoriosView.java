@@ -4,6 +4,7 @@ import controller.MovimentacaoController;
 import controller.VeiculoController;
 import model.entities.Movimentacao;
 import model.entities.Veiculo;
+import exceptions.ValidacaoException; // Importar ValidacaoException
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +17,10 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class RelatoriosView extends JFrame {
 
@@ -149,7 +152,8 @@ public class RelatoriosView extends JFrame {
 
     private JPanel criarPainelAcoes() {
         JPanel painel = new JPanel();
-        painel.setLayout(new GridLayout(6, 1, 5, 5));
+        // NOVO: Aumentar o grid para acomodar o novo botão
+        painel.setLayout(new GridLayout(7, 1, 5, 5));
         painel.setBorder(BorderFactory.createTitledBorder("Gerar Relatório"));
 
         JButton btnDespesasVeiculo = new JButton("1. Despesas por Veículo");
@@ -158,6 +162,7 @@ public class RelatoriosView extends JFrame {
         JButton btnSomaIpvaAno = new JButton("4. Somatório IPVA no Ano");
         JButton btnListarInativos = new JButton("5. Listar Veículos Inativos");
         JButton btnMultasAno = new JButton("6. Multas por Veículo no Ano");
+        JButton btnConsumoMedio = new JButton("7. Consumo Médio por Veículo"); // NOVO: Botão para Consumo Médio
 
         btnDespesasVeiculo.addActionListener(new ActionListener() {
             @Override
@@ -256,12 +261,37 @@ public class RelatoriosView extends JFrame {
             }
         });
 
+        // NOVO: Action Listener para o relatório de Consumo Médio
+        btnConsumoMedio.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Veiculo veiculo = (Veiculo) comboVeiculos.getSelectedItem();
+                Month mes = (Month) comboMes.getSelectedItem();
+                int ano = (int) comboAno.getSelectedItem();
+
+                if (veiculo == null) {
+                    JOptionPane.showMessageDialog(RelatoriosView.this, "Por favor, selecione um veículo para o relatório de Consumo Médio.", "Filtro Necessário", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                try {
+                    areaResultados.setText(gerarRelatorioConsumoMedio(veiculo, mes, ano));
+                } catch (ValidacaoException ex) {
+                    JOptionPane.showMessageDialog(RelatoriosView.this, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(RelatoriosView.this, "Erro ao gerar relatório de Consumo Médio: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+
         painel.add(btnDespesasVeiculo);
         painel.add(btnSomaGeralMes);
         painel.add(btnSomaCombustivelMes);
         painel.add(btnSomaIpvaAno);
         painel.add(btnListarInativos);
         painel.add(btnMultasAno);
+        painel.add(btnConsumoMedio); // NOVO: Adicionar o botão ao painel
 
         return painel;
     }
@@ -315,6 +345,63 @@ public class RelatoriosView extends JFrame {
 
         return sb.toString();
     }
+
+    // NOVO: Método para gerar o relatório de Consumo Médio
+    private String gerarRelatorioConsumoMedio(Veiculo veiculo, Month mes, int ano) {
+        StringBuilder sb = new StringBuilder();
+        NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+        Locale ptBR = new Locale("pt", "BR");
+
+        sb.append("==================================================\n");
+        sb.append("CONSUMO MÉDIO DO VEÍCULO\n");
+        sb.append("==================================================\n\n");
+
+        sb.append("Placa: ").append(veiculo.getPlaca()).append("\n");
+        sb.append("Marca: ").append(veiculo.getMarca()).append("\n");
+        sb.append("Modelo: ").append(veiculo.getModelo()).append("\n\n");
+
+        String nomeMes = mes.getDisplayName(TextStyle.FULL, ptBR);
+        String nomeMesFormatado = nomeMes.substring(0, 1).toUpperCase() + nomeMes.substring(1).toLowerCase();
+        sb.append("Período: ").append(nomeMesFormatado).append("/").append(ano).append("\n\n");
+
+        // NOVO: Obter as movimentações de combustível para o veículo e período
+        YearMonth yearMonth = YearMonth.of(ano, mes);
+        List<Movimentacao> movimentacoesCombustivel = movimentacaoController.listarCombustivelPorVeiculoEPeriodo(veiculo.getId(), yearMonth);
+
+        if (movimentacoesCombustivel.size() < 2) {
+            throw new ValidacaoException("Não existem registros de abastecimento suficientes para gerar o relatório deste veículo no período selecionado. São necessários pelo menos dois registros de quilometragem para calcular a distância percorrida.");
+        }
+
+        // Ordenar as movimentações por data e depois por quilometragem
+        movimentacoesCombustivel.sort(Comparator
+                .comparing(Movimentacao::getData)
+                .thenComparing(Movimentacao::getQuilometragemAtual));
+
+        double kmInicial = movimentacoesCombustivel.get(0).getQuilometragemAtual();
+        double kmFinal = movimentacoesCombustivel.get(movimentacoesCombustivel.size() - 1).getQuilometragemAtual();
+
+        double distanciaPercorrida = kmFinal - kmInicial;
+        int quantidadeAbastecimentos = movimentacoesCombustivel.size();
+        BigDecimal totalGastoCombustivel = movimentacoesCombustivel.stream()
+                .map(Movimentacao::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal custoMedioPorKM = BigDecimal.ZERO;
+        if (distanciaPercorrida > 0) {
+            custoMedioPorKM = totalGastoCombustivel.divide(BigDecimal.valueOf(distanciaPercorrida), 2, BigDecimal.ROUND_HALF_UP);
+        }
+
+        sb.append("KM Inicial: ").append(String.format("%.0f", kmInicial)).append(" km\n");
+        sb.append("KM Final: ").append(String.format("%.0f", kmFinal)).append(" km\n\n");
+        sb.append("Distância Percorrida: ").append(String.format("%.0f", distanciaPercorrida)).append(" km\n\n");
+        sb.append("Quantidade de Abastecimentos: ").append(quantidadeAbastecimentos).append("\n\n");
+        sb.append("Total Gasto com Combustível: ").append(moeda.format(totalGastoCombustivel)).append("\n\n");
+        sb.append("Custo Médio por KM: ").append(moeda.format(custoMedioPorKM)).append("/km\n\n");
+        sb.append("==================================================\n");
+
+        return sb.toString();
+    }
+
 
     private void carregarFiltros() {
         comboVeiculos.removeAllItems();

@@ -8,10 +8,13 @@ import model.entities.TipoDespesa;
 import model.entities.Veiculo;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class MovimentacaoService {
 
@@ -228,7 +231,56 @@ public class MovimentacaoService {
         return total;
     }
 
+    // NOVO: Método para buscar a última quilometragem registrada para um veículo
+    public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
+        return movimentacaoDAO.buscarUltimaQuilometragemVeiculo(veiculoId);
+    }
 
+    // NOVO: Método para buscar a última quilometragem registrada para um veículo, excluindo uma movimentação específica
+    public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
+        return movimentacaoDAO.buscarUltimaQuilometragemVeiculoExcluindoAtual(veiculoId, movimentacaoId);
+    }
 
+    // NOVO: Método para verificar se um veículo possui movimentações de combustível
+    public boolean hasCombustivelMovimentacao(Long veiculoId) {
+        return movimentacaoDAO.hasCombustivelMovimentacao(veiculoId);
+    }
 
+    // NOVO: Método para inicializar a quilometragem de veículos existentes
+    public void inicializarQuilometragemVeiculosExistentes() {
+        List<Veiculo> todosVeiculos = veiculoService.listarTodos();
+        TipoDespesa tipoCombustivel = tipoDespesaService.buscarPorDescricao("COMBUSTÍVEL");
+        Random random = new Random();
+
+        for (Veiculo veiculo : todosVeiculos) {
+            if (!hasCombustivelMovimentacao(veiculo.getId())) {
+                // Gerar quilometragem inicial fictícia
+                double quilometragemInicial = 10000 + (200000 - 10000) * random.nextDouble();
+                // Arredondar para um número inteiro
+                quilometragemInicial = Math.round(quilometragemInicial);
+
+                // Criar uma movimentação de combustível fictícia
+                Movimentacao movimentacaoInicial = new Movimentacao(
+                        veiculo,
+                        tipoCombustivel,
+                        "Inicialização de Quilometragem",
+                        LocalDate.of(2023, 1, 1), // Data fictícia no passado
+                        BigDecimal.ONE, // CORRIGIDO: Valor agora é 1.0 para passar na validação
+                        quilometragemInicial
+                );
+                // Salvar a movimentação
+                salvar(movimentacaoInicial);
+                System.out.println("Quilometragem inicial de " + quilometragemInicial + " km registrada para o veículo " + veiculo.getPlaca());
+            }
+        }
+    }
+
+    // NOVO: Método para listar movimentações de combustível por veículo e período
+    public List<Movimentacao> listarCombustivelPorVeiculoEPeriodo(Long veiculoId, YearMonth mesAno) {
+        return listarTodos().stream()
+                .filter(mov -> mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId))
+                .filter(mov -> mov.getTipoDespesa() != null && "COMBUSTÍVEL".equalsIgnoreCase(mov.getTipoDespesa().getDescricao()))
+                .filter(mov -> mov.getData() != null && YearMonth.from(mov.getData()).equals(mesAno))
+                .collect(Collectors.toList());
+    }
 }

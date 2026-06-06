@@ -98,3 +98,26 @@
 98 | 48 | 9 | 2026-05-15 | 70.00 | PEDAGIO VIAGEM BA
 99 | 49 | 8 | 2026-01-28 | 1900.00 | TROCA 4 PNEUS
 100 | 50 | 6 | 2026-02-28 | 180.00 | LICENCIAMENTO ANUAL
+102 | 4 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 19511.0
+103 | 6 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 150370.0
+104 | 10 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 110557.0
+105 | 13 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 119841.0
+106 | 16 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 157107.0
+107 | 19 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 19149.0
+108 | 20 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 19387.0
+109 | 22 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 148268.0
+110 | 25 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 133468.0
+111 | 28 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 119313.0
+112 | 32 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 63364.0
+113 | 35 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 54112.0
+114 | 36 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 58256.0
+115 | 39 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 191411.0
+116 | 40 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 39085.0
+117 | 42 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 17102.0
+118 | 44 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 16227.0
+119 | 45 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 131897.0
+120 | 47 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 69961.0
+121 | 49 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 83304.0
+122 | 50 | 1 | 2023-01-01 | 1 | Inicialização de Quilometragem | 104847.0
+123 | 1 | 1 | 2026-06-06 | 230.00 | Abastecimento do veículo | 1000.0
+124 | 1 | 1 | 2026-06-06 | 210.00 | Valor do abastecimento de veículo. | 1170.0

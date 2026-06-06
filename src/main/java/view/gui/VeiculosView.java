@@ -1,5 +1,6 @@
 package view.gui;
 
+import controller.MovimentacaoController; // NOVO: Importar MovimentacaoController
 import controller.VeiculoController;
 import exceptions.ValidacaoException;
 import model.entities.Veiculo;
@@ -21,8 +22,10 @@ import java.util.List;
 public class VeiculosView extends JFrame {
 
     VeiculoController veiculoController = new VeiculoController();
+    MovimentacaoController movimentacaoController = new MovimentacaoController(); // NOVO: Instanciar MovimentacaoController
 
-    String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado"};
+    // NOVO: Adicionar "Quilometragem" às colunas
+    String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado", "Quilometragem"};
 
     DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0) {
         @Override
@@ -55,13 +58,16 @@ public class VeiculosView extends JFrame {
     private void atualizarTabela(List<Veiculo> veiculos) {
         tableModelVeiculos.setRowCount(0);
         for (Veiculo v : veiculos) {
+            // NOVO: Buscar a última quilometragem para cada veículo
+            double ultimaQuilometragem = movimentacaoController.buscarUltimaQuilometragemVeiculo(v.getId());
             tableModelVeiculos.addRow(new Object[]{
                     v.getId(),
                     v.getPlaca(),
                     v.getMarca(),
                     v.getModelo(),
                     v.getAnoDeFabricacao(),
-                    v.getStatusVeiculo()
+                    v.getStatusVeiculo(),
+                    (int) ultimaQuilometragem // NOVO: Adicionar a quilometragem
             });
         }
     }
@@ -414,6 +420,7 @@ public class VeiculosView extends JFrame {
         botaoAtivo.setSelected(true);
     }
 
+    // Removida a anotação @Override, pois este método não sobrescreve nenhum método da superclasse JFrame
     public void refreshData() {
         atualizarTabela(veiculoController.listarTodos());
     }

@@ -1,6 +1,6 @@
 
-
 import com.formdev.flatlaf.FlatDarkLaf;
+import service.MovimentacaoService; // Importar MovimentacaoService
 import view.gui.MenuView;
 
 
@@ -14,6 +14,11 @@ public class Main {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        // NOVO: Inicializar quilometragem dos veículos existentes
+        MovimentacaoService movimentacaoService = new MovimentacaoService();
+        movimentacaoService.inicializarQuilometragemVeiculosExistentes();
+
         SwingUtilities.invokeLater(() -> {
             MenuView tela = new MenuView();
             tela.setVisible(true);

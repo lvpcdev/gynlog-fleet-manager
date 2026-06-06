@@ -15,6 +15,7 @@ public class Movimentacao {
     private String descricao;
     private LocalDate data;
     private BigDecimal valor;
+    private double quilometragemAtual; // Novo atributo para armazenar a quilometragem no momento da despesa
 
     private Veiculo veiculo;
     private TipoDespesa tipoDespesa;
@@ -28,6 +29,16 @@ public class Movimentacao {
         this.descricao = descricao;
         this.data = data;
         this.valor = valor;
+    }
+
+    // Novo construtor que inclui a quilometragem atual
+    public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor, double quilometragemAtual) {
+        this.veiculo = veiculo;
+        this.tipoDespesa = tipoDespesa;
+        this.descricao = descricao;
+        this.data = data;
+        this.valor = valor;
+        this.quilometragemAtual = quilometragemAtual;
     }
 
     public Long getId() {
@@ -78,6 +89,15 @@ public class Movimentacao {
         this.valor = valor;
     }
 
+    // Novos getters e setters para quilometragemAtual
+    public double getQuilometragemAtual() {
+        return quilometragemAtual;
+    }
+
+    public void setQuilometragemAtual(double quilometragemAtual) {
+        this.quilometragemAtual = quilometragemAtual;
+    }
+
     @Override
     public String toString() {
         DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -103,9 +123,7 @@ public class Movimentacao {
                 "  - Data: " + data.format(formatadorData) + "\n" +
                 "  - Tipo: " + descTipoDespesa + "\n" +
                 "  - Descrição: " + descricao + "\n" +
-                "  - Valor: " + formatadorMoeda.format(valor);
+                "  - Valor: " + formatadorMoeda.format(valor) + "\n" +
+                "  - Quilometragem: " + quilometragemAtual + " km"; // Adicionado ao toString
     }
 }
-
-
-
