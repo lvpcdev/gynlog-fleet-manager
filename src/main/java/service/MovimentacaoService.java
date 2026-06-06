@@ -8,7 +8,6 @@ import model.entities.TipoDespesa;
 import model.entities.Veiculo;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -270,5 +269,15 @@ public class MovimentacaoService {
         return soma.divide(new BigDecimal(quantidade), 2, RoundingMode.HALF_UP);
     }
 
+
+    public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
+        if (fila.estaVazia()) {
+            throw new FilaVaziaException("Não  há movimentações pendentes na fila");
+        }
+        Movimentacao mov = fila.removerInicio();
+        mov.setStatusMovimentacao(StatusMovimentacao.APROVADA);
+        movimentacaoDAO.atualizar(mov);
+        return mov;
+    }
 
 }

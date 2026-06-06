@@ -80,4 +80,11 @@ public class MovimentacaoController {
     public BigDecimal mediaDespesasPorCategoria(String categoria) {
         return movimentacaoService.mediaDespesasPorCategoria(categoria);
     }
+  
+  public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
+        return movimentacaoService.aprovarProxima(fila);
+    }
+    
+
+
 }
