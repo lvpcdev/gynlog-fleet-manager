@@ -251,32 +251,44 @@ public class MovimentacaoService {
 
 
     public String mediaDespesasPorCategoria() {
-        List<TipoDespesa> tipos = tipoDespesaService.listarTodos();
-        List<Movimentacao> todasMovimentacoes = movimentacaoDAO.listarTodos();
+        List<Movimentacao> todasMovimentacoes = listarTodos();
+
+        List<String> categorias = new ArrayList<>();
+
+        for (Movimentacao mov : todasMovimentacoes) {
+            String categoria = mov.getVeiculo().getCategoria();
+
+            if (!categorias.contains(categoria)) {
+                categorias.add(categoria);
+            }
+        }
 
         String resultado = "";
 
-        for (TipoDespesa tipo : tipos) {
+        for (String categoria : categorias) {
 
             BigDecimal soma = BigDecimal.ZERO;
             int quantidade = 0;
 
             for (Movimentacao mov : todasMovimentacoes) {
 
-                if (mov.getTipoDespesa().getId().equals(tipo.getId())) {
+                if (mov.getVeiculo().getCategoria().equalsIgnoreCase(categoria)) {
                     soma = soma.add(mov.getValor());
                     quantidade++;
                 }
             }
 
             if (quantidade > 0) {
-                BigDecimal media = soma.divide(new BigDecimal(quantidade), 2, RoundingMode.HALF_UP);
-                resultado = resultado + tipo.getDescricao() + ": R$ " + media + "\n";
+                double mediaDouble = soma.doubleValue() / quantidade;
+                BigDecimal media = new BigDecimal(mediaDouble);
+                resultado = resultado + categoria + ": R$ " + media + "\n";
             } else {
-                resultado = resultado + tipo.getDescricao() + ": sem registros\n";
+                resultado = resultado + categoria + ": sem registros\n";
             }
         }
 
         return resultado;
     }
+
+
 }
