@@ -21,7 +21,7 @@ public class VeiculoDAO {
                 + veiculo.getPlaca() + " | "
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
-                + veiculo.getCategoria() + "| "
+                + veiculo.getCategoria() + " | "
                 + veiculo.getAnoDeFabricacao() + " | "
                 + veiculo.getStatusVeiculo();
 
@@ -50,7 +50,7 @@ public class VeiculoDAO {
                 }
 
                 String[] partes = linha.split(" \\| ");
-                if (partes.length == 6) {
+                if (partes.length == 7) {
                     try {
                         Long id = Long.parseLong(partes[0].trim());
                         String placa = partes[1].trim();
@@ -88,7 +88,7 @@ public class VeiculoDAO {
                 + veiculo.getPlaca() + " | "
                 + veiculo.getMarca() + " | "
                 + veiculo.getModelo() + " | "
-                + veiculo.getCategoria() + "| "
+                + veiculo.getCategoria() + " | "
                 + veiculo.getAnoDeFabricacao() + " | "
                 + veiculo.getStatusVeiculo();
 

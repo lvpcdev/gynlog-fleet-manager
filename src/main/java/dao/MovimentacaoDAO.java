@@ -5,9 +5,11 @@ import exceptions.PersistenciaException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
+import model.enums.StatusMovimentacao;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -32,8 +34,9 @@ public class MovimentacaoDAO {
                 + idVeiculo + " | "
                 + idTipoDespesa + " | "
                 + movimentacao.getData().format(formatadorData) + " | "
-                + movimentacao.getValor() + " | "
-                + movimentacao.getDescricao();
+                + movimentacao.getValor() .setScale(2, RoundingMode.HALF_UP) + " | "
+                + movimentacao.getDescricao() + " | "
+                + movimentacao.getStatusMovimentacao();
 
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo, true))) {
@@ -62,7 +65,7 @@ public class MovimentacaoDAO {
                 }
 
                 String[] partes = linha.split(" \\| ");
-                if (partes.length == 6) {
+                if (partes.length == 7) {
                     try {
                         Long idMovimentacao = Long.parseLong(partes[0]);
                         Long idVeiculo = Long.parseLong(partes[1]);
@@ -70,6 +73,7 @@ public class MovimentacaoDAO {
                         LocalDate data = LocalDate.parse(partes[3], formatadorData);
                         BigDecimal valor = new BigDecimal(partes[4]);
                         String descricao = partes[5];
+                        StatusMovimentacao statusMovimentacao = StatusMovimentacao.valueOf(partes[6]);
 
 
                         Veiculo veiculo = new Veiculo();
@@ -79,7 +83,7 @@ public class MovimentacaoDAO {
                         tipoDespesa.setId(idTipoDespesa);
 
 
-                        Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor);
+                        Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor, statusMovimentacao);
                         movimentacao.setId(idMovimentacao);
                         movimentacoes.add(movimentacao);
                     } catch (NumberFormatException e) {
@@ -107,8 +111,9 @@ public class MovimentacaoDAO {
                 movimentacao.getVeiculo().getId() + " | " +
                 movimentacao.getTipoDespesa().getId() + " | " +
                 movimentacao.getData().format(formatadorData) + " | " +
-                movimentacao.getValor() + " | " +
-                movimentacao.getDescricao();
+                movimentacao.getValor().setScale(2, RoundingMode.HALF_UP) + " | " +
+                movimentacao.getDescricao() + " | " +
+                movimentacao.getStatusMovimentacao();
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));
              BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoTemp))) {

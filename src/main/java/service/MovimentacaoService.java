@@ -98,6 +98,32 @@ public class MovimentacaoService {
         return movimentacoes;
     }
 
+    public List<Movimentacao> listarAprovadas() {
+        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> resultado = new ArrayList<>();
+
+        for (Movimentacao mov : movimentacoes) {
+            if (mov.getStatusMovimentacao().equals(StatusMovimentacao.APROVADA)) {
+                resultado.add(mov);
+            }
+        }
+
+        return resultado;
+    }
+
+    public Fila<Movimentacao> listarPendentes() {
+        List<Movimentacao> movimentacoes = listarTodos();
+        Fila<Movimentacao> fila = new Fila<Movimentacao>();
+
+        for (Movimentacao mov : movimentacoes) {
+            if (mov.getStatusMovimentacao().equals(StatusMovimentacao.PENDENTE)) {
+                fila.inserirFim(mov);
+            }
+        }
+
+        return fila;
+    }
+
     public Movimentacao buscarPorId(Long id) {
         List<Movimentacao> movimentacoes = listarTodos();
 
@@ -111,7 +137,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarPorVeiculo(Long id){
-        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -135,7 +161,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarPorMes(YearMonth mesAno) {
-        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -159,7 +185,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarCombustivelPorMes(YearMonth mesAno) {
-        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -183,7 +209,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarIpvaPorAno(Year ano) {
-        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -207,7 +233,7 @@ public class MovimentacaoService {
     }
 
     public List<Movimentacao> listarMultasPorVeiculo(Long id, Year ano) {
-        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
         List<Movimentacao> resultado = new ArrayList<>();
 
 
@@ -255,7 +281,7 @@ public class MovimentacaoService {
 
     public BigDecimal mediaDespesasPorCategoria(String categoria){
 
-        List<Movimentacao> movimentacoes = listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
 
         BigDecimal soma = BigDecimal .ZERO;
         int quantidade = 0;

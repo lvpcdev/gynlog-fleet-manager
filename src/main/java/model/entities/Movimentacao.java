@@ -3,6 +3,7 @@ package model.entities;
 
 
 
+import model.enums.StatusMovimentacao;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -19,6 +20,8 @@ public class Movimentacao {
     private Veiculo veiculo;
     private TipoDespesa tipoDespesa;
 
+    private StatusMovimentacao statusMovimentacao;
+
     public Movimentacao() {
     }
 
@@ -28,6 +31,16 @@ public class Movimentacao {
         this.descricao = descricao;
         this.data = data;
         this.valor = valor;
+        this.statusMovimentacao = StatusMovimentacao.PENDENTE;
+    }
+
+    public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor, StatusMovimentacao statusMovimentacao) {
+        this.veiculo = veiculo;
+        this.tipoDespesa = tipoDespesa;
+        this.descricao = descricao;
+        this.data = data;
+        this.valor = valor;
+        this.statusMovimentacao = statusMovimentacao;
     }
 
     public Long getId() {
@@ -76,6 +89,14 @@ public class Movimentacao {
 
     public void setValor(BigDecimal valor) {
         this.valor = valor;
+    }
+
+    public StatusMovimentacao getStatusMovimentacao() {
+        return statusMovimentacao;
+    }
+
+    public void setStatusMovimentacao(StatusMovimentacao statusMovimentacao) {
+        this.statusMovimentacao = statusMovimentacao;
     }
 
     @Override

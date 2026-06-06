@@ -30,6 +30,14 @@ public class MovimentacaoController {
         return movimentacaoService.listarTodos();
     }
 
+    public List<Movimentacao> listarAprovadas() {
+        return movimentacaoService.listarAprovadas();
+    }
+
+    public Fila<Movimentacao> listarPendentes() {
+        return movimentacaoService.listarPendentes();
+    }
+
     public Movimentacao buscarPorId(Long id) {
         return movimentacaoService.buscarPorId(id);
     }
