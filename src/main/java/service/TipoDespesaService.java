@@ -1,8 +1,8 @@
 package service;
 
 import dao.TipoDespesaDAO;
-import exceptionss.EntidadeNaoEncontradaException;
-import exceptionss.ValidacaoException;
+import exceptions.EntidadeNaoEncontradaException;
+import exceptions.ValidacaoException;
 import model.entities.TipoDespesa;
 import model.enumss.StatusTipoDespesa;
 

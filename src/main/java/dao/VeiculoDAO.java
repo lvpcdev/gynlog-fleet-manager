@@ -1,7 +1,7 @@
 package dao;
 
-import exceptionss.ArquivoNaoEncontradoException;
-import exceptionss.PersistenciaException;
+import exceptions.ArquivoNaoEncontradoException;
+import exceptions.PersistenciaException;
 import model.entities.Veiculo;
 import model.enumss.StatusVeiculo;
 

@@ -1,14 +1,14 @@
 package service;
 
 import dao.MovimentacaoDAO;
-import exceptionss.EntidadeNaoEncontradaException;
-import exceptionss.FilaVaziaException;
-import exceptionss.ValidacaoException;
+import exceptions.EntidadeNaoEncontradaException;
+import exceptions.FilaVaziaException;
+import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
 import model.enumss.StatusMovimentacao;
-import utils.Fila;
+import util.Fila;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
