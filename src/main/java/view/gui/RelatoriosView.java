@@ -322,6 +322,47 @@ public class RelatoriosView extends JFrame {
             }
         });
 
+        btnIndentificarVeiculoMaiorMenorCusto.addActionListener(e ->{
+            try{
+                List<Veiculo> veiculosOrdenados = movimentacaoController.listarVeiculosOrdenadosPorCusto();
+
+                if(veiculosOrdenados == null || veiculosOrdenados.isEmpty()){
+                    areaResultados.setText("Nenhum Veículo Encontrado.");
+                    return;
+                }
+
+                Veiculo maiorCusto = veiculosOrdenados.get(0);
+                Veiculo menorCusto = veiculosOrdenados.get(veiculosOrdenados.size() - 1);
+
+                BigDecimal totalMaior = movimentacaoController.totalPorVeiculo(maiorCusto.getId());
+                BigDecimal totalMenor = movimentacaoController.totalPorVeiculo(menorCusto.getId());
+
+                NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt","BR"));
+
+                String resultado = "========================================\n" +
+                        "VEÍCULOS COM MAIOR E MENOR CUSTO\n" +
+                        "========================================\n\n" +
+                        "MAIOR CUSTO:\n" +
+                        "Placa:    " + maiorCusto.getPlaca() + "\n" +
+                        "Modelo:   " + maiorCusto.getModelo() + "\n" +
+                        "Categoria:" + maiorCusto.getCategoria() + "\n" +
+                        "Total:    " + moeda.format(totalMaior) + "\n\n" +
+                        "----------------------------------------\n\n" +
+                        "MENOR CUSTO:\n" +
+                        "Placa:    " + menorCusto.getPlaca() + "\n" +
+                        "Modelo:   " + menorCusto.getModelo() + "\n" +
+                        "Categoria:" + menorCusto.getCategoria() + "\n" +
+                        "Total:    " + moeda.format(totalMenor) + "\n\n" +
+                        "========================================\n";
+
+                areaResultados.setText(resultado);
+
+            }catch(Exception ex){
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Erro: "+ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         painel.add(btnDespesasVeiculo);
         painel.add(btnSomaGeralMes);
         painel.add(btnSomaCombustivelMes);
