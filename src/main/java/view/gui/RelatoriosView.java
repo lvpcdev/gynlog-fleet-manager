@@ -27,6 +27,7 @@ public class RelatoriosView extends JFrame {
     private JComboBox<Veiculo> comboVeiculos;
     private JComboBox<Month> comboMes;
     private JComboBox<Integer> comboAno;
+    private JComboBox<String> comboCategoria;
     private JTextArea areaResultados;
 
     public RelatoriosView() {
@@ -137,19 +138,33 @@ public class RelatoriosView extends JFrame {
 
         comboAno = new JComboBox<Integer>();
 
+        comboCategoria = new JComboBox<>();
+        try {
+            List<String> categorias = veiculoController.listarCategorias();
+            for (String cat : categorias){
+                comboCategoria.addItem(cat);
+            }
+        }catch (Exception e){
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: "+ e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
         painel.add(new JLabel("Veículo:"));
         painel.add(comboVeiculos);
         painel.add(new JLabel("Mês:"));
         painel.add(comboMes);
         painel.add(new JLabel("Ano:"));
         painel.add(comboAno);
+        painel.add(new JLabel("Categoria"));
+        painel.add(comboCategoria);
+
 
         return painel;
     }
 
     private JPanel criarPainelAcoes() {
         JPanel painel = new JPanel();
-        painel.setLayout(new GridLayout(6, 1, 5, 5));
+        painel.setLayout(new GridLayout(10, 1, 5, 5));
         painel.setBorder(BorderFactory.createTitledBorder("Gerar Relatório"));
 
         JButton btnDespesasVeiculo = new JButton("1. Despesas por Veículo");
@@ -158,6 +173,10 @@ public class RelatoriosView extends JFrame {
         JButton btnSomaIpvaAno = new JButton("4. Somatório IPVA no Ano");
         JButton btnListarInativos = new JButton("5. Listar Veículos Inativos");
         JButton btnMultasAno = new JButton("6. Multas por Veículo no Ano");
+        JButton btnMediaDespesaVeiculoCategoria = new JButton("7. Média das Despesas por Categoria de Veículo");
+        JButton btnConsumoMedioVeiculo = new JButton("8. Consumo Médio por Veículo");
+        JButton btnCosumoMedioIPVA = new JButton("9. Custo Médio do IPVA em Determinado Ano");
+        JButton btnIndentificarVeiculoMaiorMenorCusto = new JButton("10. Identificar o Veículo com Maior e Menor Custo de Consumo");
 
         btnDespesasVeiculo.addActionListener(new ActionListener() {
             @Override
@@ -256,12 +275,63 @@ public class RelatoriosView extends JFrame {
             }
         });
 
+        btnMediaDespesaVeiculoCategoria.addActionListener(e -> {
+            String categoria = (String) comboCategoria.getSelectedItem();
+            if(categoria == null || categoria.isBlank()){
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Por favor, selecione uma categoria","Filtro Necessario",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try{
+                BigDecimal media = movimentacaoController.mediaDespesasPorCategoria(categoria);
+                String resultado = "========================================\n" +
+                                "  MÉDIA DE DESPESAS - CATEGORIA: " + categoria.toUpperCase() + "\n" +
+                                "========================================\n\n" +
+                                "  Média das despesas: R$ " + media + "\n\n" +
+                                "========================================\n";
+                areaResultados.setText(resultado);
+            }catch (Exception ex){
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Erro: "+ ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        btnCosumoMedioIPVA.addActionListener(e -> {
+            Integer anoSelecionado = (Integer) comboAno.getSelectedItem();
+
+            if(anoSelecionado == null){
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Por favor, selecione um ano.", "Filtro Necessário",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            try {
+                Year ano = Year.of(anoSelecionado);
+                BigDecimal media = movimentacaoController.mediaIpvaPorAno(ano);
+                String resultado = "========================================\n" +
+                        "  CUSTO MÉDIO DO IPVA - ANO: " + anoSelecionado + "\n" +
+                        "========================================\n\n" +
+                        "  Média do IPVA no ano: R$ " + media + "\n\n" +
+                        "========================================\n";
+                areaResultados.setText(resultado);
+            }   catch (Exception ex){
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Erro: "+ ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         painel.add(btnDespesasVeiculo);
         painel.add(btnSomaGeralMes);
         painel.add(btnSomaCombustivelMes);
         painel.add(btnSomaIpvaAno);
         painel.add(btnListarInativos);
         painel.add(btnMultasAno);
+        painel.add(btnMediaDespesaVeiculoCategoria);
+        painel.add(btnConsumoMedioVeiculo);
+        painel.add(btnCosumoMedioIPVA);
+        painel.add(btnIndentificarVeiculoMaiorMenorCusto);
 
         return painel;
     }
