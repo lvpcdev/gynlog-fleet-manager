@@ -7,8 +7,8 @@ import exceptions.ValidacaoException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
 import model.entities.Veiculo;
-import model.enums.StatusMovimentacao;
 import model.enums.StatusTipoDespesa;
+import util.CsvExporter;
 import util.Fila;
 import view.util.CaixaAltaComLimiteFilter;
 
@@ -22,6 +22,7 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -250,6 +251,13 @@ public class DespesasView extends JFrame {
         painelBotoes.add(botaoEditar);
         painelBotoes.add(botaoExcluir);
         painel.add(painelBotoes, BorderLayout.SOUTH);
+        JButton botaoExportarMovimentacoes = new JButton("Exportar CSV");
+        botaoExportarMovimentacoes.setBackground(new Color(40, 167, 69));
+        botaoExportarMovimentacoes.setForeground(Color.WHITE);
+        botaoExportarMovimentacoes.setOpaque(true);
+        botaoExportarMovimentacoes.setBorderPainted(false);
+        botaoExportarMovimentacoes.setFocusPainted(false);
+        painelBotoes.add(botaoExportarMovimentacoes);
 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
@@ -290,6 +298,27 @@ public class DespesasView extends JFrame {
                         JOptionPane.showMessageDialog(DespesasView.this, "Despesa excluída com sucesso!");
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(DespesasView.this, "Erro ao excluir: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
+        botaoExportarMovimentacoes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Salvar CSV - Movimentações");
+                fileChooser.setSelectedFile(new File("movimentacoes.csv"));
+                if (fileChooser.showSaveDialog(DespesasView.this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        File arquivo = fileChooser.getSelectedFile();
+                        String caminho = arquivo.getAbsolutePath().endsWith(".csv")
+                                ? arquivo.getAbsolutePath()
+                                : arquivo.getAbsolutePath() + ".csv";
+                        CsvExporter.exportarMovimentacoes(movimentacaoController.listarAprovadas(), caminho);
+                        JOptionPane.showMessageDialog(DespesasView.this, "Exportado com sucesso!\n" + caminho);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(DespesasView.this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -439,6 +468,14 @@ public class DespesasView extends JFrame {
         painelAdicionar.add(botaoSalvarNovo);
         painelPrincipal.add(painelAdicionar, BorderLayout.SOUTH);
 
+        JButton botaoExportarDespesas = new JButton("Exportar CSV");
+        botaoExportarDespesas.setBackground(new Color(40, 167, 69));
+        botaoExportarDespesas.setForeground(Color.WHITE);
+        botaoExportarDespesas.setOpaque(true);
+        botaoExportarDespesas.setBorderPainted(false);
+        botaoExportarDespesas.setFocusPainted(false);
+        painelAdicionar.add(botaoExportarDespesas);
+
         atualizarListaTipos(listModel);
 
         botaoSalvarNovo.addActionListener(new ActionListener() {
@@ -476,6 +513,27 @@ public class DespesasView extends JFrame {
                 janelaEdicao.pack();
                 janelaEdicao.setLocationRelativeTo(DespesasView.this);
                 janelaEdicao.setVisible(true);
+            }
+        });
+
+        botaoExportarDespesas.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Salvar CSV - Tipos de Despesa");
+                fileChooser.setSelectedFile(new File("despesas.csv"));
+                if (fileChooser.showSaveDialog(DespesasView.this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        File arquivo = fileChooser.getSelectedFile();
+                        String caminho = arquivo.getAbsolutePath().endsWith(".csv")
+                                ? arquivo.getAbsolutePath()
+                                : arquivo.getAbsolutePath() + ".csv";
+                        CsvExporter.exportarTiposDespesa(tipoDespesaController.listarTodos(), caminho);
+                        JOptionPane.showMessageDialog(DespesasView.this, "Exportado com sucesso!\n" + caminho);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(DespesasView.this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 

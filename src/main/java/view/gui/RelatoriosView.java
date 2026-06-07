@@ -286,9 +286,9 @@ public class RelatoriosView extends JFrame {
             try{
                 BigDecimal media = movimentacaoController.mediaDespesasPorCategoria(categoria);
                 String resultado = "========================================\n" +
-                                "  MÉDIA DE DESPESAS - CATEGORIA: " + categoria.toUpperCase() + "\n" +
+                                "MÉDIA DE DESPESAS - CATEGORIA: " + categoria.toUpperCase() + "\n" +
                                 "========================================\n\n" +
-                                "  Média das despesas: R$ " + media + "\n\n" +
+                                "Média das despesas: R$ " + media + "\n\n" +
                                 "========================================\n";
                 areaResultados.setText(resultado);
             }catch (Exception ex){
@@ -311,9 +311,9 @@ public class RelatoriosView extends JFrame {
                 Year ano = Year.of(anoSelecionado);
                 BigDecimal media = movimentacaoController.mediaIpvaPorAno(ano);
                 String resultado = "========================================\n" +
-                        "  CUSTO MÉDIO DO IPVA - ANO: " + anoSelecionado + "\n" +
+                        "CUSTO MÉDIO DO IPVA - ANO: " + anoSelecionado + "\n" +
                         "========================================\n\n" +
-                        "  Média do IPVA no ano: R$ " + media + "\n\n" +
+                        "Média do IPVA no ano: R$ " + media + "\n\n" +
                         "========================================\n";
                 areaResultados.setText(resultado);
             }   catch (Exception ex){

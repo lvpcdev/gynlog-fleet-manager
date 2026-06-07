@@ -5,6 +5,7 @@ import exceptions.ValidacaoException;
 import model.entities.Veiculo;
 import model.enums.StatusVeiculo;
 import util.BuscaSequencial;
+import util.CsvExporter;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.time.Year;
 import java.util.List;
 
@@ -117,7 +119,6 @@ public class VeiculosView extends JFrame {
         JRadioButton botaoAtivo = new JRadioButton("Estado Veículo - ATIVO");
         JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
         JButton botaoCadastrar = new JButton("Cadastrar Veículos");
-
         botaoAtivo.setSelected(true);
 
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
@@ -161,7 +162,8 @@ public class VeiculosView extends JFrame {
         painel.add(campoModelo, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
         painel.add(new JLabel("CATEGORIA:"), gbc);
 
         gbc.gridx = 1; gbc.gridy = 3;
@@ -254,6 +256,12 @@ public class VeiculosView extends JFrame {
         JButton botaoBuscarPlaca = new JButton("Buscar Placa");
         JButton botaoBuscarModelo = new JButton("Buscar Modelo");
         JButton botaoLimparBusca = new JButton("Limpar");
+        JButton botaoExportarVeiculos = new JButton("Exportar CSV");
+        botaoExportarVeiculos.setBackground(new Color(40, 167, 69));
+        botaoExportarVeiculos.setForeground(Color.WHITE);
+        botaoExportarVeiculos.setOpaque(true);
+        botaoExportarVeiculos.setBorderPainted(false);
+        botaoExportarVeiculos.setFocusPainted(false);
 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
@@ -348,6 +356,27 @@ public class VeiculosView extends JFrame {
             }
         });
 
+        botaoExportarVeiculos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Salvar CSV - Veículos");
+                fileChooser.setSelectedFile(new File("veiculos.csv"));
+                if (fileChooser.showSaveDialog(VeiculosView.this) == JFileChooser.APPROVE_OPTION) {
+                    try{
+                        File arquivo = fileChooser.getSelectedFile();
+                        String caminho = arquivo.getAbsolutePath().endsWith(".csv")
+                                ? arquivo.getAbsolutePath()
+                                : arquivo.getAbsolutePath() + ".csv";
+                        CsvExporter.exportarVeiculos(veiculoController.listarTodos(), caminho);
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Exportado com sucesso!\n" + caminho);
+                    }catch(Exception ex){
+                        JOptionPane.showMessageDialog(VeiculosView.this,"Erro: " + ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
         painel.add(painelBotoes, BorderLayout.SOUTH);
         painelBotoes.add(botaoEditar);
         painelBotoes.add(checkBoxInativos);
@@ -357,6 +386,7 @@ public class VeiculosView extends JFrame {
         painelBotoes.add(botaoBuscarPlaca);
         painelBotoes.add(botaoBuscarModelo);
         painelBotoes.add(botaoLimparBusca);
+        painelBotoes.add(botaoExportarVeiculos);
 
         return painel;
     }

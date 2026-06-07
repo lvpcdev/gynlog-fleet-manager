@@ -102,4 +102,4 @@
 109 | 54 | 5 | 2026-06-07 | 9000.00 | Seguro de veículo esportivo | APROVADA
 110 | 55 | 5 | 2026-06-07 | 10000.00 | Seguro | APROVADA
 111 | 53 | 3 | 2026-06-07 | 134.19 | Excesso de Velocidade | APROVADA
-112 | 56 | 4 | 2026-04-05 | 223.99 | Troca de oleo e revisão | PENDENTE
+112 | 56 | 4 | 2026-04-05 | 223.99 | Troca de oleo e revisão | APROVADA
