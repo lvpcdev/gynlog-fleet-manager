@@ -99,3 +99,7 @@
 99 | 49 | 8 | 2026-01-28 | 1900.00 | TROCA 4 PNEUS | APROVADA
 100 | 50 | 6 | 2026-02-28 | 180.00 | LICENCIAMENTO ANUAL | APROVADA
 108 | 1 | 6 | 2026-06-07 | 234.99 | Licencimento do veiculo | APROVADA
+109 | 54 | 5 | 2026-06-07 | 9000.00 | Seguro de veículo esportivo | APROVADA
+110 | 55 | 5 | 2026-06-07 | 10000.00 | Seguro | APROVADA
+111 | 53 | 3 | 2026-06-07 | 134.19 | Excesso de Velocidade | APROVADA
+112 | 56 | 4 | 2026-04-05 | 223.99 | Troca de oleo e revisão | PENDENTE

@@ -389,6 +389,7 @@ public class RelatoriosView extends JFrame {
     private void carregarFiltros() {
         comboVeiculos.removeAllItems();
         comboAno.removeAllItems();
+        comboCategoria.removeAllItems();
 
         comboVeiculos.addItem(null);
         List<Veiculo> veiculos = veiculoController.listarTodos();
@@ -399,6 +400,12 @@ public class RelatoriosView extends JFrame {
         int anoAtual = Year.now().getValue();
         for (int i = anoAtual; i >= anoAtual - 10; i--) {
             comboAno.addItem(i);
+        }
+
+        comboCategoria.addItem(null);
+        List<String> categorias = veiculoController.listarCategorias();
+        for (String cat : categorias){
+            comboCategoria.addItem(cat);
         }
 
         comboMes.setSelectedItem(Month.from(java.time.LocalDate.now()));
