@@ -2,6 +2,7 @@ package controller;
 
 
 import model.entities.Movimentacao;
+import model.entities.Veiculo;
 import service.MovimentacaoService;
 import util.Fila;
 
@@ -88,6 +89,10 @@ public class MovimentacaoController {
 
     public BigDecimal mediaDespesasPorCategoria(String categoria) {
         return movimentacaoService.mediaDespesasPorCategoria(categoria);
+    }
+
+    public List<Veiculo> listarVeiculosOrdenadosPorCusto() {
+        return movimentacaoService.listarVeiculosOrdenadosPorCusto();
     }
   
   public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {

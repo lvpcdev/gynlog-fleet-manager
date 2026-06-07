@@ -9,6 +9,7 @@ import model.entities.TipoDespesa;
 import model.entities.Veiculo;
 import model.enums.StatusMovimentacao;
 import util.Fila;
+import util.SelectionSort;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -297,6 +298,12 @@ public class MovimentacaoService {
         }
 
         return soma.divide(new BigDecimal(quantidade), 2, RoundingMode.HALF_UP);
+    }
+
+    public List<Veiculo> listarVeiculosOrdenadosPorCusto() {
+        List<Veiculo> veiculos = veiculoService.listarTodos();
+        List<Movimentacao> movimentacoes = listarAprovadas();
+        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculos, movimentacoes);
     }
 
 
