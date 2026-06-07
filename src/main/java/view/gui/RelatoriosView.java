@@ -376,6 +376,7 @@ public class RelatoriosView extends JFrame {
                 sb.append("Placa: ").append(v.getPlaca()).append("\n");
                 sb.append("Marca: ").append(v.getMarca()).append("\n");
                 sb.append("Modelo: ").append(v.getModelo()).append("\n");
+                sb.append("Categoria: ").append(v.getCategoria()).append("\n");
                 sb.append("Ano: ").append(v.getAnoDeFabricacao()).append("\n");
                 sb.append("Status: ").append(v.getStatusVeiculo()).append("\n");
                 sb.append("----------------------------------------\n");
