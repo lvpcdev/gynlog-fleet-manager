@@ -303,7 +303,17 @@ public class MovimentacaoService {
     public List<Veiculo> listarVeiculosOrdenadosPorCusto() {
         List<Veiculo> veiculos = veiculoService.listarTodos();
         List<Movimentacao> movimentacoes = listarAprovadas();
-        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculos, movimentacoes);
+
+        List<Veiculo> veiculosComMovimentacao = new ArrayList<>();
+        for (Veiculo v : veiculos) {
+            for (Movimentacao mov : movimentacoes) {
+                if (mov.getVeiculo().getId().equals(v.getId())) {
+                    veiculosComMovimentacao.add(v);
+                    break;
+                }
+            }
+        }
+        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculosComMovimentacao, movimentacoes);
     }
 
 
