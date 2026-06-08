@@ -141,11 +141,11 @@ public class RelatoriosView extends JFrame {
         comboCategoria = new JComboBox<>();
         try {
             List<String> categorias = veiculoController.listarCategorias();
-            for (String cat : categorias){
+            for (String cat : categorias) {
                 comboCategoria.addItem(cat);
             }
-        }catch (Exception e){
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: "+ e.getMessage(),
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -277,30 +277,73 @@ public class RelatoriosView extends JFrame {
 
         btnMediaDespesaVeiculoCategoria.addActionListener(e -> {
             String categoria = (String) comboCategoria.getSelectedItem();
-            if(categoria == null || categoria.isBlank()){
+            if (categoria == null || categoria.isBlank()) {
                 JOptionPane.showMessageDialog(RelatoriosView.this,
-                        "Por favor, selecione uma categoria","Filtro Necessario",
+                        "Por favor, selecione uma categoria", "Filtro Necessario",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            try{
+            try {
                 BigDecimal media = movimentacaoController.mediaDespesasPorCategoria(categoria);
                 String resultado = "========================================\n" +
-                                "MÉDIA DE DESPESAS - CATEGORIA: " + categoria.toUpperCase() + "\n" +
-                                "========================================\n\n" +
-                                "Média das despesas: R$ " + media + "\n\n" +
-                                "========================================\n";
+                        "MÉDIA DE DESPESAS - CATEGORIA: " + categoria.toUpperCase() + "\n" +
+                        "========================================\n\n" +
+                        "Média das despesas: R$ " + media + "\n\n" +
+                        "========================================\n";
                 areaResultados.setText(resultado);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(RelatoriosView.this,
-                        "Erro: "+ ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+                        "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        btnConsumoMedioVeiculo.addActionListener(e -> {
+            Veiculo veiculo = (Veiculo) comboVeiculos.getSelectedItem();
+            if (veiculo == null) {
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Por favor, selecione um veículo.", "Filtro Necessário",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try {
+                boolean temCombustivel = movimentacaoController.existeCombustivelMovimentacao(veiculo.getId());
+                if (!temCombustivel) {
+                    areaResultados.setText(
+                            "========================================\n" +
+                                    "CONSUMO MÉDIO - " + veiculo.getPlaca() + "\n" +
+                                    "========================================\n\n" +
+                                    "Nenhum registro de combustível\n" +
+                                    "encontrado para este veículo.\n\n" +
+                                    "========================================\n"
+                    );
+                    return;
+                }
+
+                BigDecimal consumoMedio = movimentacaoController.consumoMedioPorVeiculo(veiculo.getId());
+                double ultimaQuilometragem = movimentacaoController.buscarUltimaQuilometragemVeiculo(veiculo.getId());
+
+                String resultado =
+                        "========================================\n" +
+                                "CONSUMO MÉDIO - " + veiculo.getPlaca() + "\n" +
+                                "========================================\n\n" +
+                                "Veículo:            " + veiculo.getPlaca() + " (" + veiculo.getModelo() + ")\n" +
+                                "Categoria:          " + veiculo.getCategoria() + "\n\n" +
+                                "Consumo médio:      " + consumoMedio + " km/L\n" +
+                                "Última km registrada: " + String.format("%.0f km", ultimaQuilometragem) + "\n\n" +
+                                "========================================\n";
+
+                areaResultados.setText(resultado);
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(RelatoriosView.this,
+                        "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         btnCosumoMedioIPVA.addActionListener(e -> {
             Integer anoSelecionado = (Integer) comboAno.getSelectedItem();
 
-            if(anoSelecionado == null){
+            if (anoSelecionado == null) {
                 JOptionPane.showMessageDialog(RelatoriosView.this,
                         "Por favor, selecione um ano.", "Filtro Necessário",
                         JOptionPane.WARNING_MESSAGE);
@@ -316,17 +359,17 @@ public class RelatoriosView extends JFrame {
                         "Média do IPVA no ano: R$ " + media + "\n\n" +
                         "========================================\n";
                 areaResultados.setText(resultado);
-            }   catch (Exception ex){
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(RelatoriosView.this,
-                        "Erro: "+ ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+                        "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        btnIndentificarVeiculoMaiorMenorCusto.addActionListener(e ->{
-            try{
+        btnIndentificarVeiculoMaiorMenorCusto.addActionListener(e -> {
+            try {
                 List<Veiculo> veiculosOrdenados = movimentacaoController.listarVeiculosOrdenadosPorCusto();
 
-                if(veiculosOrdenados == null || veiculosOrdenados.isEmpty()){
+                if (veiculosOrdenados == null || veiculosOrdenados.isEmpty()) {
                     areaResultados.setText("Nenhum Veículo Encontrado.");
                     return;
                 }
@@ -337,7 +380,7 @@ public class RelatoriosView extends JFrame {
                 BigDecimal totalMaior = movimentacaoController.totalPorVeiculo(maiorCusto.getId());
                 BigDecimal totalMenor = movimentacaoController.totalPorVeiculo(menorCusto.getId());
 
-                NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt","BR"));
+                NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
                 String resultado = "========================================\n" +
                         "VEÍCULOS COM MAIOR E MENOR CUSTO\n" +
@@ -357,9 +400,9 @@ public class RelatoriosView extends JFrame {
 
                 areaResultados.setText(resultado);
 
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(RelatoriosView.this,
-                        "Erro: "+ex.getMessage(),"Erro",JOptionPane.ERROR_MESSAGE);
+                        "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -446,7 +489,7 @@ public class RelatoriosView extends JFrame {
 
         comboCategoria.addItem(null);
         List<String> categorias = veiculoController.listarCategorias();
-        for (String cat : categorias){
+        for (String cat : categorias) {
             comboCategoria.addItem(cat);
         }
 

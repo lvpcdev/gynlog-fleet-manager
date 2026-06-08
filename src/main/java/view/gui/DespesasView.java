@@ -170,6 +170,8 @@ public class DespesasView extends JFrame {
                 if (value instanceof Veiculo) {
                     Veiculo veiculo = (Veiculo) value;
                     setText(veiculo.getPlaca() + " (" + veiculo.getModelo() + ")");
+                } else if (value == null) {
+                    setText("Selecione um veículo");
                 }
                 return this;
             }
@@ -180,34 +182,90 @@ public class DespesasView extends JFrame {
         campoData = new JTextField(10);
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         campoDescricao = new JTextField(25);
+
+        JTextField campoQuilometragem = new JTextField(10);
+        AbstractDocument docKm = (AbstractDocument) campoQuilometragem.getDocument();
+        docKm.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                if (string.matches("[0-9]+")) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                if (text.matches("[0-9]*")) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+        });
+        JLabel labelQuilometragem = new JLabel("Nova KM:");
+        JLabel labelKmAnterior = new JLabel("KM anterior:");
+        JLabel valorKmAnterior = new JLabel("—");
+
+        campoQuilometragem.setVisible(false);
+        labelQuilometragem.setVisible(false);
+        labelKmAnterior.setVisible(false);
+        valorKmAnterior.setVisible(false);
+
         JButton botaoSalvar = new JButton("Salvar Despesa");
 
         aplicarFiltroValor(campoValor);
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        painel.add(new JLabel("Veículo:"), gbc);
-        gbc.gridy++;
-        painel.add(new JLabel("Tipo de Despesa:"), gbc);
-        gbc.gridy++;
-        painel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
-        gbc.gridy++;
-        painel.add(new JLabel("Valor (R$):"), gbc);
-        gbc.gridy++;
-        painel.add(new JLabel("Descrição:"), gbc);
+        Runnable atualizarKmAnterior = () -> {
+            Veiculo veiculoSelecionado = (Veiculo) comboBoxVeiculos.getSelectedItem();
+            TipoDespesa tipoSelecionado = (TipoDespesa) comboBoxTiposDespesa.getSelectedItem();
+            boolean ehCombustivel = tipoSelecionado != null && (
+                    tipoSelecionado.getDescricao().toUpperCase().contains("COMBUSTIVEL") ||
+                            tipoSelecionado.getDescricao().toUpperCase().contains("COMBUSTÍVEL"));
 
-        gbc.gridx = 1; gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        painel.add(comboBoxVeiculos, gbc);
-        gbc.gridy++;
-        painel.add(comboBoxTiposDespesa, gbc);
-        gbc.gridy++;
-        painel.add(campoData, gbc);
-        gbc.gridy++;
-        painel.add(campoValor, gbc);
-        gbc.gridy++;
-        painel.add(campoDescricao, gbc);
+            campoQuilometragem.setVisible(ehCombustivel);
+            labelQuilometragem.setVisible(ehCombustivel);
+            labelKmAnterior.setVisible(ehCombustivel);
+            valorKmAnterior.setVisible(ehCombustivel);
 
-        gbc.gridx = 0; gbc.gridy++;
+            if (ehCombustivel && veiculoSelecionado != null) {
+                try {
+                    boolean temRegistro = movimentacaoController.existeCombustivelMovimentacao(veiculoSelecionado.getId());
+                    if (temRegistro) {
+                        double kmAnterior = movimentacaoController.buscarUltimaQuilometragemVeiculo(veiculoSelecionado.getId());
+                        valorKmAnterior.setText(String.format("%.0f km", kmAnterior));
+                    } else {
+                        valorKmAnterior.setText("Nenhum registro anterior");
+                    }
+                } catch (Exception ex) {
+                    valorKmAnterior.setText("Erro ao buscar");
+                }
+            }
+
+            painel.revalidate();
+            painel.repaint();
+        };
+
+        comboBoxTiposDespesa.addActionListener(e -> atualizarKmAnterior.run());
+        comboBoxVeiculos.addActionListener(e -> atualizarKmAnterior.run());
+
+        gbc.gridx = 0; gbc.gridy = 0; painel.add(new JLabel("Veículo:"), gbc);
+        gbc.gridy = 1;                 painel.add(new JLabel("Tipo de Despesa:"), gbc);
+        gbc.gridy = 2;                 painel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
+        gbc.gridy = 3;                 painel.add(new JLabel("Valor (R$):"), gbc);
+        gbc.gridy = 4;                 painel.add(new JLabel("Descrição:"), gbc);
+        gbc.gridy = 5;                 painel.add(labelQuilometragem, gbc);
+        gbc.gridy = 6;                 painel.add(labelKmAnterior, gbc);
+
+
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridy = 0; painel.add(comboBoxVeiculos, gbc);
+        gbc.gridy = 1; painel.add(comboBoxTiposDespesa, gbc);
+        gbc.gridy = 2; painel.add(campoData, gbc);
+        gbc.gridy = 3; painel.add(campoValor, gbc);
+        gbc.gridy = 4; painel.add(campoDescricao, gbc);
+        gbc.gridy = 5; painel.add(campoQuilometragem, gbc);
+        gbc.gridy = 6; painel.add(valorKmAnterior, gbc);
+
+
+        gbc.gridx = 0; gbc.gridy = 7;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
@@ -216,8 +274,63 @@ public class DespesasView extends JFrame {
         botaoSalvar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                registrarNovaMovimentacao();
+                try {
+                    Veiculo veiculo = (Veiculo) comboBoxVeiculos.getSelectedItem();
+                    TipoDespesa tipo = (TipoDespesa) comboBoxTiposDespesa.getSelectedItem();
+                    if (veiculo == null) {
+                        JOptionPane.showMessageDialog(DespesasView.this,
+                                "Por favor, selecione um veículo.",
+                                "Filtro Necessário",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if (tipo == null) {
+                        JOptionPane.showMessageDialog(DespesasView.this,
+                                "Por favor, selecione um tipo de despesa.",
+                                "Filtro Necessário",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    LocalDate data = LocalDate.parse(campoData.getText(), formatter);
+                    BigDecimal valor = extrairValor(campoValor.getText());
+                    String descricao = campoDescricao.getText();
+
+                    Double quilometragem = null;
+                    if (campoQuilometragem.isVisible() && !campoQuilometragem.getText().trim().isEmpty()) {
+                        quilometragem = Double.parseDouble(campoQuilometragem.getText().trim().replace(",", "."));
+
+                        // ← validação km nova > km anterior
+                        if (veiculo != null && movimentacaoController.existeCombustivelMovimentacao(veiculo.getId())) {
+                            double kmAnterior = movimentacaoController.buscarUltimaQuilometragemVeiculo(veiculo.getId());
+                            if (quilometragem <= kmAnterior) {
+                                JOptionPane.showMessageDialog(DespesasView.this,
+                                        "A quilometragem informada (" + quilometragem.intValue() + " km) deve ser\n" +
+                                                "maior que a última registrada (" + (int) kmAnterior + " km).",
+                                        "Quilometragem Inválida",
+                                        JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
+                        }
+                    }
+
+                    Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor);
+                    novaMovimentacao.setQuilometragemAtual(quilometragem);
+
+                    movimentacaoController.salvar(novaMovimentacao);
+                    JOptionPane.showMessageDialog(DespesasView.this, "Despesa registrada com sucesso! Status: PENDENTE");
+                    limparCamposCadastro();
+                    campoQuilometragem.setText("");
+                    atualizarDados();
+                    atualizarTabelaPendentes();
+
+                } catch (ValidacaoException ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(DespesasView.this, "Erro ao registrar despesa: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             }
+
         });
 
         return painel;
@@ -580,6 +693,7 @@ public class DespesasView extends JFrame {
 
     private void atualizarDados() {
         comboBoxVeiculos.removeAllItems();
+        comboBoxVeiculos.addItem(null);
         List<Veiculo> veiculos = veiculoController.listarAtivos();
         for (Veiculo v : veiculos) {
             comboBoxVeiculos.addItem(v);
