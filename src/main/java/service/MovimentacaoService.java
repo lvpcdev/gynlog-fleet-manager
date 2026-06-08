@@ -316,6 +316,107 @@ public class MovimentacaoService {
         return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculosComMovimentacao, movimentacoes);
     }
 
+    public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
+        return buscarUltimaQuilometragemVeiculoInterno(veiculoId, null);
+    }
+
+    public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
+        return buscarUltimaQuilometragemVeiculoInterno(veiculoId, movimentacaoId);
+    }
+
+    private double buscarUltimaQuilometragemVeiculoInterno(Long veiculoId, Long movimentacaoIdExcluir) {
+        List<Movimentacao> todasMovimentacoes = listarTodos();
+        List<Movimentacao> filtradas = new ArrayList<>();
+
+        for (Movimentacao mov : todasMovimentacoes) {
+            if (mov.getVeiculo() == null || !mov.getVeiculo().getId().equals(veiculoId)) continue;
+            if (movimentacaoIdExcluir != null && mov.getId().equals(movimentacaoIdExcluir)) continue;
+            if (mov.getTipoDespesa() == null || !mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")) continue;
+            if (mov.getQuilometragemAtual() == null || mov.getQuilometragemAtual() <= 0) continue;
+            filtradas.add(mov);
+        }
+
+        for (int i = 0; i < filtradas.size() - 1; i++) {
+            int indiceMenor = i;
+            for (int j = i + 1; j < filtradas.size(); j++) {
+                if (filtradas.get(j).getData().isBefore(filtradas.get(indiceMenor).getData())) {
+                    indiceMenor = j;
+                }
+            }
+            if (indiceMenor != i) {
+                Movimentacao temp = filtradas.get(i);
+                filtradas.set(i, filtradas.get(indiceMenor));
+                filtradas.set(indiceMenor, temp);
+            }
+        }
+
+        if (!filtradas.isEmpty()) {
+            return filtradas.get(filtradas.size() - 1).getQuilometragemAtual();
+        }
+
+        return 0.0;
+    }
+
+    public boolean existeCombustivelMovimentacao(Long veiculoId) {
+        List<Movimentacao> todasMovimentacoes = listarTodos();
+
+        for (Movimentacao mov : todasMovimentacoes) {
+            if (mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId)
+                    && mov.getTipoDespesa() != null
+                    && mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public BigDecimal consumoMedioPorVeiculo(Long veiculoId) {
+        List<Movimentacao> movimentacoes = listarAprovadas();
+        List<Movimentacao> filtradas = new ArrayList<>();
+
+        for (Movimentacao mov : movimentacoes) {
+            if (mov.getVeiculo().getId().equals(veiculoId)
+                    && mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")
+                    && mov.getQuilometragemAtual() != null
+                    && mov.getQuilometragemAtual() > 0) {
+                filtradas.add(mov);
+            }
+        }
+
+        if (filtradas.size() < 2) {
+            return BigDecimal.ZERO;
+        }
+
+        for (int i = 0; i < filtradas.size() - 1; i++) {
+            int indiceMenor = i;
+            for (int j = i + 1; j < filtradas.size(); j++) {
+                if (filtradas.get(j).getData().isBefore(filtradas.get(indiceMenor).getData())) {
+                    indiceMenor = j;
+                }
+            }
+            if (indiceMenor != i) {
+                Movimentacao temp = filtradas.get(i);
+                filtradas.set(i, filtradas.get(indiceMenor));
+                filtradas.set(indiceMenor, temp);
+            }
+        }
+
+        double kmInicial = filtradas.get(0).getQuilometragemAtual();
+        double kmFinal = filtradas.get(filtradas.size() - 1).getQuilometragemAtual();
+        double kmRodados = kmFinal - kmInicial;
+
+        if (kmRodados <= 0) return BigDecimal.ZERO;
+
+        BigDecimal totalValor = BigDecimal.ZERO;
+        for (int i = 1; i < filtradas.size(); i++) {
+            totalValor = totalValor.add(filtradas.get(i).getValor());
+        }
+
+        if (totalValor.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
+
+        return new BigDecimal(kmRodados).divide(totalValor, 2, RoundingMode.HALF_UP);
+    }
+
 
     public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
         if (fila.estaVazia()) {
