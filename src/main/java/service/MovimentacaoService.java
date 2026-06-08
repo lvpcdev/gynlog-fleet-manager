@@ -326,7 +326,7 @@ public class MovimentacaoService {
 
     private double buscarUltimaQuilometragemVeiculoInterno(Long veiculoId, Long movimentacaoIdExcluir) {
         List<Movimentacao> todasMovimentacoes = listarTodos();
-        List<Movimentacao> filtradas = new ArrayList<Movimentacao>();
+        List<Movimentacao> filtradas = new ArrayList<>();
 
         for (Movimentacao mov : todasMovimentacoes) {
             if (mov.getVeiculo() == null || !mov.getVeiculo().getId().equals(veiculoId)) continue;
@@ -372,7 +372,7 @@ public class MovimentacaoService {
 
     public BigDecimal consumoMedioPorVeiculo(Long veiculoId) {
         List<Movimentacao> movimentacoes = listarAprovadas();
-        List<Movimentacao> filtradas = new ArrayList<Movimentacao>();
+        List<Movimentacao> filtradas = new ArrayList<>();
 
         for (Movimentacao mov : movimentacoes) {
             if (mov.getVeiculo().getId().equals(veiculoId)
