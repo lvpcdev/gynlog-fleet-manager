@@ -76,7 +76,7 @@ public class TipoDespesaService {
         throw new EntidadeNaoEncontradaException("Tipo de despesa com id " + id + " não encontrado");
     }
 
-    // NOVO: Método para buscar TipoDespesa pela descrição
+
     public TipoDespesa buscarPorDescricao(String descricao) {
         return tipoDespesaDAO.buscarPorDescricao(descricao);
     }

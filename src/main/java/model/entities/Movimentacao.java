@@ -31,7 +31,6 @@ public class Movimentacao {
         this.valor = valor;
     }
 
-    // Novo construtor que inclui a quilometragem atual
     public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor, double quilometragemAtual) {
         this.veiculo = veiculo;
         this.tipoDespesa = tipoDespesa;
@@ -89,7 +88,6 @@ public class Movimentacao {
         this.valor = valor;
     }
 
-    // Novos getters e setters para quilometragemAtual
     public double getQuilometragemAtual() {
         return quilometragemAtual;
     }

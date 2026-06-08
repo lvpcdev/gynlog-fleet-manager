@@ -40,19 +40,16 @@ public class TipoDespesaDAO {
         File arquivo = new File(caminhoArquivo);
 
         if (!arquivo.exists()) {
-            // NOVO: Criar o arquivo se não existir e adicionar o tipo "COMBUSTÍVEL"
             try {
-                arquivo.getParentFile().mkdirs(); // Garante que o diretório exista
+                arquivo.getParentFile().mkdirs();
                 arquivo.createNewFile();
-                // Adicionar "COMBUSTÍVEL" como tipo padrão se o arquivo não existir
                 TipoDespesa combustivel = new TipoDespesa("COMBUSTÍVEL", StatusTipoDespesa.ATIVO);
-                salvar(combustivel); // Salva o tipo de despesa, que também gera um ID
-                tiposDeDespesa.add(combustivel); // Adiciona à lista para retorno imediato
+                salvar(combustivel);
+                tiposDeDespesa.add(combustivel);
             } catch (IOException e) {
                 throw new PersistenciaException("Erro ao criar arquivo de tipos de despesa: ", e);
             }
-            // Se o arquivo foi recém-criado e "COMBUSTÍVEL" foi adicionado, não precisamos ler o arquivo novamente
-            // Apenas retornamos a lista com "COMBUSTÍVEL"
+
             return tiposDeDespesa;
         }
 
@@ -137,7 +134,6 @@ public class TipoDespesaDAO {
     private Long gerarId() {
         File arquivoUltimoId = new File(caminhoId);
 
-        // NOVO: Criar o arquivo se não existir e inicializar com 0
         if (!arquivoUltimoId.exists()) {
             try {
                 arquivoUltimoId.getParentFile().mkdirs(); // Garante que o diretório exista
@@ -159,7 +155,7 @@ public class TipoDespesaDAO {
                 novoId = Long.parseLong(linha);
                 novoId++;
             } else {
-                novoId = 1L; // Se o arquivo estava vazio ou só tinha espaços, começa com 1
+                novoId = 1L;
             }
         } catch (IOException e) {
             throw new PersistenciaException("Erro ao ler ID", e);
@@ -173,7 +169,6 @@ public class TipoDespesaDAO {
         return novoId;
     }
 
-    // NOVO: Método para buscar TipoDespesa pela descrição
     public TipoDespesa buscarPorDescricao(String descricao) {
         List<TipoDespesa> tiposDeDespesa = listarTodos(); // Reutiliza o método listarTodos
 

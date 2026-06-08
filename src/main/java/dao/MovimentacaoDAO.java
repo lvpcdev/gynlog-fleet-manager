@@ -1,6 +1,6 @@
 package dao;
 
-import exceptions.ArquivoNaoEncontradoException;
+import exceptions.ArquivoNaoEncontradoException; // Corrigido o nome da exceção
 import exceptions.PersistenciaException;
 import model.entities.Movimentacao;
 import model.entities.TipoDespesa;
@@ -11,11 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MovimentacaoDAO {
 
@@ -25,9 +21,6 @@ public class MovimentacaoDAO {
 
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    // NOVO: Dependência para TipoDespesaDAO para buscar descrições
-    private TipoDespesaDAO tipoDespesaDAO = new TipoDespesaDAO();
-
 
     public void salvar(Movimentacao movimentacao) {
         File arquivo = new File(caminhoArquivo);
@@ -35,7 +28,6 @@ public class MovimentacaoDAO {
         Long idVeiculo = movimentacao.getVeiculo().getId();
         Long idTipoDespesa = movimentacao.getTipoDespesa().getId();
 
-        // NOVO: Adicionar quilometragemAtual à linha
         String linha = movimentacao.getId() + " | "
                 + idVeiculo + " | "
                 + idTipoDespesa + " | "
@@ -59,8 +51,7 @@ public class MovimentacaoDAO {
         File arquivo = new File(caminhoArquivo);
 
         if (!arquivo.exists()) {
-            // Se o arquivo não existe, retorna uma lista vazia em vez de lançar exceção
-            // Isso é útil para o primeiro uso do sistema
+
             return movimentacoes;
         }
 
@@ -73,7 +64,7 @@ public class MovimentacaoDAO {
                 }
 
                 String[] partes = linha.split(" \\| ");
-                // NOVO: Ajustar para 6 ou 7 partes (com ou sem quilometragem)
+
                 if (partes.length >= 6) {
                     try {
                         Long idMovimentacao = Long.parseLong(partes[0]);
@@ -82,9 +73,9 @@ public class MovimentacaoDAO {
                         LocalDate data = LocalDate.parse(partes[3], formatadorData);
                         BigDecimal valor = new BigDecimal(partes[4]);
                         String descricao = partes[5];
-                        double quilometragemAtual = 0.0; // Valor padrão para compatibilidade
+                        double quilometragemAtual = 0.0;
 
-                        if (partes.length == 7) { // Se a quilometragem está presente
+                        if (partes.length == 7) {
                             quilometragemAtual = Double.parseDouble(partes[6]);
                         }
 
@@ -96,7 +87,7 @@ public class MovimentacaoDAO {
                         tipoDespesa.setId(idTipoDespesa);
 
 
-                        // NOVO: Usar o construtor com quilometragem
+
                         Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor, quilometragemAtual);
                         movimentacao.setId(idMovimentacao);
                         movimentacoes.add(movimentacao);
@@ -121,7 +112,7 @@ public class MovimentacaoDAO {
             throw new ArquivoNaoEncontradoException("Arquivo movimentações não encontrado.");
         }
 
-        // NOVO: Adicionar quilometragemAtual à linha de atualização
+
         String movimentacaoTexto = movimentacao.getId() + " | " +
                 movimentacao.getVeiculo().getId() + " | " +
                 movimentacao.getTipoDespesa().getId() + " | " +
@@ -142,7 +133,7 @@ public class MovimentacaoDAO {
 
                 String[] partes = linha.split(" \\| ");
 
-                // NOVO: Verificar se a linha tem pelo menos 6 partes antes de tentar parsear o ID
+
                 if (partes.length >= 6 && Long.parseLong(partes[0]) == movimentacao.getId()) {
                     linha = movimentacaoTexto;
                 }
@@ -171,7 +162,7 @@ public class MovimentacaoDAO {
         File arquivoTemp = new File("data/movimentacoes/movimentacoesTemp.txt");
 
         if (!arquivoOriginal.exists()) {
-            throw new ArquivoNaoEncontradoException("Arquivo movimentações não encontrado.");
+            throw new ArquivoNaoEncontradoException("Arquivo movimentações não encontrado."); // Corrigido o nome da exceção
         }
 
 
@@ -182,7 +173,7 @@ public class MovimentacaoDAO {
             while ((linha = br.readLine()) != null) {
                 String[] partes = linha.split(" \\| ");
 
-                // NOVO: Verificar se a linha tem pelo menos 6 partes antes de tentar parsear o ID
+                // Verificar se a linha tem pelo menos 6 partes antes de tentar parsear o ID
                 if (partes.length >= 6 && Long.parseLong(partes[0]) == id) {
                     continue;
                 }
@@ -207,7 +198,6 @@ public class MovimentacaoDAO {
     private Long gerarId() {
         File arquivoUltimoId = new File(caminhoId);
 
-        // NOVO: Criar o arquivo se não existir e inicializar com 0
         if (!arquivoUltimoId.exists()) {
             try {
                 arquivoUltimoId.getParentFile().mkdirs(); // Garante que o diretório exista
@@ -226,11 +216,11 @@ public class MovimentacaoDAO {
 
             String linha = br.readLine();
 
-            if (linha != null && !linha.trim().isEmpty()) { // NOVO: Verificar se a linha não está vazia
+            if (linha != null && !linha.trim().isEmpty()) {
                 novoId = Long.parseLong(linha);
                 novoId++;
             } else {
-                novoId = 1L; // Se o arquivo estava vazio ou só tinha espaços, começa com 1
+                novoId = 1L;
             }
         } catch (IOException e) {
             throw new PersistenciaException("Erro ao ler ID", e);
@@ -244,57 +234,5 @@ public class MovimentacaoDAO {
         return novoId;
     }
 
-    // NOVO: Método para buscar a última quilometragem registrada para um veículo
-    public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
-        return buscarUltimaQuilometragemVeiculoInterno(veiculoId, null);
-    }
 
-    // NOVO: Método para buscar a última quilometragem registrada para um veículo, excluindo uma movimentação específica
-    public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
-        return buscarUltimaQuilometragemVeiculoInterno(veiculoId, movimentacaoId);
-    }
-
-    private double buscarUltimaQuilometragemVeiculoInterno(Long veiculoId, Long movimentacaoIdExcluir) {
-        List<Movimentacao> todasMovimentacoes = listarTodos();
-        List<TipoDespesa> todosTiposDespesa = tipoDespesaDAO.listarTodos(); // Buscar todos os tipos de despesa
-
-        // Mapear IDs de TipoDespesa para suas descrições para fácil acesso
-        // Isso é necessário porque MovimentacaoDAO não tem acesso direto ao serviço de TipoDespesa
-        // e o Movimentacao.tipoDespesa no DAO só tem o ID.
-        Map<Long, String> tipoDespesaMap = todosTiposDespesa.stream()
-                .collect(Collectors.toMap(TipoDespesa::getId, TipoDespesa::getDescricao));
-
-        Optional<Movimentacao> ultimaMovimentacao = todasMovimentacoes.stream()
-                .filter(mov -> mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId))
-                .filter(mov -> movimentacaoIdExcluir == null || !mov.getId().equals(movimentacaoIdExcluir)) // Excluir movimentação se ID for fornecido
-                .filter(mov -> {
-                    String descricaoTipo = tipoDespesaMap.get(mov.getTipoDespesa().getId());
-                    return "COMBUSTÍVEL".equalsIgnoreCase(descricaoTipo);
-                })
-                .filter(mov -> mov.getQuilometragemAtual() > 0) // Apenas movimentações com quilometragem válida
-                .sorted(Comparator
-                        .comparing(Movimentacao::getData)
-                        .thenComparing(Movimentacao::getQuilometragemAtual, Comparator.reverseOrder())) // Ordena por data e depois por quilometragem (decrescente)
-                .reduce((first, second) -> second); // Pega o último elemento após a ordenação
-
-        return ultimaMovimentacao.map(Movimentacao::getQuilometragemAtual).orElse(0.0);
-    }
-
-    // NOVO: Método para verificar se um veículo possui movimentações de combustível
-    public boolean hasCombustivelMovimentacao(Long veiculoId) {
-        List<Movimentacao> todasMovimentacoes = listarTodos();
-        List<TipoDespesa> todosTiposDespesa = tipoDespesaDAO.listarTodos();
-
-        Map<Long, String> tipoDespesaMap = todosTiposDespesa.stream()
-                .collect(Collectors.toMap(TipoDespesa::getId, TipoDespesa::getDescricao));
-
-        return todasMovimentacoes.stream()
-                .filter(mov -> mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId))
-                .filter(mov -> {
-                    String descricaoTipo = tipoDespesaMap.get(mov.getTipoDespesa().getId());
-                    return "COMBUSTÍVEL".equalsIgnoreCase(descricaoTipo);
-                })
-                .findAny() // Encontra qualquer um que satisfaça os filtros
-                .isPresent(); // Retorna true se encontrou, false caso contrário
-    }
 }

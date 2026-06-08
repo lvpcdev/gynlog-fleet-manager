@@ -12,9 +12,10 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
+// import java.util.stream.Collectors; // REMOVIDO: Não é mais necessário
 
 public class MovimentacaoService {
 
@@ -86,6 +87,7 @@ public class MovimentacaoService {
     public List<Movimentacao> listarTodos() {
         List<Movimentacao> movimentacoes = movimentacaoDAO.listarTodos();
 
+        // Preencher os objetos Veiculo e TipoDespesa completos
         for (Movimentacao mov : movimentacoes) {
             Veiculo veiculo = veiculoService.buscarPorId(mov.getVeiculo().getId());
             TipoDespesa tipoDespesa = tipoDespesaService.buscarPorId(mov.getTipoDespesa().getId());
@@ -231,22 +233,69 @@ public class MovimentacaoService {
         return total;
     }
 
-    // NOVO: Método para buscar a última quilometragem registrada para um veículo
     public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
-        return movimentacaoDAO.buscarUltimaQuilometragemVeiculo(veiculoId);
+        return buscarUltimaQuilometragemVeiculoInterno(veiculoId, null);
     }
 
-    // NOVO: Método para buscar a última quilometragem registrada para um veículo, excluindo uma movimentação específica
+
     public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
-        return movimentacaoDAO.buscarUltimaQuilometragemVeiculoExcluindoAtual(veiculoId, movimentacaoId);
+        return buscarUltimaQuilometragemVeiculoInterno(veiculoId, movimentacaoId);
     }
 
-    // NOVO: Método para verificar se um veículo possui movimentações de combustível
+
+    private double buscarUltimaQuilometragemVeiculoInterno(Long veiculoId, Long movimentacaoIdExcluir) {
+        List<Movimentacao> todasMovimentacoes = listarTodos();
+        List<Movimentacao> movimentacoesFiltradas = new ArrayList<>();
+
+        for (Movimentacao mov : todasMovimentacoes) {
+
+            if (mov.getVeiculo() == null || !mov.getVeiculo().getId().equals(veiculoId)) {
+                continue;
+            }
+            if (movimentacaoIdExcluir != null && mov.getId().equals(movimentacaoIdExcluir)) {
+                continue;
+            }
+            if (mov.getTipoDespesa() == null || !"COMBUSTÍVEL".equalsIgnoreCase(mov.getTipoDespesa().getDescricao())) {
+                continue;
+            }
+            if (mov.getQuilometragemAtual() <= 0) {
+                continue;
+            }
+            movimentacoesFiltradas.add(mov);
+        }
+
+        movimentacoesFiltradas.sort(new Comparator<Movimentacao>() {
+            @Override
+            public int compare(Movimentacao m1, Movimentacao m2) {
+                int dateComparison = m1.getData().compareTo(m2.getData());
+                if (dateComparison != 0) {
+                    return dateComparison;
+                }
+                return Double.compare(m2.getQuilometragemAtual(), m1.getQuilometragemAtual());
+            }
+        });
+
+        if (!movimentacoesFiltradas.isEmpty()) {
+            return movimentacoesFiltradas.get(0).getQuilometragemAtual();
+        }
+
+        return 0.0;
+    }
+
+
     public boolean hasCombustivelMovimentacao(Long veiculoId) {
-        return movimentacaoDAO.hasCombustivelMovimentacao(veiculoId);
+        List<Movimentacao> todasMovimentacoes = listarTodos();
+
+        for (Movimentacao mov : todasMovimentacoes) {
+            if (mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId) &&
+                mov.getTipoDespesa() != null && "COMBUSTÍVEL".equalsIgnoreCase(mov.getTipoDespesa().getDescricao())) {
+                return true;
+            }
+        }
+        return false; // Não encontrou
     }
 
-    // NOVO: Método para inicializar a quilometragem de veículos existentes
+
     public void inicializarQuilometragemVeiculosExistentes() {
         List<Veiculo> todosVeiculos = veiculoService.listarTodos();
         TipoDespesa tipoCombustivel = tipoDespesaService.buscarPorDescricao("COMBUSTÍVEL");
@@ -254,33 +303,38 @@ public class MovimentacaoService {
 
         for (Veiculo veiculo : todosVeiculos) {
             if (!hasCombustivelMovimentacao(veiculo.getId())) {
-                // Gerar quilometragem inicial fictícia
+
                 double quilometragemInicial = 10000 + (200000 - 10000) * random.nextDouble();
-                // Arredondar para um número inteiro
+
                 quilometragemInicial = Math.round(quilometragemInicial);
 
-                // Criar uma movimentação de combustível fictícia
+
                 Movimentacao movimentacaoInicial = new Movimentacao(
                         veiculo,
                         tipoCombustivel,
                         "Inicialização de Quilometragem",
                         LocalDate.of(2023, 1, 1), // Data fictícia no passado
-                        BigDecimal.ONE, // CORRIGIDO: Valor agora é 1.0 para passar na validação
+                        BigDecimal.ONE,
                         quilometragemInicial
                 );
-                // Salvar a movimentação
+
                 salvar(movimentacaoInicial);
                 System.out.println("Quilometragem inicial de " + quilometragemInicial + " km registrada para o veículo " + veiculo.getPlaca());
             }
         }
     }
 
-    // NOVO: Método para listar movimentações de combustível por veículo e período
     public List<Movimentacao> listarCombustivelPorVeiculoEPeriodo(Long veiculoId, YearMonth mesAno) {
-        return listarTodos().stream()
-                .filter(mov -> mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId))
-                .filter(mov -> mov.getTipoDespesa() != null && "COMBUSTÍVEL".equalsIgnoreCase(mov.getTipoDespesa().getDescricao()))
-                .filter(mov -> mov.getData() != null && YearMonth.from(mov.getData()).equals(mesAno))
-                .collect(Collectors.toList());
+        List<Movimentacao> todasMovimentacoes = listarTodos();
+        List<Movimentacao> resultado = new ArrayList<>();
+
+        for (Movimentacao mov : todasMovimentacoes) {
+            if (mov.getVeiculo() != null && mov.getVeiculo().getId().equals(veiculoId) &&
+                mov.getTipoDespesa() != null && "COMBUSTÍVEL".equalsIgnoreCase(mov.getTipoDespesa().getDescricao()) &&
+                mov.getData() != null && YearMonth.from(mov.getData()).equals(mesAno)) {
+                resultado.add(mov);
+            }
+        }
+        return resultado;
     }
 }
