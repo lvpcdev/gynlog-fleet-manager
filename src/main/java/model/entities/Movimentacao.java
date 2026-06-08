@@ -16,6 +16,7 @@ public class Movimentacao {
     private String descricao;
     private LocalDate data;
     private BigDecimal valor;
+    private Double quilometragemAtual;
 
     private Veiculo veiculo;
     private TipoDespesa tipoDespesa;
@@ -32,15 +33,17 @@ public class Movimentacao {
         this.data = data;
         this.valor = valor;
         this.statusMovimentacao = StatusMovimentacao.PENDENTE;
+        this.quilometragemAtual = null;
     }
 
-    public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor, StatusMovimentacao statusMovimentacao) {
+    public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor,Double quilometragemAtual, StatusMovimentacao  statusMovimentacao) {
         this.veiculo = veiculo;
         this.tipoDespesa = tipoDespesa;
         this.descricao = descricao;
         this.data = data;
         this.valor = valor;
         this.statusMovimentacao = statusMovimentacao;
+        this.quilometragemAtual = quilometragemAtual;
     }
 
     public Long getId() {
@@ -97,6 +100,14 @@ public class Movimentacao {
 
     public void setStatusMovimentacao(StatusMovimentacao statusMovimentacao) {
         this.statusMovimentacao = statusMovimentacao;
+    }
+
+    public Double getQuilometragemAtual() {
+        return quilometragemAtual;
+    }
+
+    public void setQuilometragemAtual(Double quilometragemAtual) {
+        this.quilometragemAtual = quilometragemAtual;
     }
 
     @Override
