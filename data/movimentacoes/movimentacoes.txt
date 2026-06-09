@@ -114,4 +114,4 @@
 122 | 1 | 2 | 2026-06-08 | 200.00 | Teste | null | APROVADA
 128 | 1 | 1 | 2026-06-08 | 100.00 | COmbustivel | 511.0 | APROVADA
 129 | 1 | 1 | 2026-06-08 | 1100.00 | teste | 523.0 | APROVADA
-130 | 2 | 1 | 2026-06-08 | 110.00 | Combustivel | 200.0 | PENDENTE
+130 | 2 | 1 | 2026-06-08 | 110.00 | Combustivel | 200.0 | APROVADA

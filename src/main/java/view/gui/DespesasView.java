@@ -153,6 +153,11 @@ public class DespesasView extends JFrame {
 
         atualizarDados();
 
+        abas.addChangeListener(e -> {
+            if (abas.getSelectedIndex() == 0) {
+                limparCamposCadastro();
+            }
+        });
         return root;
     }
 
@@ -178,6 +183,18 @@ public class DespesasView extends JFrame {
         });
 
         comboBoxTiposDespesa = new JComboBox<TipoDespesa>();
+        comboBoxTiposDespesa.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof TipoDespesa) {
+                    setText(((TipoDespesa) value).getDescricao());
+                } else if (value == null) {
+                    setText("Selecione uma despesa");
+                }
+                return this;
+            }
+        });
         campoValor = new JTextField(10);
         campoData = new JTextField(10);
         campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -237,6 +254,8 @@ public class DespesasView extends JFrame {
                 } catch (Exception ex) {
                     valorKmAnterior.setText("Erro ao buscar");
                 }
+            } else {
+                valorKmAnterior.setText("—"); // ← reseta quando veículo for null
             }
 
             painel.revalidate();
@@ -263,7 +282,6 @@ public class DespesasView extends JFrame {
         gbc.gridy = 4; painel.add(campoDescricao, gbc);
         gbc.gridy = 5; painel.add(campoQuilometragem, gbc);
         gbc.gridy = 6; painel.add(valorKmAnterior, gbc);
-
 
         gbc.gridx = 0; gbc.gridy = 7;
         gbc.gridwidth = 2;
@@ -700,6 +718,7 @@ public class DespesasView extends JFrame {
         }
 
         comboBoxTiposDespesa.removeAllItems();
+        comboBoxTiposDespesa.addItem(null);
         List<TipoDespesa> tipos = tipoDespesaController.listarAtivos();
         for (TipoDespesa td : tipos) {
             comboBoxTiposDespesa.addItem(td);
