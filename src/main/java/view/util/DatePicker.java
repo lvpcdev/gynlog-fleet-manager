@@ -107,16 +107,9 @@ public class DatePicker extends JPanel {
 
     private void buildUI() {
         // Campo de texto (somente leitura visual, mas permite leitura programática)
-        dateField = new JTextField(10);
+        dateField = new JTextField();
         dateField.setText(selectedDate.format(DISPLAY_FORMAT));
         dateField.setEditable(false);
-        dateField.setBackground(FIELD_BG);
-        dateField.setForeground(TEXT_PRIMARY);
-        dateField.setCaretColor(TEXT_PRIMARY);
-        dateField.setBorder(BorderFactory.createCompoundBorder(
-                new RoundedBorder(BORDER_COLOR, 6),
-                BorderFactory.createEmptyBorder(4, 8, 4, 4)
-        ));
         dateField.setFont(new Font("SansSerif", Font.PLAIN, 13));
         dateField.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         dateField.addMouseListener(new MouseAdapter() {

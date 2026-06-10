@@ -274,7 +274,7 @@ public class DespesasView extends JFrame {
         gbc.gridy = 6;                 painel.add(labelKmAnterior, gbc);
 
 
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
         gbc.gridy = 0; painel.add(comboBoxVeiculos, gbc);
         gbc.gridy = 1; painel.add(comboBoxTiposDespesa, gbc);
         gbc.gridy = 2; painel.add(campoData, gbc);
@@ -285,6 +285,7 @@ public class DespesasView extends JFrame {
 
         gbc.gridx = 0; gbc.gridy = 7;
         gbc.gridwidth = 2;
+        gbc.weightx = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvar, gbc);
