@@ -11,6 +11,7 @@ import model.enums.StatusTipoDespesa;
 import util.CsvExporter;
 import util.Fila;
 import view.util.CaixaAltaComLimiteFilter;
+import view.util.DatePicker;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -39,7 +40,7 @@ public class DespesasView extends JFrame {
     private JComboBox<Veiculo> comboBoxVeiculos;
     private JComboBox<TipoDespesa> comboBoxTiposDespesa;
     private JTextField campoValor;
-    private JTextField campoData;
+    private DatePicker campoData;
     private JTextField campoDescricao;
     private DefaultTableModel tableModelMovimentacoes;
     private DefaultTableModel tableModelPendentes;
@@ -196,8 +197,7 @@ public class DespesasView extends JFrame {
             }
         });
         campoValor = new JTextField(10);
-        campoData = new JTextField(10);
-        campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        campoData = new DatePicker(LocalDate.now());
         campoDescricao = new JTextField(25);
 
         JTextField campoQuilometragem = new JTextField(10);
@@ -267,7 +267,7 @@ public class DespesasView extends JFrame {
 
         gbc.gridx = 0; gbc.gridy = 0; painel.add(new JLabel("Veículo:"), gbc);
         gbc.gridy = 1;                 painel.add(new JLabel("Tipo de Despesa:"), gbc);
-        gbc.gridy = 2;                 painel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
+        gbc.gridy = 2;                 painel.add(new JLabel("Data:"), gbc);
         gbc.gridy = 3;                 painel.add(new JLabel("Valor (R$):"), gbc);
         gbc.gridy = 4;                 painel.add(new JLabel("Descrição:"), gbc);
         gbc.gridy = 5;                 painel.add(labelQuilometragem, gbc);
@@ -309,8 +309,7 @@ public class DespesasView extends JFrame {
                                 JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                    LocalDate data = LocalDate.parse(campoData.getText(), formatter);
+                    LocalDate data = campoData.getSelectedDate();
                     BigDecimal valor = extrairValor(campoValor.getText());
                     String descricao = campoDescricao.getText();
 
@@ -683,8 +682,7 @@ public class DespesasView extends JFrame {
         try {
             Veiculo veiculo = (Veiculo) comboBoxVeiculos.getSelectedItem();
             TipoDespesa tipo = (TipoDespesa) comboBoxTiposDespesa.getSelectedItem();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate data = LocalDate.parse(campoData.getText(), formatter);
+            LocalDate data = campoData.getSelectedDate();
             BigDecimal valor = extrairValor(campoValor.getText());
             String descricao = campoDescricao.getText();
 
@@ -704,7 +702,7 @@ public class DespesasView extends JFrame {
     private void limparCamposCadastro() {
         campoValor.setText("");
         campoDescricao.setText("");
-        campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        campoData.setDate(LocalDate.now());
         if (comboBoxVeiculos.getItemCount() > 0) comboBoxVeiculos.setSelectedIndex(0);
         if (comboBoxTiposDespesa.getItemCount() > 0) comboBoxTiposDespesa.setSelectedIndex(0);
     }
@@ -751,7 +749,7 @@ public class DespesasView extends JFrame {
         JComboBox<Veiculo> editComboBoxVeiculos = new JComboBox<Veiculo>();
         JComboBox<TipoDespesa> editComboBoxTiposDespesa = new JComboBox<TipoDespesa>();
         JTextField editCampoValor = new JTextField(10);
-        JTextField editCampoData = new JTextField(10);
+        DatePicker editCampoData = new DatePicker(movimentacaoParaEditar.getData());
         JTextField editCampoDescricao = new JTextField(25);
         JButton botaoSalvarAlteracoes = new JButton("Salvar Alterações");
 
@@ -775,13 +773,13 @@ public class DespesasView extends JFrame {
             }
         }
 
-        editCampoData.setText(movimentacaoParaEditar.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        // Data já definida no construtor do DatePicker
         editCampoValor.setText(movimentacaoParaEditar.getValor().toPlainString());
         editCampoDescricao.setText(movimentacaoParaEditar.getDescricao());
 
         gbc.gridx = 0; gbc.gridy = 0; painel.add(new JLabel("Veículo:"), gbc);
         gbc.gridy++; painel.add(new JLabel("Tipo de Despesa:"), gbc);
-        gbc.gridy++; painel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
+        gbc.gridy++; painel.add(new JLabel("Data:"), gbc);
         gbc.gridy++; painel.add(new JLabel("Valor (R$):"), gbc);
         gbc.gridy++; painel.add(new JLabel("Descrição:"), gbc);
 
@@ -804,7 +802,7 @@ public class DespesasView extends JFrame {
                 try {
                     Veiculo veiculoSelecionado = (Veiculo) editComboBoxVeiculos.getSelectedItem();
                     TipoDespesa tipoSelecionado = (TipoDespesa) editComboBoxTiposDespesa.getSelectedItem();
-                    LocalDate data = LocalDate.parse(editCampoData.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                    LocalDate data = editCampoData.getSelectedDate();
                     BigDecimal valor = extrairValor(editCampoValor.getText());
                     String descricao = editCampoDescricao.getText();
 
