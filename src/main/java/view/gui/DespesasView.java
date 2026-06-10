@@ -255,7 +255,7 @@ public class DespesasView extends JFrame {
                     valorKmAnterior.setText("Erro ao buscar");
                 }
             } else {
-                valorKmAnterior.setText("—"); // ← reseta quando veículo for null
+                valorKmAnterior.setText("—");
             }
 
             painel.revalidate();
@@ -274,7 +274,7 @@ public class DespesasView extends JFrame {
         gbc.gridy = 6;                 painel.add(labelKmAnterior, gbc);
 
 
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridy = 0; painel.add(comboBoxVeiculos, gbc);
         gbc.gridy = 1; painel.add(comboBoxTiposDespesa, gbc);
         gbc.gridy = 2; painel.add(campoData, gbc);
@@ -285,7 +285,6 @@ public class DespesasView extends JFrame {
 
         gbc.gridx = 0; gbc.gridy = 7;
         gbc.gridwidth = 2;
-        gbc.weightx = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         painel.add(botaoSalvar, gbc);
@@ -318,7 +317,6 @@ public class DespesasView extends JFrame {
                     if (campoQuilometragem.isVisible() && !campoQuilometragem.getText().trim().isEmpty()) {
                         quilometragem = Double.parseDouble(campoQuilometragem.getText().trim().replace(",", "."));
 
-                        // ← validação km nova > km anterior
                         if (veiculo != null && movimentacaoController.existeCombustivelMovimentacao(veiculo.getId())) {
                             double kmAnterior = movimentacaoController.buscarUltimaQuilometragemVeiculo(veiculo.getId());
                             if (quilometragem <= kmAnterior) {
@@ -774,7 +772,6 @@ public class DespesasView extends JFrame {
             }
         }
 
-        // Data já definida no construtor do DatePicker
         editCampoValor.setText(movimentacaoParaEditar.getValor().toPlainString());
         editCampoDescricao.setText(movimentacaoParaEditar.getDescricao());
 

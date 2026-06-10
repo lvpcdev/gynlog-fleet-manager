@@ -12,17 +12,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
-/**
- * Componente moderno de seleção de data com calendário interativo popup.
- * Adequado à interface do sistema (FlatLaf dark theme).
- * Não permite selecionar datas superiores à data atual.
- */
+
 public class DatePicker extends JPanel {
 
     private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final Locale PT_BR = new Locale("pt", "BR");
 
-    // Cores derivadas do tema ativo do UIManager (FlatLaf)
     private final Color BG_DARK;
     private final Color BG_HEADER;
     private final Color ACCENT;
@@ -50,7 +45,6 @@ public class DatePicker extends JPanel {
         this.maxDate = LocalDate.now();
         this.selectedDate = initialDate != null && !initialDate.isAfter(maxDate) ? initialDate : maxDate;
 
-        // Inicializa cores a partir do tema FlatLaf ativo
         Color panelBg = getUIColor("Panel.background", new Color(60, 63, 65));
         Color textFieldBg = getUIColor("TextField.background", new Color(69, 73, 74));
         Color focusColor = getUIColor("Component.focusColor", new Color(0, 123, 255));
@@ -79,13 +73,11 @@ public class DatePicker extends JPanel {
         buildUI();
     }
 
-    /** Obtém cor do UIManager com fallback. */
     private static Color getUIColor(String key, Color fallback) {
         Color c = UIManager.getColor(key);
         return c != null ? c : fallback;
     }
 
-    /** Escurece uma cor pelo fator dado (0.0–1.0). */
     private static Color darker(Color c, double factor) {
         return new Color(
                 Math.max((int) (c.getRed() * factor), 0),
@@ -95,7 +87,6 @@ public class DatePicker extends JPanel {
         );
     }
 
-    /** Clareia uma cor pelo fator dado (>1.0). */
     private static Color brighter(Color c, double factor) {
         return new Color(
                 Math.min((int) (c.getRed() * factor), 255),
@@ -106,7 +97,6 @@ public class DatePicker extends JPanel {
     }
 
     private void buildUI() {
-        // Campo de texto (somente leitura visual, mas permite leitura programática)
         dateField = new JTextField();
         dateField.setText(selectedDate.format(DISPLAY_FORMAT));
         dateField.setEditable(false);
@@ -119,7 +109,6 @@ public class DatePicker extends JPanel {
             }
         });
 
-        // Botão do calendário
         calendarButton = new JButton("📅");
         calendarButton.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 15));
         calendarButton.setPreferredSize(new Dimension(34, 28));
@@ -183,9 +172,6 @@ public class DatePicker extends JPanel {
         }
     }
 
-    /**
-     * Painel do calendário interativo.
-     */
     private class CalendarPanel extends JPanel {
 
         private YearMonth currentMonth;
@@ -223,7 +209,6 @@ public class DatePicker extends JPanel {
             });
 
             nextBtn.addActionListener(e -> {
-                // Não avançar além do mês atual se já no mês máximo
                 YearMonth maxMonth = YearMonth.from(maxDate);
                 if (currentMonth.isBefore(maxMonth)) {
                     currentMonth = currentMonth.plusMonths(1);
@@ -243,7 +228,6 @@ public class DatePicker extends JPanel {
             JPanel body = new JPanel(new BorderLayout(0, 4));
             body.setBackground(BG_DARK);
 
-            // Cabeçalho dos dias da semana
             JPanel weekHeader = new JPanel(new GridLayout(1, 7, 2, 0));
             weekHeader.setBackground(BG_DARK);
             weekHeader.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
@@ -275,7 +259,6 @@ public class DatePicker extends JPanel {
 
         private void updateMonthYearLabel() {
             String month = currentMonth.getMonth().getDisplayName(TextStyle.FULL, PT_BR);
-            // Capitalizar primeira letra
             month = month.substring(0, 1).toUpperCase() + month.substring(1);
             monthYearLabel.setText(month + " " + currentMonth.getYear());
         }
@@ -289,17 +272,14 @@ public class DatePicker extends JPanel {
 
         private void populateDays() {
             LocalDate first = currentMonth.atDay(1);
-            // Ajustar para domingo = 0
             int startOffset = first.getDayOfWeek().getValue() % 7; // DOM=0, SEG=1, ...
 
             LocalDate today = LocalDate.now();
 
-            // Células vazias antes do dia 1
             for (int i = 0; i < startOffset; i++) {
                 daysGrid.add(createEmptyCell());
             }
 
-            // Dias do mês
             int daysInMonth = currentMonth.lengthOfMonth();
             for (int day = 1; day <= daysInMonth; day++) {
                 LocalDate date = currentMonth.atDay(day);
@@ -310,7 +290,6 @@ public class DatePicker extends JPanel {
                 daysGrid.add(createDayCell(day, date, isFuture, isToday, isSelected));
             }
 
-            // Preencher restante da grade (6 linhas x 7 colunas = 42)
             int totalCells = startOffset + daysInMonth;
             for (int i = totalCells; i < 42; i++) {
                 daysGrid.add(createEmptyCell());
@@ -338,17 +317,14 @@ public class DatePicker extends JPanel {
                     int y = (h - size) / 2;
 
                     if (isSelected && !isFuture) {
-                        // Círculo de seleção preenchido
                         g2.setColor(ACCENT);
                         g2.fill(new RoundRectangle2D.Float(x, y, size, size, size, size));
                     } else if (getBackground().equals(DAY_HOVER_BG) && !isFuture) {
-                        // Hover
                         g2.setColor(DAY_HOVER_BG);
                         g2.fill(new RoundRectangle2D.Float(x, y, size, size, size, size));
                     }
 
                     if (isToday && !isSelected) {
-                        // Anel indicando hoje
                         g2.setColor(TODAY_RING);
                         g2.setStroke(new BasicStroke(2f));
                         g2.draw(new RoundRectangle2D.Float(x + 1, y + 1, size - 2, size - 2, size - 2, size - 2));
@@ -359,7 +335,7 @@ public class DatePicker extends JPanel {
                 }
             };
 
-            lbl.setOpaque(false); // Painting handled manually
+            lbl.setOpaque(false);
             lbl.setPreferredSize(new Dimension(36, 32));
             lbl.setFont(new Font("SansSerif", isToday ? Font.BOLD : Font.PLAIN, 13));
 
@@ -427,9 +403,7 @@ public class DatePicker extends JPanel {
         }
     }
 
-    /**
-     * Borda arredondada customizada.
-     */
+
     private static class RoundedBorder extends AbstractBorder {
         private final Color color;
         private final int radius;
