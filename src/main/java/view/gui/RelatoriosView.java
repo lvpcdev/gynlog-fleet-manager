@@ -222,7 +222,12 @@ public class RelatoriosView extends JFrame {
                                 "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-                    int ano = (int) comboAno.getSelectedItem();
+                    Integer ano = (Integer) comboAno.getSelectedItem();
+                    if(ano == null){
+                        JOptionPane.showMessageDialog(RelatoriosView.this,"Por favor, selecione um ano",
+                                "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     YearMonth mesAno = YearMonth.of(ano, mes);
                     List<Movimentacao> lista = movimentacaoController.listarPorMes(mesAno);
                     BigDecimal total = movimentacaoController.totalPorMes(mesAno);
@@ -243,7 +248,12 @@ public class RelatoriosView extends JFrame {
                                 "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-                    int ano = (int) comboAno.getSelectedItem();
+                    Integer ano = (Integer) comboAno.getSelectedItem();
+                    if(ano == null){
+                        JOptionPane.showMessageDialog(RelatoriosView.this,"Por favor, selecione um ano",
+                                "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     YearMonth mesAno = YearMonth.of(ano, mes);
                     List<Movimentacao> lista = movimentacaoController.listarCombustivelPorMes(mesAno);
                     BigDecimal total = movimentacaoController.totalCombustivelPorMes(mesAno);
@@ -258,7 +268,12 @@ public class RelatoriosView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    int ano = (int) comboAno.getSelectedItem();
+                    Integer ano = (Integer) comboAno.getSelectedItem();
+                    if(ano == null){
+                        JOptionPane.showMessageDialog(RelatoriosView.this,"Por favor, selecione um ano",
+                                "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     Year anoFiltro = Year.of(ano);
                     List<Movimentacao> lista = movimentacaoController.listarIpvaPorAno(anoFiltro);
                     BigDecimal total = movimentacaoController.totalIpvaPorAno(anoFiltro);
@@ -290,7 +305,12 @@ public class RelatoriosView extends JFrame {
                     return;
                 }
                 try {
-                    int ano = (int) comboAno.getSelectedItem();
+                    Integer ano = (Integer) comboAno.getSelectedItem();
+                    if(ano == null){
+                        JOptionPane.showMessageDialog(RelatoriosView.this,"Por favor, selecione um ano",
+                                "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     Year anoFiltro = Year.of(ano);
                     List<Movimentacao> lista = movimentacaoController.listarMultasPorVeiculo(veiculo.getId(), anoFiltro);
                     BigDecimal total = movimentacaoController.totalMultasPorVeiculo(veiculo.getId(), anoFiltro);
@@ -525,8 +545,5 @@ public class RelatoriosView extends JFrame {
         for (String cat : categorias) {
             comboCategoria.addItem(cat);
         }
-
-        comboMes.setSelectedItem(Month.from(java.time.LocalDate.now()));
-        comboAno.setSelectedItem(anoAtual);
     }
 }
