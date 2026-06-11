@@ -25,7 +25,7 @@ public class RelatoriosView extends JFrame {
     private final VeiculoController veiculoController;
 
     private JComboBox<Veiculo> comboVeiculos;
-    private JComboBox<Month> comboMes;
+    private JComboBox<Object> comboMes;
     private JComboBox<Integer> comboAno;
     private JComboBox<String> comboCategoria;
     private JTextArea areaResultados;
@@ -120,7 +120,11 @@ public class RelatoriosView extends JFrame {
             }
         });
 
-        comboMes = new JComboBox<Month>(Month.values());
+        comboMes = new JComboBox<Object>();
+        comboMes.addItem(null);
+        for (Month m :Month.values()){
+            comboMes.addItem(m);
+        }
         comboMes.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -129,25 +133,36 @@ public class RelatoriosView extends JFrame {
                     Month mes = (Month) value;
                     Locale ptBR = new Locale("pt", "BR");
                     String nomeMes = mes.getDisplayName(TextStyle.FULL, ptBR);
-                    String nomeFormatado = nomeMes.substring(0, 1).toUpperCase() + nomeMes.substring(1).toLowerCase();
-                    setText(nomeFormatado);
+                    setText(nomeMes.substring(0, 1).toUpperCase() + nomeMes.substring(1).toLowerCase());
+                } else if (value == null) {
+                    setText("Selecione um mês");
                 }
                 return this;
             }
         });
 
         comboAno = new JComboBox<Integer>();
+        comboAno.setRenderer(new DefaultListCellRenderer(){
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value == null) {
+                    setText("Selecione um ano");
+                }
+                return this;
+            }
+        });
 
         comboCategoria = new JComboBox<>();
-        try {
-            List<String> categorias = veiculoController.listarCategorias();
-            for (String cat : categorias) {
-                comboCategoria.addItem(cat);
+        comboCategoria.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value == null) {
+                    setText("Selecione uma categoria");
+                }
+                return this;
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
-        }
+        });
 
         painel.add(new JLabel("Veículo:"));
         painel.add(comboVeiculos);
@@ -197,10 +212,16 @@ public class RelatoriosView extends JFrame {
         });
 
         btnSomaGeralMes.addActionListener(new ActionListener() {
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     Month mes = (Month) comboMes.getSelectedItem();
+                    if(mes == null){
+                        JOptionPane.showMessageDialog(RelatoriosView.this,"Por Favor, selecione um mês",
+                                "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     int ano = (int) comboAno.getSelectedItem();
                     YearMonth mesAno = YearMonth.of(ano, mes);
                     List<Movimentacao> lista = movimentacaoController.listarPorMes(mesAno);
@@ -217,6 +238,11 @@ public class RelatoriosView extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Month mes = (Month) comboMes.getSelectedItem();
+                    if(mes == null){
+                        JOptionPane.showMessageDialog(RelatoriosView.this,"Por Favor, selecione um mês",
+                                "Filtro Necessário",JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     int ano = (int) comboAno.getSelectedItem();
                     YearMonth mesAno = YearMonth.of(ano, mes);
                     List<Movimentacao> lista = movimentacaoController.listarCombustivelPorMes(mesAno);
@@ -475,6 +501,7 @@ public class RelatoriosView extends JFrame {
         comboVeiculos.removeAllItems();
         comboAno.removeAllItems();
         comboCategoria.removeAllItems();
+        comboMes.removeAllItems();
 
         comboVeiculos.addItem(null);
         List<Veiculo> veiculos = veiculoController.listarTodos();
@@ -482,9 +509,15 @@ public class RelatoriosView extends JFrame {
             comboVeiculos.addItem(v);
         }
 
+        comboAno.addItem(null);
         int anoAtual = Year.now().getValue();
         for (int i = anoAtual; i >= anoAtual - 10; i--) {
             comboAno.addItem(i);
+        }
+
+        comboMes.addItem(null);
+        for (Month m : Month.values()) {
+            comboMes.addItem(m);
         }
 
         comboCategoria.addItem(null);
