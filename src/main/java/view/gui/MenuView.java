@@ -21,12 +21,24 @@ public class MenuView extends JFrame {
         sidebar.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
         ImageIcon logoOriginal = new ImageIcon(getClass().getClassLoader().getResource("resources/LogoGynLogFleetManager.png"));
-        Image logoRedimensionada = logoOriginal.getImage().getScaledInstance(150, 80, Image.SCALE_SMOOTH);
-        JLabel labelLogo = new JLabel(new ImageIcon(logoRedimensionada));
+        JLabel labelLogo = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.drawImage(logoOriginal.getImage(), 0, 0, getWidth(), getHeight(), this);
+                g2.dispose();
+            }
+        };
+        labelLogo.setPreferredSize(new Dimension(140, 62));
+        labelLogo.setMaximumSize(new Dimension(140, 62));
         labelLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        labelLogo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         sidebar.add(labelLogo);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 30)));
         sidebar.setPreferredSize(new Dimension(180, 0));
         final Dimension originalSidebarSize = sidebar.getPreferredSize();
         final int collapsedWidth = 48;
@@ -103,7 +115,7 @@ public class MenuView extends JFrame {
 
             veiculosView.refreshData();
             despesasView.refreshData();
-           relatoriosView.refreshData();
+            relatoriosView.refreshData();
             selectVeiculos.run();
         });
         botaoDespesas.addActionListener((ActionEvent e) -> {
