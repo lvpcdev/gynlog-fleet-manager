@@ -272,7 +272,7 @@ public class DatePicker extends JPanel {
 
         private void populateDays() {
             LocalDate first = currentMonth.atDay(1);
-            int startOffset = first.getDayOfWeek().getValue() % 7; // DOM=0, SEG=1, ...
+            int startOffset = first.getDayOfWeek().getValue() % 7;
 
             LocalDate today = LocalDate.now();
 
