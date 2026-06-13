@@ -2,7 +2,9 @@ package controller;
 
 
 import model.entities.Movimentacao;
+import model.entities.Veiculo;
 import service.MovimentacaoService;
+import util.Fila;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -27,6 +29,14 @@ public class MovimentacaoController {
 
     public List<Movimentacao> listarTodos() {
         return movimentacaoService.listarTodos();
+    }
+
+    public List<Movimentacao> listarAprovadas() {
+        return movimentacaoService.listarAprovadas();
+    }
+
+    public Fila<Movimentacao> listarPendentes() {
+        return movimentacaoService.listarPendentes();
     }
 
     public Movimentacao buscarPorId(Long id) {
@@ -73,5 +83,36 @@ public class MovimentacaoController {
         return movimentacaoService.totalMultasPorVeiculo(id, ano);
     }
 
+    public BigDecimal mediaIpvaPorAno(Year ano) {
+        return movimentacaoService.mediaIpvaPorAno(ano);
+    }
+
+    public BigDecimal mediaDespesasPorCategoria(String categoria) {
+        return movimentacaoService.mediaDespesasPorCategoria(categoria);
+    }
+
+    public List<Veiculo> listarVeiculosOrdenadosPorCusto() {
+        return movimentacaoService.listarVeiculosOrdenadosPorCusto();
+    }
+
+    public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
+        return movimentacaoService.aprovarProxima(fila);
+    }
+
+    public BigDecimal consumoMedioPorVeiculo(Long veiculoId) {
+        return movimentacaoService.consumoMedioPorVeiculo(veiculoId);
+    }
+
+    public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
+        return movimentacaoService.buscarUltimaQuilometragemVeiculo(veiculoId);
+    }
+
+    public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
+        return movimentacaoService.buscarUltimaQuilometragemVeiculoExcluindoAtual(veiculoId, movimentacaoId);
+    }
+
+    public boolean existeCombustivelMovimentacao(Long veiculoId) {
+        return movimentacaoService.existeCombustivelMovimentacao(veiculoId);
+    }
 
 }

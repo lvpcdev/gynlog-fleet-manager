@@ -42,6 +42,6 @@ public class TipoDespesa {
 
     @Override
     public String toString() {
-        return getDescricao();
+        return getDescricao() + " - " + getStatusTipoDespesa();
     }
 }

@@ -4,17 +4,22 @@ import controller.VeiculoController;
 import exceptions.ValidacaoException;
 import model.entities.Veiculo;
 import model.enums.StatusVeiculo;
+import util.BuscaSequencial;
+import util.CsvExporter;
 import view.util.CaixaAltaComLimiteFilter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.time.Year;
 import java.util.List;
 
@@ -22,7 +27,7 @@ public class VeiculosView extends JFrame {
 
     VeiculoController veiculoController = new VeiculoController();
 
-    String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Ano Fabricação", "Estado"};
+    String[] colunas = {"ID", "Placa", "Marca", "Modelo", "Categoria", "Ano Fabricação", "Estado"};
 
     DefaultTableModel tableModelVeiculos = new DefaultTableModel(colunas, 0) {
         @Override
@@ -33,7 +38,7 @@ public class VeiculosView extends JFrame {
 
     public VeiculosView() {
         setTitle("VEÍCULOS");
-        setSize(800, 600);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         this.setContentPane(buildMainPanel(true));
@@ -60,6 +65,7 @@ public class VeiculosView extends JFrame {
                     v.getPlaca(),
                     v.getMarca(),
                     v.getModelo(),
+                    v.getCategoria(),
                     v.getAnoDeFabricacao(),
                     v.getStatusVeiculo()
             });
@@ -110,11 +116,11 @@ public class VeiculosView extends JFrame {
         JTextField campoPlaca = new JTextField(8);
         JTextField campoMarca = new JTextField(20);
         JTextField campoModelo = new JTextField(20);
+        JTextField campoCategoria = new JTextField(20);
         JTextField campoAnoFabricacao = new JTextField(4);
         JRadioButton botaoAtivo = new JRadioButton("Estado Veículo - ATIVO");
         JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
         JButton botaoCadastrar = new JButton("Cadastrar Veículos");
-
         botaoAtivo.setSelected(true);
 
         AbstractDocument docPlaca = (AbstractDocument) campoPlaca.getDocument();
@@ -126,44 +132,91 @@ public class VeiculosView extends JFrame {
         AbstractDocument docModelo = (AbstractDocument) campoModelo.getDocument();
         docModelo.setDocumentFilter(new CaixaAltaComLimiteFilter(50));
 
-        AbstractDocument docAnoFabricacao = (AbstractDocument) campoAnoFabricacao.getDocument();
-        docAnoFabricacao.setDocumentFilter(new CaixaAltaComLimiteFilter(4));
+        AbstractDocument docCategoria = (AbstractDocument) campoCategoria.getDocument();
+        docCategoria.setDocumentFilter(new CaixaAltaComLimiteFilter(30));
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
+        AbstractDocument docAnoFabricacao = (AbstractDocument) campoAnoFabricacao.getDocument();
+        docAnoFabricacao.setDocumentFilter(new CaixaAltaComLimiteFilter(4) {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                if (string.matches("[0-9]+") && fb.getDocument().getLength() + string.length() <= 4) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                if (text.matches("[0-9]*") && fb.getDocument().getLength() - length + text.length() <= 4) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+        });
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("PLACA:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(campoPlaca, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("MARCA:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
         painel.add(campoMarca, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("MODELO:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 0.0;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
         painel.add(campoModelo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("CATEGORIA:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
+        painel.add(campoCategoria, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("ANO DE FABRICAÇÃO:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.CENTER; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.CENTER;
+        gbc.weightx = 1.0;
         painel.add(campoAnoFabricacao, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("ESTADO DO VEÍCULO:"), gbc);
 
         ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
@@ -175,11 +228,13 @@ public class VeiculosView extends JFrame {
         painelEstadoVeiculo.add(new JLabel("\t|\t"));
         painelEstadoVeiculo.add(botaoInativo);
 
-        gbc.gridx = 1; gbc.gridy = 4;
+        gbc.gridx = 1;
+        gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(painelEstadoVeiculo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridx = 0;
+        gbc.gridy = 6;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoCadastrar, gbc);
@@ -187,18 +242,32 @@ public class VeiculosView extends JFrame {
         botaoCadastrar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (campoPlaca.getText().trim().isEmpty() ||
+                        campoMarca.getText().trim().isEmpty() ||
+                        campoModelo.getText().trim().isEmpty() ||
+                        campoCategoria.getText().trim().isEmpty() ||
+                        campoAnoFabricacao.getText().trim().isEmpty()) {
+
+                    JOptionPane.showMessageDialog(painel,
+                            "Todos os campos são obrigatórios!\n" +
+                                    "Preencha: Placa, Marca, Modelo, Categoria e Ano de Fabricação.",
+                            "Campos Obrigatórios",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 try {
                     StatusVeiculo status = botaoAtivo.isSelected() ? StatusVeiculo.ATIVO : StatusVeiculo.INATIVO;
                     Veiculo novoVeiculo = new Veiculo(
                             campoPlaca.getText(),
                             campoMarca.getText(),
                             campoModelo.getText(),
+                            campoCategoria.getText(),
                             status,
                             Year.parse(campoAnoFabricacao.getText())
                     );
                     veiculoController.salvar(novoVeiculo);
                     JOptionPane.showMessageDialog(painel, "Veículo cadastrado com sucesso!");
-                    limparCampos(campoPlaca, campoMarca, campoModelo, campoAnoFabricacao, botaoAtivo);
+                    limparCampos(campoPlaca, campoMarca, campoModelo, campoCategoria, campoAnoFabricacao, botaoAtivo);
                     atualizarTabela(veiculoController.listarTodos());
                 } catch (ValidacaoException ex) {
                     JOptionPane.showMessageDialog(painel, ex.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
@@ -235,6 +304,16 @@ public class VeiculosView extends JFrame {
         JButton botaoEditar = new JButton("Editar Veículos");
         JCheckBox checkBoxInativos = new JCheckBox("Apenas Inativos");
         JCheckBox checkBoxAtivos = new JCheckBox("Apenas Ativos");
+        JTextField campoBusca = new JTextField(15);
+        JButton botaoBuscarPlaca = new JButton("Buscar Placa");
+        JButton botaoBuscarModelo = new JButton("Buscar Modelo");
+        JButton botaoLimparBusca = new JButton("Limpar");
+        JButton botaoExportarVeiculos = new JButton("Exportar CSV");
+        botaoExportarVeiculos.setBackground(new Color(40, 167, 69));
+        botaoExportarVeiculos.setForeground(Color.WHITE);
+        botaoExportarVeiculos.setOpaque(true);
+        botaoExportarVeiculos.setBorderPainted(false);
+        botaoExportarVeiculos.setFocusPainted(false);
 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
@@ -287,10 +366,80 @@ public class VeiculosView extends JFrame {
             }
         });
 
+        botaoBuscarPlaca.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String termo = campoBusca.getText().trim();
+                if (termo.isEmpty()) {
+                    JOptionPane.showMessageDialog(VeiculosView.this, "Digite algo para buscar!");
+                    return;
+                }
+                List<Veiculo> resultado = BuscaSequencial.buscarPorPlaca(veiculoController.listarTodos(), termo);
+                if (resultado.isEmpty()) {
+                    JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veículo encontrado!");
+                    return;
+                }
+                atualizarTabela(resultado);
+            }
+        });
+
+        botaoBuscarModelo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String termo = campoBusca.getText().trim();
+                if (termo.isEmpty()) {
+                    JOptionPane.showMessageDialog(VeiculosView.this, "Digite algo para buscar!");
+                    return;
+                }
+                List<Veiculo> resultado = BuscaSequencial.buscarPorModelo(veiculoController.listarTodos(), termo);
+                if (resultado.isEmpty()) {
+                    JOptionPane.showMessageDialog(VeiculosView.this, "Nenhum veículo encontrado!");
+                    return;
+                }
+                atualizarTabela(resultado);
+            }
+        });
+
+        botaoLimparBusca.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                campoBusca.setText("");
+                atualizarTabela(veiculoController.listarTodos());
+            }
+        });
+
+        botaoExportarVeiculos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Salvar CSV - Veículos");
+                fileChooser.setSelectedFile(new File("veiculos.csv"));
+                if (fileChooser.showSaveDialog(VeiculosView.this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        File arquivo = fileChooser.getSelectedFile();
+                        String caminho = arquivo.getAbsolutePath().endsWith(".csv")
+                                ? arquivo.getAbsolutePath()
+                                : arquivo.getAbsolutePath() + ".csv";
+                        CsvExporter.exportarVeiculos(veiculoController.listarTodos(), caminho);
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Exportado com sucesso!\n" + caminho);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(VeiculosView.this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
         painel.add(painelBotoes, BorderLayout.SOUTH);
-        painelBotoes.add(botaoEditar, BorderLayout.SOUTH);
-        painelBotoes.add(checkBoxInativos, BorderLayout.SOUTH);
-        painelBotoes.add(checkBoxAtivos, BorderLayout.SOUTH);
+        painelBotoes.add(botaoEditar);
+        painelBotoes.add(checkBoxInativos);
+        painelBotoes.add(checkBoxAtivos);
+        painelBotoes.add(new JLabel("Buscar:"));
+        painelBotoes.add(campoBusca);
+        painelBotoes.add(botaoBuscarPlaca);
+        painelBotoes.add(botaoBuscarModelo);
+        painelBotoes.add(botaoLimparBusca);
+        painelBotoes.add(botaoExportarVeiculos);
+
         return painel;
     }
 
@@ -303,6 +452,7 @@ public class VeiculosView extends JFrame {
         JTextField campoPlaca = new JTextField(8);
         JTextField campoMarca = new JTextField(20);
         JTextField campoModelo = new JTextField(20);
+        JTextField campoCategoria = new JTextField(20);
         JTextField campoAnoFabricacao = new JTextField(4);
         JRadioButton botaoAtivo = new JRadioButton("Estado Veículo - ATIVO");
         JRadioButton botaoInativo = new JRadioButton("Estado Veículo - INATIVO");
@@ -310,41 +460,70 @@ public class VeiculosView extends JFrame {
 
         botaoAtivo.setSelected(true);
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("PLACA:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(campoPlaca, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("MARCA:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
         painel.add(campoMarca, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER; gbc.weightx = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("MODELO:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 0.0;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
         painel.add(campoModelo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        painel.add(new JLabel("CATEGORIA:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0.0;
+        painel.add(campoCategoria, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("ANO DE FABRICAÇÃO:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.CENTER; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.CENTER;
+        gbc.weightx = 1.0;
         painel.add(campoAnoFabricacao, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         painel.add(new JLabel("ESTADO DO VEÍCULO:"), gbc);
 
         ButtonGroup grupoEstadoVeiculo = new ButtonGroup();
@@ -356,11 +535,13 @@ public class VeiculosView extends JFrame {
         painelEstadoVeiculo.add(new JLabel("\t|\t"));
         painelEstadoVeiculo.add(botaoInativo);
 
-        gbc.gridx = 1; gbc.gridy = 4;
+        gbc.gridx = 1;
+        gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.WEST;
         painel.add(painelEstadoVeiculo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridx = 0;
+        gbc.gridy = 6;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoEditar, gbc);
@@ -369,6 +550,7 @@ public class VeiculosView extends JFrame {
         campoPlaca.setText(veiculo.getPlaca());
         campoMarca.setText(veiculo.getMarca());
         campoModelo.setText(veiculo.getModelo());
+        campoCategoria.setText(veiculo.getCategoria());
         campoAnoFabricacao.setText(veiculo.getAnoDeFabricacao().toString());
         if (veiculo.getStatusVeiculo() == StatusVeiculo.ATIVO) {
             botaoAtivo.setSelected(true);
@@ -385,6 +567,7 @@ public class VeiculosView extends JFrame {
                             campoPlaca.getText(),
                             campoMarca.getText(),
                             campoModelo.getText(),
+                            campoCategoria.getText(),
                             status,
                             Year.parse(campoAnoFabricacao.getText())
                     );
@@ -405,11 +588,12 @@ public class VeiculosView extends JFrame {
     }
 
     private void limparCampos(JTextField campoPlaca, JTextField campoMarca,
-                              JTextField campoModelo, JTextField campoAnoFabricacao,
-                              JRadioButton botaoAtivo) {
+                              JTextField campoModelo, JTextField campoCategoria,
+                              JTextField campoAnoFabricacao, JRadioButton botaoAtivo) {
         campoPlaca.setText("");
         campoMarca.setText("");
         campoModelo.setText("");
+        campoCategoria.setText("");
         campoAnoFabricacao.setText("");
         botaoAtivo.setSelected(true);
     }

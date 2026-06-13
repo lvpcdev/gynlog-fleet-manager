@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>3.4</version> <!-- ou mais recente -->
+            <version>3.4</version>
         </dependency>
     </dependencies>
 

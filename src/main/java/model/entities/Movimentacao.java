@@ -3,6 +3,7 @@ package model.entities;
 
 
 
+import model.enums.StatusMovimentacao;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -15,9 +16,12 @@ public class Movimentacao {
     private String descricao;
     private LocalDate data;
     private BigDecimal valor;
+    private Double quilometragemAtual;
 
     private Veiculo veiculo;
     private TipoDespesa tipoDespesa;
+
+    private StatusMovimentacao statusMovimentacao;
 
     public Movimentacao() {
     }
@@ -28,6 +32,18 @@ public class Movimentacao {
         this.descricao = descricao;
         this.data = data;
         this.valor = valor;
+        this.statusMovimentacao = StatusMovimentacao.PENDENTE;
+        this.quilometragemAtual = null;
+    }
+
+    public Movimentacao(Veiculo veiculo, TipoDespesa tipoDespesa, String descricao, LocalDate data, BigDecimal valor,Double quilometragemAtual, StatusMovimentacao  statusMovimentacao) {
+        this.veiculo = veiculo;
+        this.tipoDespesa = tipoDespesa;
+        this.descricao = descricao;
+        this.data = data;
+        this.valor = valor;
+        this.statusMovimentacao = statusMovimentacao;
+        this.quilometragemAtual = quilometragemAtual;
     }
 
     public Long getId() {
@@ -76,6 +92,22 @@ public class Movimentacao {
 
     public void setValor(BigDecimal valor) {
         this.valor = valor;
+    }
+
+    public StatusMovimentacao getStatusMovimentacao() {
+        return statusMovimentacao;
+    }
+
+    public void setStatusMovimentacao(StatusMovimentacao statusMovimentacao) {
+        this.statusMovimentacao = statusMovimentacao;
+    }
+
+    public Double getQuilometragemAtual() {
+        return quilometragemAtual;
+    }
+
+    public void setQuilometragemAtual(Double quilometragemAtual) {
+        this.quilometragemAtual = quilometragemAtual;
     }
 
     @Override
