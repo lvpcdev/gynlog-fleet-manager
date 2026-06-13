@@ -364,6 +364,38 @@ public class MovimentacaoService {
         return 0.0;
     }
 
+    public double buscarUltimaQuilometragemAprovadaPorVeiculo(Long veiculoId) {
+        List<Movimentacao> movimentacoesAprovadas = listarAprovadas();
+        List<Movimentacao> filtradas = new ArrayList<>();
+
+        for (Movimentacao mov : movimentacoesAprovadas) {
+            if (mov.getVeiculo() == null || !mov.getVeiculo().getId().equals(veiculoId)) continue;
+            if (mov.getTipoDespesa() == null || !mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")) continue;
+            if (mov.getQuilometragemAtual() == null || mov.getQuilometragemAtual() <= 0) continue;
+            filtradas.add(mov);
+        }
+
+        for (int i = 0; i < filtradas.size() - 1; i++) {
+            int indiceMenor = i;
+            for (int j = i + 1; j < filtradas.size(); j++) {
+                if (filtradas.get(j).getData().isBefore(filtradas.get(indiceMenor).getData())) {
+                    indiceMenor = j;
+                }
+            }
+            if (indiceMenor != i) {
+                Movimentacao temp = filtradas.get(i);
+                filtradas.set(i, filtradas.get(indiceMenor));
+                filtradas.set(indiceMenor, temp);
+            }
+        }
+
+        if (!filtradas.isEmpty()) {
+            return filtradas.get(filtradas.size() - 1).getQuilometragemAtual();
+        }
+
+        return 0.0;
+    }
+
     public boolean existeCombustivelMovimentacao(Long veiculoId) {
         List<Movimentacao> todasMovimentacoes = listarTodos();
 
@@ -385,7 +417,9 @@ public class MovimentacaoService {
             if (mov.getVeiculo().getId().equals(veiculoId)
                     && mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")
                     && mov.getQuilometragemAtual() != null
-                    && mov.getQuilometragemAtual() > 0) {
+                    && mov.getQuilometragemAtual() > 0
+                    && mov.getQuantidadeLitros() != null
+                    && mov.getQuantidadeLitros() > 0) {
                 filtradas.add(mov);
             }
         }
@@ -414,14 +448,14 @@ public class MovimentacaoService {
 
         if (kmRodados <= 0) return BigDecimal.ZERO;
 
-        BigDecimal totalValor = BigDecimal.ZERO;
+        double totalLitros = 0.0;
         for (int i = 1; i < filtradas.size(); i++) {
-            totalValor = totalValor.add(filtradas.get(i).getValor());
+            totalLitros += filtradas.get(i).getQuantidadeLitros();
         }
 
-        if (totalValor.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
+        if (totalLitros == 0.0) return BigDecimal.ZERO;
 
-        return new BigDecimal(kmRodados).divide(totalValor, 2, RoundingMode.HALF_UP);
+        return new BigDecimal(kmRodados).divide(new BigDecimal(totalLitros), 2, RoundingMode.HALF_UP);
     }
 
 

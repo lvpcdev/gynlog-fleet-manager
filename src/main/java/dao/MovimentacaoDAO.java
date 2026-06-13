@@ -37,6 +37,7 @@ public class MovimentacaoDAO {
                 + movimentacao.getValor().setScale(2, RoundingMode.HALF_UP) + " | "
                 + movimentacao.getDescricao() + " | "
                 + movimentacao.getQuilometragemAtual() + " | "
+                + movimentacao.getQuantidadeLitros() + " | "
                 + movimentacao.getStatusMovimentacao();
 
 
@@ -66,7 +67,7 @@ public class MovimentacaoDAO {
                 }
 
                 String[] partes = linha.split(" \\| ");
-                if (partes.length == 8) {
+                if (partes.length == 9) {
                     try {
                         Long idMovimentacao = Long.parseLong(partes[0]);
                         Long idVeiculo = Long.parseLong(partes[1]);
@@ -75,10 +76,14 @@ public class MovimentacaoDAO {
                         BigDecimal valor = new BigDecimal(partes[4]);
                         String descricao = partes[5];
                         Double quilometragemAtual = null;
+                        Double quantidadeLitros = null;
                         if (!partes[6].trim().equals("null")) {
                             quilometragemAtual = Double.parseDouble(partes[6].trim());
                         }
-                        StatusMovimentacao statusMovimentacao = StatusMovimentacao.valueOf(partes[7]);
+                        if (!partes[7].trim().equals("null")) {
+                             quantidadeLitros = Double.parseDouble(partes[7].trim());
+                        }
+                        StatusMovimentacao statusMovimentacao = StatusMovimentacao.valueOf(partes[8]);
 
 
                         Veiculo veiculo = new Veiculo();
@@ -88,7 +93,7 @@ public class MovimentacaoDAO {
                         tipoDespesa.setId(idTipoDespesa);
 
 
-                        Movimentacao movimentacao = new Movimentacao(veiculo, tipoDespesa, descricao, data, valor, quilometragemAtual, statusMovimentacao);
+                        Movimentacao movimentacao = new Movimentacao(descricao, data, valor, quilometragemAtual, quantidadeLitros, veiculo, tipoDespesa, statusMovimentacao);
                         movimentacao.setId(idMovimentacao);
                         movimentacoes.add(movimentacao);
                     } catch (NumberFormatException e) {
@@ -119,6 +124,7 @@ public class MovimentacaoDAO {
                 movimentacao.getValor().setScale(2, RoundingMode.HALF_UP) + " | " +
                 movimentacao.getDescricao() + " | " +
                 movimentacao.getQuilometragemAtual() + " | " +
+                movimentacao.getQuantidadeLitros() + " | " +
                 movimentacao.getStatusMovimentacao();
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoOriginal));

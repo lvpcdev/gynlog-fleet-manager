@@ -107,6 +107,10 @@ public class MovimentacaoController {
         return movimentacaoService.buscarUltimaQuilometragemVeiculo(veiculoId);
     }
 
+    public double buscarUltimaQuilometragemAprovadaPorVeiculo(Long veiculoId) {
+        return movimentacaoService.buscarUltimaQuilometragemAprovadaPorVeiculo(veiculoId);
+    }
+
     public double buscarUltimaQuilometragemVeiculoExcluindoAtual(Long veiculoId, Long movimentacaoId) {
         return movimentacaoService.buscarUltimaQuilometragemVeiculoExcluindoAtual(veiculoId, movimentacaoId);
     }

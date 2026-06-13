@@ -366,7 +366,7 @@ public class RelatoriosView extends JFrame {
                 }
 
                 BigDecimal consumoMedio = movimentacaoController.consumoMedioPorVeiculo(veiculo.getId());
-                double ultimaQuilometragem = movimentacaoController.buscarUltimaQuilometragemVeiculo(veiculo.getId());
+                double ultimaQuilometragem = movimentacaoController.buscarUltimaQuilometragemAprovadaPorVeiculo(veiculo.getId());
 
                 String resultado =
                         "========================================\n" +

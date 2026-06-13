@@ -7,6 +7,7 @@
     import model.entities.Movimentacao;
     import model.entities.TipoDespesa;
     import model.entities.Veiculo;
+    import model.enums.StatusMovimentacao;
     import model.enums.StatusTipoDespesa;
     import util.CsvExporter;
     import util.Fila;
@@ -42,6 +43,8 @@
         private JTextField campoValor;
         private DatePicker campoData;
         private JTextField campoDescricao;
+        private JTextField campoQuilometragem;
+        private JTextField campoQuantidadeLitros;
         private DefaultTableModel tableModelMovimentacoes;
         private DefaultTableModel tableModelPendentes;
         private Fila<Movimentacao> filaPendentes;
@@ -200,7 +203,7 @@
             campoData = new DatePicker(LocalDate.now());
             campoDescricao = new JTextField(25);
     
-            JTextField campoQuilometragem = new JTextField(10);
+            campoQuilometragem = new JTextField(10);
             AbstractDocument docKm = (AbstractDocument) campoQuilometragem.getDocument();
             docKm.setDocumentFilter(new DocumentFilter() {
                 @Override
@@ -225,10 +228,18 @@
             labelQuilometragem.setVisible(false);
             labelKmAnterior.setVisible(false);
             valorKmAnterior.setVisible(false);
+
+            campoQuantidadeLitros = new JTextField(10);
+
+            JLabel labelQuantidadeLitros = new JLabel("Litros Abastecidos:");
+
+            campoQuantidadeLitros.setVisible(false);
+            labelQuantidadeLitros.setVisible(false);
     
             JButton botaoSalvar = new JButton("Salvar Despesa");
     
             aplicarFiltroValor(campoValor);
+            aplicarFiltroValor(campoQuantidadeLitros);
     
             Runnable atualizarKmAnterior = () -> {
                 Veiculo veiculoSelecionado = (Veiculo) comboBoxVeiculos.getSelectedItem();
@@ -241,6 +252,8 @@
                 labelQuilometragem.setVisible(ehCombustivel);
                 labelKmAnterior.setVisible(ehCombustivel);
                 valorKmAnterior.setVisible(ehCombustivel);
+                campoQuantidadeLitros.setVisible(ehCombustivel);
+                labelQuantidadeLitros.setVisible(ehCombustivel);
     
                 if (ehCombustivel && veiculoSelecionado != null) {
                     try {
@@ -272,8 +285,10 @@
             gbc.gridy = 4;                 painel.add(new JLabel("Descrição:"), gbc);
             gbc.gridy = 5;                 painel.add(labelQuilometragem, gbc);
             gbc.gridy = 6;                 painel.add(labelKmAnterior, gbc);
-    
-    
+            gbc.gridy = 7;                 painel.add(labelQuantidadeLitros, gbc);
+
+
+
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
             gbc.gridy = 0; painel.add(comboBoxVeiculos, gbc);
             gbc.gridy = 1; painel.add(comboBoxTiposDespesa, gbc);
@@ -282,8 +297,10 @@
             gbc.gridy = 4; painel.add(campoDescricao, gbc);
             gbc.gridy = 5; painel.add(campoQuilometragem, gbc);
             gbc.gridy = 6; painel.add(valorKmAnterior, gbc);
-    
-            gbc.gridx = 0; gbc.gridy = 7;
+            gbc.gridy = 7; painel.add(campoQuantidadeLitros, gbc);
+
+
+            gbc.gridx = 0; gbc.gridy = 8;
             gbc.gridwidth = 2;
             gbc.anchor = GridBagConstraints.CENTER;
             gbc.fill = GridBagConstraints.NONE;
@@ -329,14 +346,26 @@
                                 }
                             }
                         }
+
+                        Double quantidadeLitros = null;
+                        if (campoQuantidadeLitros.isVisible() && !campoQuantidadeLitros.getText().trim().isEmpty()) {
+                            quantidadeLitros = Double.parseDouble(campoQuantidadeLitros.getText().trim().replace(",", "."));
+                            if (quantidadeLitros <= 0) {
+                                JOptionPane.showMessageDialog(DespesasView.this,
+                                        "A quantidade de litros deve ser maior que zero.",
+                                        "Valor Inválido",
+                                        JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
+                        }
     
                         Movimentacao novaMovimentacao = new Movimentacao(veiculo, tipo, descricao, data, valor);
                         novaMovimentacao.setQuilometragemAtual(quilometragem);
+                        novaMovimentacao.setQuantidadeLitros(quantidadeLitros);
     
                         movimentacaoController.salvar(novaMovimentacao);
                         JOptionPane.showMessageDialog(DespesasView.this, "Despesa registrada com sucesso! Status: PENDENTE");
                         limparCamposCadastro();
-                        campoQuilometragem.setText("");
                         atualizarDados();
                         atualizarTabelaPendentes();
     
@@ -356,7 +385,7 @@
             JPanel painel = new JPanel(new BorderLayout(10, 10));
             painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     
-            String[] colunas = {"ID", "Data", "Veículo", "Tipo", "Descrição", "Valor"};
+            String[] colunas = {"ID", "Data", "Veículo", "Tipo", "Descrição", "Valor", "KM Atual", "Litros Abastecidos"};
             tableModelMovimentacoes = new DefaultTableModel(colunas, 0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -460,7 +489,7 @@
             JPanel painel = new JPanel(new BorderLayout(10, 10));
             painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     
-            String[] colunas = {"ID", "Data", "Veículo", "Tipo", "Descrição", "Valor", "Status"};
+            String[] colunas = {"ID", "Data", "Veículo", "Tipo", "Descrição", "Valor", "KM Atual", "Litros Abastecidos","Status"};
             tableModelPendentes = new DefaultTableModel(colunas, 0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -566,6 +595,8 @@
                         mov.getTipoDespesa().getDescricao(),
                         mov.getDescricao(),
                         currencyFormatter.format(mov.getValor()),
+                        mov.getQuilometragemAtual() != null ? String.format("%.0f km", mov.getQuilometragemAtual()) : "—",
+                        mov.getQuantidadeLitros() != null ? String.format("%.2f L", mov.getQuantidadeLitros()) : "—",
                         mov.getStatusMovimentacao()
                 });
             }
@@ -702,6 +733,8 @@
             campoValor.setText("");
             campoDescricao.setText("");
             campoData.setDate(LocalDate.now());
+            campoQuilometragem.setText("");
+            campoQuantidadeLitros.setText("");
             if (comboBoxVeiculos.getItemCount() > 0) comboBoxVeiculos.setSelectedIndex(0);
             if (comboBoxTiposDespesa.getItemCount() > 0) comboBoxTiposDespesa.setSelectedIndex(0);
         }
@@ -733,7 +766,9 @@
                             mov.getVeiculo().getPlaca(),
                             mov.getTipoDespesa().getDescricao(),
                             mov.getDescricao(),
-                            currencyFormatter.format(mov.getValor())
+                            currencyFormatter.format(mov.getValor()),
+                            mov.getQuilometragemAtual() != null ? String.format("%.0f km", mov.getQuilometragemAtual()) : "—",
+                            mov.getQuantidadeLitros() != null ? String.format("%.2f L", mov.getQuantidadeLitros()) : "—"
                     });
                 }
             }
@@ -750,11 +785,30 @@
             JTextField editCampoValor = new JTextField(10);
             DatePicker editCampoData = new DatePicker(movimentacaoParaEditar.getData());
             JTextField editCampoDescricao = new JTextField(25);
+            JTextField editCampoQuilometragem = new JTextField(10);
+            JTextField editCampoQuantidadeLitros = new JTextField(10);
+            JLabel editLabelQuilometragem = new JLabel("KM Atual:");
+            JLabel editLabelQuantidadeLitros = new JLabel("Litros Abastecidos:");
             JButton botaoSalvarAlteracoes = new JButton("Salvar Alterações");
+
+            AbstractDocument editDocKm = (AbstractDocument) editCampoQuilometragem.getDocument();
+            editDocKm.setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                    if (string.matches("[0-9]+")) super.insertString(fb, offset, string, attr);
+                }
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                    if (text.matches("[0-9]*")) super.replace(fb, offset, length, text, attrs);
+                }
+            });
+
+
     
             editComboBoxVeiculos.setRenderer(comboBoxVeiculos.getRenderer());
     
             aplicarFiltroValor(editCampoValor);
+            aplicarFiltroValor(editCampoQuantidadeLitros);
     
             List<Veiculo> todosVeiculos = veiculoController.listarTodos();
             for (Veiculo v : todosVeiculos) {
@@ -774,7 +828,38 @@
     
             editCampoValor.setText(movimentacaoParaEditar.getValor().toPlainString());
             editCampoDescricao.setText(movimentacaoParaEditar.getDescricao());
-    
+
+            if (movimentacaoParaEditar.getQuilometragemAtual() != null) {
+                editCampoQuilometragem.setText(String.format("%.0f", movimentacaoParaEditar.getQuilometragemAtual()));
+            }
+            if (movimentacaoParaEditar.getQuantidadeLitros() != null) {
+                editCampoQuantidadeLitros.setText(String.format("%.2f", movimentacaoParaEditar.getQuantidadeLitros()).replace(".", ","));
+            }
+
+            Runnable atualizarVisibilidadeCombustivel = () -> {
+                TipoDespesa tipoSelecionado = (TipoDespesa) editComboBoxTiposDespesa.getSelectedItem();
+                boolean combustivel = tipoSelecionado != null && (
+                        tipoSelecionado.getDescricao().toUpperCase().contains("COMBUSTIVEL") ||
+                                tipoSelecionado.getDescricao().toUpperCase().contains("COMBUSTÍVEL"));
+
+                editCampoQuilometragem.setVisible(combustivel);
+                editLabelQuilometragem.setVisible(combustivel);
+                editCampoQuantidadeLitros.setVisible(combustivel);
+                editLabelQuantidadeLitros.setVisible(combustivel);
+
+                if (!combustivel) {
+                    editCampoQuilometragem.setText("");
+                    editCampoQuantidadeLitros.setText("");
+                }
+
+                painel.revalidate();
+                painel.repaint();
+            };
+
+            atualizarVisibilidadeCombustivel.run();
+
+            editComboBoxTiposDespesa.addActionListener(e -> atualizarVisibilidadeCombustivel.run());
+
             gbc.gridx = 0; gbc.gridy = 0; painel.add(new JLabel("Veículo:"), gbc);
             gbc.gridy++; painel.add(new JLabel("Tipo de Despesa:"), gbc);
             gbc.gridy++; painel.add(new JLabel("Data:"), gbc);
@@ -787,6 +872,15 @@
             gbc.gridy++; painel.add(editCampoData, gbc);
             gbc.gridy++; painel.add(editCampoValor, gbc);
             gbc.gridy++; painel.add(editCampoDescricao, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy++; painel.add(editLabelQuilometragem, gbc);
+            gbc.gridy++; painel.add(editLabelQuantidadeLitros, gbc);
+
+            gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+            int gridyAtual = gbc.gridy;
+            gbc.gridy = gridyAtual - 1; painel.add(editCampoQuilometragem, gbc);
+            gbc.gridy = gridyAtual;     painel.add(editCampoQuantidadeLitros, gbc);
     
             gbc.gridx = 0; gbc.gridy++;
             gbc.gridwidth = 2;
@@ -803,10 +897,33 @@
                         LocalDate data = editCampoData.getSelectedDate();
                         BigDecimal valor = extrairValor(editCampoValor.getText());
                         String descricao = editCampoDescricao.getText();
+                        Double novaQuilometragem = null;
+                        if (editCampoQuilometragem.isVisible() && !editCampoQuilometragem.getText().trim().isEmpty()) {
+                            novaQuilometragem = Double.parseDouble(editCampoQuilometragem.getText().trim().replace(",", "."));
+
+                            double kmAnterior = movimentacaoController.buscarUltimaQuilometragemVeiculoExcluindoAtual(
+                                    veiculoSelecionado.getId(), movimentacaoParaEditar.getId());
+
+                            if (kmAnterior > 0 && novaQuilometragem <= kmAnterior) {
+                                JOptionPane.showMessageDialog(janelaPai,
+                                        "A quilometragem informada (" + novaQuilometragem.intValue() + " km) deve ser\n" +
+                                                "maior que a última registrada (" + (int) kmAnterior + " km).",
+                                        "Quilometragem Inválida",
+                                        JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
+                        }
+
+                        Double novaQuantidadeLitros = null;
+                        if (editCampoQuantidadeLitros.isVisible() && !editCampoQuantidadeLitros.getText().trim().isEmpty()) {
+                            novaQuantidadeLitros = Double.parseDouble(editCampoQuantidadeLitros.getText().trim().replace(",", "."));
+                        }
     
                         Movimentacao movimentacaoAtualizada = new Movimentacao(veiculoSelecionado, tipoSelecionado, descricao, data, valor);
                         movimentacaoAtualizada.setId(movimentacaoParaEditar.getId());
-                        movimentacaoAtualizada.setStatusMovimentacao(movimentacaoParaEditar.getStatusMovimentacao());
+                        movimentacaoAtualizada.setStatusMovimentacao(StatusMovimentacao.PENDENTE);
+                        movimentacaoAtualizada.setQuilometragemAtual(novaQuilometragem);
+                        movimentacaoAtualizada.setQuantidadeLitros(novaQuantidadeLitros);
     
                         movimentacaoController.atualizar(movimentacaoAtualizada);
                         JOptionPane.showMessageDialog(janelaPai, "Despesa atualizada com sucesso!");
