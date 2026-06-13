@@ -304,16 +304,23 @@ public class MovimentacaoService {
         List<Veiculo> veiculos = veiculoService.listarTodos();
         List<Movimentacao> movimentacoes = listarAprovadas();
 
-        List<Veiculo> veiculosComMovimentacao = new ArrayList<>();
+        List<Movimentacao> combustivel = new ArrayList<>();
+        for (Movimentacao mov : movimentacoes) {
+            if (mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")) {
+                combustivel.add(mov);
+            }
+        }
+
+        List<Veiculo> veiculosComCombustivel = new ArrayList<>();
         for (Veiculo v : veiculos) {
-            for (Movimentacao mov : movimentacoes) {
+            for (Movimentacao mov : combustivel) {
                 if (mov.getVeiculo().getId().equals(v.getId())) {
-                    veiculosComMovimentacao.add(v);
+                    veiculosComCombustivel.add(v);
                     break;
                 }
             }
         }
-        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculosComMovimentacao, movimentacoes);
+        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculosComCombustivel, movimentacoes);
     }
 
     public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {
