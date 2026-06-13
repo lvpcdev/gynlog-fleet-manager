@@ -20,6 +20,13 @@ public class MenuView extends JFrame {
         sidebar.setBackground(new Color(45, 52, 54));
         sidebar.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
+        ImageIcon logoOriginal = new ImageIcon(getClass().getClassLoader().getResource("resources/LogoGynLogFleetManager.png"));
+        Image logoRedimensionada = logoOriginal.getImage().getScaledInstance(150, 80, Image.SCALE_SMOOTH);
+        JLabel labelLogo = new JLabel(new ImageIcon(logoRedimensionada));
+        labelLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        labelLogo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+
+        sidebar.add(labelLogo);
         sidebar.setPreferredSize(new Dimension(180, 0));
         final Dimension originalSidebarSize = sidebar.getPreferredSize();
         final int collapsedWidth = 48;
