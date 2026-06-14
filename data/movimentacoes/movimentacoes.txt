@@ -1,0 +1,4 @@
+1 | 1 | 1 | 2026-06-01 | 220.00 | Abastecimento posto ipiranga | 12000.0 | 22.0 | APROVADA
+2 | 1 | 1 | 2026-06-13 | 200.00 | Abastecimento posto shell | 12340.0 | 20.0 | APROVADA
+3 | 2 | 2 | 2026-03-10 | 1450.00 | IPVA 2026 parcela unica | null | null | APROVADA
+4 | 4 | 3 | 2026-05-05 | 195.23 | Multa excesso de velocidade | null | null | APROVADA

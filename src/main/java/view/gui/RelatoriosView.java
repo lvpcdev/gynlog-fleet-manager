@@ -423,8 +423,8 @@ public class RelatoriosView extends JFrame {
                 Veiculo maiorCusto = veiculosOrdenados.get(0);
                 Veiculo menorCusto = veiculosOrdenados.get(veiculosOrdenados.size() - 1);
 
-                BigDecimal totalMaior = movimentacaoController.totalPorVeiculo(maiorCusto.getId());
-                BigDecimal totalMenor = movimentacaoController.totalPorVeiculo(menorCusto.getId());
+                BigDecimal totalMaior = movimentacaoController.totalCombustivelPorVeiculo(maiorCusto.getId());
+                BigDecimal totalMenor = movimentacaoController.totalCombustivelPorVeiculo(menorCusto.getId());
 
                 NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 

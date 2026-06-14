@@ -320,7 +320,19 @@ public class MovimentacaoService {
                 }
             }
         }
-        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculosComCombustivel, movimentacoes);
+        return SelectionSort.ordenarVeiculosPorTotalDespesa(veiculosComCombustivel, combustivel);
+    }
+
+    public BigDecimal totalCombustivelPorVeiculo(Long veiculoId) {
+        List<Movimentacao> movimentacoes = listarPorVeiculo(veiculoId);
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Movimentacao mov : movimentacoes) {
+            if (mov.getTipoDespesa().getDescricao().equalsIgnoreCase("COMBUSTÍVEL")) {
+                total = total.add(mov.getValor());
+            }
+        }
+        return total;
     }
 
     public double buscarUltimaQuilometragemVeiculo(Long veiculoId) {

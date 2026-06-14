@@ -127,7 +127,7 @@ public class TipoDespesaDAO {
             throw new ArquivoNaoEncontradoException("Arquivo tipos de despesa ultimo id não encontrado.");
         }
 
-        Long novoId = 0L;
+        Long novoId = 1L;
         try (BufferedReader br = new BufferedReader(new FileReader(arquivoUltimoId))) {
 
             String linha = br.readLine();

@@ -95,6 +95,9 @@ public class MovimentacaoController {
         return movimentacaoService.listarVeiculosOrdenadosPorCusto();
     }
 
+    public BigDecimal totalCombustivelPorVeiculo(Long veiculoId) {
+        return movimentacaoService.totalCombustivelPorVeiculo(veiculoId);
+    }
     public Movimentacao aprovarProxima(Fila<Movimentacao> fila) {
         return movimentacaoService.aprovarProxima(fila);
     }
