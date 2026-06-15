@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -44,20 +45,24 @@ public class CsvExporter {
     public static void exportarMovimentacoes(List<Movimentacao> movimentacoes, String caminhoArquivo) {
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(caminhoArquivo), ENCODING))) {
             bw.write('\uFEFF');
-            bw.write("ID;Data;Veiculo;Tipo;Descricao;Valor;Status");
+            bw.write("ID;Data;Veiculo;Tipo;Descricao;Valor;KM Atual;Litros Abastecidos;Status");
             bw.newLine();
 
             for (Movimentacao m : movimentacoes) {
                 String veiculoPlaca = (m.getVeiculo() != null && m.getVeiculo().getPlaca() != null) ? m.getVeiculo().getPlaca() : "";
                 String tipoDespesaDescricao = (m.getTipoDespesa() != null && m.getTipoDespesa().getDescricao() != null) ? m.getTipoDespesa().getDescricao() : "";
+                String km = m.getQuilometragemAtual() != null ? String.format("%.0f", m.getQuilometragemAtual()) : "";
+                String litros = m.getQuantidadeLitros() != null ? String.format("%.2f", m.getQuantidadeLitros()) : "";
 
-                bw.write(String.format("%d;%s;%s;%s;%s;R$ %.2f;%s",
+                bw.write(String.format("%d;%s;%s;%s;%s;R$ %s;%s;%s;%s",
                         m.getId(),
                         m.getData().format(FORMATO_DATA),
                         escapeCsv(veiculoPlaca),
                         escapeCsv(tipoDespesaDescricao),
                         escapeCsv(m.getDescricao()),
-                        m.getValor().doubleValue(),
+                        m.getValor().setScale(2, RoundingMode.HALF_UP).toPlainString(),
+                        km,
+                        litros,
                         m.getStatusMovimentacao()
                 ));
                 bw.newLine();
