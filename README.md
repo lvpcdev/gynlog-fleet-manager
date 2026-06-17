@@ -2,93 +2,103 @@
 
 ## 📋 Sobre o Projeto
 
-O **GynLog Fleet Manager** é uma aplicação *Desktop* desenvolvida em **Java** com o padrão de arquitetura **Model-View-Controller (MVC)**. O projeto foi concebido com o objetivo de fornecer uma solução robusta para o **controle financeiro e operacional de frotas de veículos**.
-
-Este projeto possui um caráter **acadêmico**, demonstrando a aplicação de conceitos de programação orientada a objetos, design patterns (MVC) e persistência de dados em um ambiente de aplicação *Desktop*.
+O **GynLog Fleet Manager** é uma aplicação *Desktop* desenvolvida em **Java** para o controle de gastos da frota veicular da empresa GynLog. O projeto foi concebido como Projeto Integrador do curso de Engenharia de Software (3º Período), aplicando conceitos de programação orientada a objetos, arquitetura em camadas, estruturas de dados e persistência de dados em arquivo texto.
 
 ### 🎯 Funcionalidades Principais
 
-A aplicação oferece um conjunto de funcionalidades essenciais para a gestão de frotas:
-
-*   **Controle de Veículos:** Cadastro, consulta e gestão do status da frota.
-*   **Gestão de Movimentações:** Registro de entradas e saídas financeiras relacionadas à frota.
-*   **Controle de Despesas:** Cadastro e categorização de tipos de despesas.
-*   **Geração de Relatórios:** Emissão de relatórios operacionais e financeiros para análise.
-*   **Persistência de Dados:** Os dados são armazenados de forma local em arquivos de texto, simulando um sistema de persistência simples e eficaz.
+* **Controle de Veículos:** cadastro, edição, busca por placa/modelo e gestão de status (ativo/inativo).
+* **Controle de Tipos de Despesa:** cadastro, edição e gestão de status (ativo/inativo).
+* **Gestão de Movimentações (Despesas):** registro de despesas por veículo, com data, valor, descrição e, para despesas de combustível, quilometragem e litros abastecidos.
+* **Fila de Aprovação:** toda movimentação cadastrada (ou editada) entra como **PENDENTE** em uma fila de aprovação (estrutura de dados própria, FIFO) e só passa a contar nos relatórios após ser **aprovada**. Movimentações rejeitadas são excluídas.
+* **Relatórios Gerenciais:** 10 relatórios distintos, incluindo despesas por veículo, totais mensais, totais de combustível, IPVA por ano, veículos inativos, multas por veículo, média de despesas por categoria, consumo médio (km/L), custo médio de IPVA e identificação do veículo com maior/menor custo de combustível.
+* **Exportação para Planilha:** exportação de veículos, tipos de despesa e movimentações para arquivos `.csv`, compatíveis com Excel/LibreOffice.
+* **Persistência de Dados:** armazenamento local em arquivos de texto (`.txt`), sem uso de banco de dados.
 
 ## 🛠️ Tecnologias Utilizadas
 
-O projeto foi construído utilizando as seguintes tecnologias e ferramentas:
-
 | Tecnologia | Descrição |
 | :--- | :--- |
-| **Java** | Linguagem de programação principal. |
-| **Maven** | Ferramenta de automação de *build* e gerenciamento de dependências. |
-| **MVC (Model-View-Controller)** | Padrão de arquitetura para separação de responsabilidades. |
-| **Swing/AWT** | Bibliotecas nativas do Java para construção da interface gráfica (*Desktop*). |
-| **FlatLaf** | Biblioteca de *look and feel* para modernização da interface gráfica. |
+| **Java 21 (JDK)** | Linguagem de programação principal. |
+| **Apache Maven** | Ferramenta de automação de *build* e gerenciamento de dependências. |
+| **Java Swing** | Biblioteca nativa do Java para construção da interface gráfica (*Desktop*). |
+| **FlatLaf 3.4** | Biblioteca de *look and feel* para modernização da interface gráfica. |
+| **Git/GitHub** | Controle de versão. |
 
 ## 📂 Estrutura do Projeto
 
-A estrutura de diretórios reflete o padrão MVC, garantindo a separação lógica entre as camadas da aplicação:
+A estrutura segue uma arquitetura em camadas (View → Controller → Service → DAO), com estruturas de dados e utilitários isolados em `util`:
 
 ```
 gynlog-fleet-manager/
-├── data/                 # Arquivos de persistência de dados (TXT)
+├── data/                    # Arquivos de persistência (TXT)
+│   ├── veiculos/
 │   ├── despesas/
-│   ├── movimentacoes/
-│   └── veiculos/
+│   └── movimentacoes/
 ├── src/
 │   ├── main/
-│   │   └── java/
-│   │       ├── controller/   # Lógica de controle e manipulação de dados
-│   │       ├── model/        # Entidades (Movimentacao, Veiculo, TipoDespesa) e Enums
-│   │       ├── persistence/  # Camada de acesso a dados (DAOs)
-│   │       └── view/         # Interfaces gráficas (GUI)
+│   │   ├── java/
+│   │   │   ├── controller/   # Ponte entre a interface e os services
+│   │   │   ├── service/      # Regras de negócio e validações
+│   │   │   ├── dao/          # Persistência em arquivo texto (CRUD)
+│   │   │   ├── model/
+│   │   │   │   ├── entities/ # Veiculo, TipoDespesa, Movimentacao
+│   │   │   │   └── enums/    # StatusVeiculo, StatusTipoDespesa, StatusMovimentacao
+│   │   │   ├── view/
+│   │   │   │   ├── gui/      # Telas Swing (MenuView, VeiculosView, DespesasView, RelatoriosView)
+│   │   │   │   └── util/     # Componentes auxiliares de interface (DatePicker, filtros)
+│   │   │   ├── util/         # Fila (lista encadeada), SelectionSort, BuscaSequencial, CsvExporter
+│   │   │   └── exceptions/   # Exceções customizadas da aplicação
+│   │   └── resources/        # Logomarca e demais recursos estáticos
 │   └── test/
-├── pom.xml               # Arquivo de configuração do Maven
-└── LICENSE               # Licença do projeto (MIT)
+├── pom.xml                   # Configuração do Maven
+└── LICENSE
 ```
+
+## 🧩 Estruturas de Dados Implementadas
+
+Como parte da disciplina de Estrutura de Dados I, o projeto implementa manualmente (sem uso de bibliotecas prontas do Java Collections para essas finalidades):
+
+* **Fila (lista encadeada própria — `Fila<T>`/`No<T>`):** utilizada para controlar as movimentações pendentes de aprovação, respeitando a ordem de cadastro (FIFO).
+* **Algoritmo de ordenação manual (`SelectionSort`):** utilizado para ordenar veículos por custo total de combustível, identificando o de maior e o de menor gasto.
+* **Busca sequencial (`BuscaSequencial`):** utilizada para localizar veículos por placa ou modelo na tela de cadastro de veículos.
 
 ## 🚀 Como Executar
 
-Para rodar o projeto em sua máquina local, siga os passos abaixo.
-
 ### Pré-requisitos
 
-Certifique-se de ter as seguintes ferramentas instaladas:
-
-*   **Java Development Kit (JDK)**: Versão 8 ou superior.
-*   **Apache Maven**: Para gerenciar as dependências e compilar o projeto.
-*   **Git**: Para clonar o repositório.
+* **JDK 21** ou superior.
+* **Apache Maven**.
+* **Git** (para clonar o repositório).
 
 ### Instalação e Execução
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone https://github.com/lvpcdev/gynlog-fleet-manager.git
-    cd gynlog-fleet-manager
-    ```
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/lvpcdev/gynlog-fleet-manager.git
+   cd gynlog-fleet-manager
+   ```
 
-2.  **Compile o projeto com Maven:**
-    ```bash
-    mvn clean install
-    ```
-    Este comando irá baixar as dependências e compilar o código-fonte, gerando o arquivo `.jar` na pasta `target/`.
+2. **Compile o projeto com Maven:**
+   ```bash
+   mvn clean package
+   ```
+   Este comando baixa as dependências (FlatLaf) e compila o código-fonte, gerando o `.jar` na pasta `target/`.
 
-3.  **Execute a aplicação:**
-    O arquivo JAR gerado pode ser executado diretamente. O nome exato do arquivo pode variar, mas geralmente segue o padrão `gynlog-fleet-manager-X.Y.Z.jar`.
-    ```bash
-    java -jar target/gynlog-fleet-manager-1.0-SNAPSHOT.jar
-    ```
-    *(Nota: O nome do arquivo JAR pode precisar ser ajustado para o nome exato gerado pelo Maven.)*
+3. **Execute a aplicação:**
+   ```bash
+   java -jar target/gynlog-fleet-manager-1.0-SNAPSHOT.jar
+   ```
+   *(O nome exato do arquivo `.jar` pode variar conforme a versão definida no `pom.xml`.)*
+
+   Alternativamente, a classe `Main` pode ser executada diretamente pela IDE (IntelliJ IDEA recomendado).
 
 ## 💾 Persistência de Dados
 
-É importante notar que a aplicação utiliza um sistema de persistência baseado em arquivos de texto simples, localizados no diretório `data/`.
+A aplicação utiliza um sistema de persistência baseado em arquivos de texto simples, localizados no diretório `data/`, sem uso de banco de dados:
 
-*   Cada entidade (Veículo, Movimentação, TipoDespesa) possui seu próprio arquivo de texto para armazenamento.
-*   Os arquivos `*UltimoId.txt` são utilizados para controlar o ID sequencial das entidades.
+* Cada entidade (`Veiculo`, `TipoDespesa`, `Movimentacao`) possui seu próprio arquivo de dados (`.txt`) e um arquivo auxiliar de controle de ID (`*UltimoId.txt`).
+* Os arquivos de dados podem estar vazios (sem registros).
+* Os dados podem ser exportados para `.csv` a qualquer momento pelas telas de Veículos, Tipos de Despesa e Histórico de Despesas, permitindo sua manipulação em planilhas eletrônicas (Excel/LibreOffice Calc).
 
 ## 📄 Licença
 
@@ -96,10 +106,11 @@ Este projeto está licenciado sob a **Licença MIT**. Consulte o arquivo [LICENS
 
 ## 👥 Contribuidores
 
-O projeto acadêmico foi desenvolvido pelos seguintes colaboradores:
+Projeto acadêmico desenvolvido pelos seguintes colaboradores:
 
-*   **Lucas Vicente**
-*   **Samuel Tavares**
-*   **Arthur Caetano**
-*   **Ruan Carlos**
-*   **Davi Fraga**
+* **Lucas Vicente**
+* **Samuel Tavares**
+* **Rafael Camargo**
+* **Arthur Caetano**
+* **Ruan Carlos**
+* **Davi Fraga**
